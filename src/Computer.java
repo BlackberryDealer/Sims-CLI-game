@@ -10,4 +10,4 @@ public class Computer implements Interactable {
     
     @Override
     public String getObjectName() { return "Computer"; }
-}
+} 
