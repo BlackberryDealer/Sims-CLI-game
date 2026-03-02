@@ -1,7 +1,6 @@
 package simcli.world.interactables;
 import simcli.engine.SimulationException;
 import simcli.entities.Sim;
-import simcli.world.Interactable;
 
 public class WeightBench implements Interactable {
     @Override

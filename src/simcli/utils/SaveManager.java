@@ -1,0 +1,101 @@
+package simcli.utils;
+
+import simcli.engine.GameEngine;
+import simcli.entities.AdultSim;
+import simcli.entities.Job;
+import simcli.entities.Sim;
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public class SaveManager {
+    private static final String SAVE_DIR = "saves/";
+
+    // Ensures the saves directory exists
+    public static void checkDirectory() {
+        File dir = new File(SAVE_DIR);
+        if (!dir.exists()) dir.mkdirs();
+    }
+
+    // Checks if a world name is already taken (MainMenu needs this!)
+    public static boolean saveExists(String worldName) {
+        return new File(SAVE_DIR + worldName + ".txt").exists();
+    }
+
+    // Gets a list of all current save files (MainMenu needs this!)
+    public static List<String> getExistingSaves() {
+        checkDirectory();
+        List<String> saves = new ArrayList<>();
+        File dir = new File(SAVE_DIR);
+        File[] files = dir.listFiles((d, name) -> name.endsWith(".txt"));
+        
+        if (files != null) {
+            for (File f : files) {
+                saves.add(f.getName().replace(".txt", ""));
+            }
+        }
+        return saves;
+    }
+
+    // Saves the game engine state to a text file
+    public static void saveGame(GameEngine engine, String worldName) {
+        checkDirectory();
+        try (PrintWriter writer = new PrintWriter(new FileWriter(SAVE_DIR + worldName + ".txt"))) {
+            writer.println("WORLD:" + engine.getWorldName());
+            writer.println("TICK:" + engine.getCurrentTick());
+            
+            for (Sim sim : engine.getNeighborhood()) {
+                if (sim instanceof AdultSim) {
+                    AdultSim aSim = (AdultSim) sim;
+                    // Format: AdultSim:Name,Age,JobName,Money,Groceries,Hunger,Energy
+                    writer.println("AdultSim:" + aSim.getName() + "," + aSim.getAge() + "," + 
+                                 aSim.getCareer().name() + "," + aSim.getMoney() + "," + aSim.getGroceries() + "," + 
+                                 aSim.getHunger().getValue() + "," + aSim.getEnergy().getValue());
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error saving game: " + e.getMessage());
+        }
+    }
+
+    // Loads a game engine state from a text file
+    public static GameEngine loadGame(String worldName) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(SAVE_DIR + worldName + ".txt"))) {
+            String line;
+            String loadedWorldName = "Unknown";
+            int loadedTick = 1;
+            List<Sim> loadedNeighborhood = new ArrayList<>();
+
+            while ((line = reader.readLine()) != null) {
+                if (line.startsWith("WORLD:")) {
+                    loadedWorldName = line.substring(6);
+                } else if (line.startsWith("TICK:")) {
+                    loadedTick = Integer.parseInt(line.substring(5));
+                } else if (line.startsWith("AdultSim:")) {
+                    String[] data = line.substring(9).split(",");
+                    
+                    // Parse Enum Job safely
+                    Job loadedJob = Job.valueOf(data[2]);
+                    AdultSim sim = new AdultSim(data[0], Integer.parseInt(data[1]), loadedJob);
+                    
+                    // Load the new economy stats
+                    sim.setMoney(Integer.parseInt(data[3]));
+                    sim.setGroceries(Integer.parseInt(data[4]));
+                    
+                    // Load the needs
+                    sim.getHunger().setValue(Integer.parseInt(data[5]));
+                    sim.getEnergy().setValue(Integer.parseInt(data[6]));
+                    sim.updateState(); 
+                    
+                    loadedNeighborhood.add(sim);
+                }
+            }
+            return new GameEngine(loadedWorldName, loadedTick, loadedNeighborhood);
+            
+        } catch (Exception e) {
+            System.err.println("Error loading game: " + e.getMessage());
+            return null;
+        }
+    }
+}

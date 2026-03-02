@@ -1,108 +1,128 @@
 package simcli.engine;
-import java.util.Scanner;
 
 import simcli.entities.AdultSim;
+import simcli.entities.Job;
 import simcli.entities.Sim;
-import simcli.entities.SimState;
+import simcli.world.Building;
+import simcli.world.Commercial;
 import simcli.world.Residential;
-import simcli.world.interactables.Bed;
-import simcli.world.interactables.Computer;
-import simcli.world.interactables.WeightBench;
+import simcli.world.interactables.*;
+import simcli.utils.SaveManager;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
-/**
- * The Controller: Initializes the environment and manages the core gameplay loop.
- */
 public class GameEngine {
     private List<Sim> neighborhood;
-    private Residential playerHome;
-    
-    public GameEngine() {
+    private List<Building> cityMap;
+    private Building currentLocation;
+    private String worldName; 
+    private int currentTick;
+
+    // CONSTRUCTOR: For Creating a New World
+    public GameEngine(String worldName) {
+        this.worldName = worldName;
+        this.currentTick = 1;
         this.neighborhood = new ArrayList<>();
-        this.playerHome = new Residential("The Shared Dorm");
+        setupWorld();
+    }
+
+    // CONSTRUCTOR: For Loading an Existing World
+    public GameEngine(String worldName, int currentTick, List<Sim> loadedNeighborhood) {
+        this.worldName = worldName;
+        this.currentTick = currentTick;
+        this.neighborhood = loadedNeighborhood;
+        setupWorld();
+    }
+
+    // Centralized method to build the map
+    private void setupWorld() {
+        this.cityMap = new ArrayList<>();
         
-        // Populating the environment with interactive objects
-        this.playerHome.addInteractable(new Bed());
-        this.playerHome.addInteractable(new Computer());
-        this.playerHome.addInteractable(new WeightBench());
+        // Build Home
+        Residential home = new Residential("The Shared Dorm");
+        home.addInteractable(new Bed());
+        home.addInteractable(new Computer());
+        home.addInteractable(new WeightBench());
+        home.addInteractable(new Fridge()); // The new free/cheap food source
+        this.cityMap.add(home);
+
+        // Build Supermarket
+        Commercial store = new Commercial("Town Supermarket");
+        store.addInteractable(new GroceryShelf()); // The new paid food source
+        this.cityMap.add(store);
+
+        // Default spawn location
+        this.currentLocation = home;
     }
     
     public void init() {
-        AdultSim player1 = new AdultSim("Dylan", 21, "Software Engineer");
+        // Start the player with the Software Engineer job from our new Enum
+        AdultSim player1 = new AdultSim("Dylan", 21, Job.SOFTWARE_ENGINEER);
         this.neighborhood.add(player1);
-        System.out.println("=== Booting Simulation: The Sims (CLI Edition) ===");
+        System.out.println("\n=== Booting World: " + this.worldName + " ===");
     }
     
-    public void run() {
-        Scanner scanner = new Scanner(System.in);
+    public void run(Scanner scanner) {
         boolean running = true;
-        int currentTick = 1;
-        
-        // Polymorphism: Grabbing a Sim reference
         Sim activePlayer = this.neighborhood.get(0);
-        this.playerHome.enter(activePlayer);
+        this.currentLocation.enter(activePlayer);
         
         while (running) {
-            System.out.println("\n--- TICK " + currentTick + " ---");
+            System.out.println("\n--- TICK " + currentTick + " | Location: " + currentLocation.getName() + " ---");
             activePlayer.tick();
+            System.out.println("Inventory -> Groceries: " + activePlayer.getGroceries());
             
-            if (activePlayer.getState() == SimState.DEAD) {
-                System.out.println("FATAL: " + activePlayer.getName() + " has expired. Simulation Terminated.");
-                break;
+            List<Interactable> items = currentLocation.getInteractables();
+            System.out.println("\nAvailable Actions:");
+            for (int i = 0; i < items.size(); i++) {
+                System.out.print("[" + (i+1) + "] Use " + items.get(i).getObjectName() + "   ");
             }
-            
-            System.out.println("\nSelect Action for " + activePlayer.getName() + ":");
-            System.out.println("[1] Go to Work");
-            System.out.println("[2] Sleep (Use Bed)");
-            System.out.println("[3] Study (Use Computer)");
-            System.out.println("[4] Exercise (Use Weight Bench)");
-            System.out.println("[5] Exit Simulation");
+            System.out.println("\n[W] Go to Work   [T] Travel   [S] Save & Exit");
             System.out.print("COMMAND> ");
             
-            String choice = scanner.nextLine();
+            String input = scanner.nextLine().toUpperCase();
             
             try {
-                switch (choice) {
-                    case "1":
-                        activePlayer.performActivity("Work");
-                        break;
-                    case "2":
-                        this.playerHome.getInteractables().get(0).interact(activePlayer);
-                        break;
-                    case "3":
-                        this.playerHome.getInteractables().get(1).interact(activePlayer);
-                        break;
-                    case "4":
-                        this.playerHome.getInteractables().get(2).interact(activePlayer);
-                        break;
-                    case "5":
-                        running = false;
-                        System.out.println("Saving and Exiting...");
-                        break;
-                    default:
-                        System.out.println("Invalid CLI command. Time passes idly.");
+                if (input.equals("W")) {
+                    activePlayer.performActivity("Work");
+                } else if (input.equals("T")) {
+                    // Swap location logic
+                    currentLocation = (currentLocation == cityMap.get(0)) ? cityMap.get(1) : cityMap.get(0);
+                    currentLocation.enter(activePlayer);
+                } else if (input.equals("S")) {
+                    running = false;
+                    System.out.println("Saving game...");
+                    SaveManager.saveGame(this, this.worldName);
+                    System.out.println("Game Saved! Returning to Main Menu...\n");
+                } else {
+                    // Handle numbers for objects
+                    int choice = Integer.parseInt(input) - 1;
+                    if (choice >= 0 && choice < items.size()) {
+                        items.get(choice).interact(activePlayer);
+                    } else {
+                        System.out.println("Invalid item choice.");
+                    }
                 }
             } catch (SimulationException e) {
-                // Checked Exception handling
                 System.err.println("ACTION REJECTED: " + e.getMessage());
-            } catch (Exception e) {
-                // Unchecked/Runtime Exception fallback
-                System.err.println("CRITICAL SYSTEM FAULT: " + e.toString());
-            } finally {
-                System.out.println("Tick " + currentTick + " resolution complete.");
+            } catch (NumberFormatException e) {
+                System.err.println("Invalid input. Time passes idly.");
             }
             
-            currentTick++;
+            if (running) {
+                currentTick++;
+                if (currentTick % 10 == 0) {
+                    System.out.println("[System] Autosaving...");
+                    SaveManager.saveGame(this, this.worldName); 
+                }
+            }
         }
-        
-        scanner.close();
     }
-    
-    public static void main(String[] args) {
-        GameEngine engine = new GameEngine();
-        engine.init();
-        engine.run();
-    }
+
+    // Getters for SaveManager
+    public String getWorldName() { return worldName; }
+    public int getCurrentTick() { return currentTick; }
+    public List<Sim> getNeighborhood() { return neighborhood; }
 }

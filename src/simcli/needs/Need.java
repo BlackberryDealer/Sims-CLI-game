@@ -1,4 +1,5 @@
 package simcli.needs;
+
 /**
  * Abstract representation of a Sim's biological or emotional need.
  */
@@ -23,5 +24,9 @@ public abstract class Need {
     }
     
     public int getValue() { return this.value; }
+
+    public void setValue(int value) { 
+        this.value = Math.max(0, Math.min(value, MAX_VALUE));
+    }
     public String getName() { return this.name; }
 }

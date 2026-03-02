@@ -3,6 +3,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import simcli.entities.Sim;
+import simcli.world.interactables.Interactable;
 
 public abstract class Building {
     protected String name;
@@ -12,6 +13,8 @@ public abstract class Building {
         this.name = name;
         this.interactables = new ArrayList<>();
     }
+
+    public String getName () {return this.name;}
     
     public abstract void enter(Sim sim);
     

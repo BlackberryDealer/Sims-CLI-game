@@ -1,4 +1,4 @@
-package simcli.world;
+package simcli.world.interactables;
 import simcli.engine.SimulationException;
 import simcli.entities.Sim;
 
