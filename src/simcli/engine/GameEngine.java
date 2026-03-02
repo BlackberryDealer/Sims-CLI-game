@@ -1,4 +1,14 @@
+package simcli.engine;
 import java.util.Scanner;
+
+import simcli.entities.AdultSim;
+import simcli.entities.Sim;
+import simcli.entities.SimState;
+import simcli.world.Residential;
+import simcli.world.interactables.Bed;
+import simcli.world.interactables.Computer;
+import simcli.world.interactables.WeightBench;
+
 import java.util.ArrayList;
 import java.util.List;
 

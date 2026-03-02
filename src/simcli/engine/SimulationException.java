@@ -1,3 +1,4 @@
+package simcli.engine;
 /**
  * Custom checked exception to handle invalid simulation actions gracefully.
  */

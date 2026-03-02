@@ -1,3 +1,4 @@
+package simcli.entities;
 /**
  * Represents the health and lifecycle states of a Sim.
  */

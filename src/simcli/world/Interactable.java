@@ -1,3 +1,7 @@
+package simcli.world;
+import simcli.engine.SimulationException;
+import simcli.entities.Sim;
+
 /**
  * Interface defining objects that Sims can use.
  */

@@ -1,3 +1,7 @@
+package simcli.world.interactables;
+import simcli.entities.Sim;
+import simcli.world.Interactable;
+
 public class Bed implements Interactable {
     @Override
     public void interact(Sim sim) {

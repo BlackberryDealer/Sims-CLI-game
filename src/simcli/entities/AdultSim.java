@@ -1,3 +1,6 @@
+package simcli.entities;
+import simcli.engine.SimulationException;
+
 /**
  * Concrete class representing an employable, player-controlled Sim.
  */

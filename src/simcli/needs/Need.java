@@ -1,3 +1,4 @@
+package simcli.needs;
 /**
  * Abstract representation of a Sim's biological or emotional need.
  */

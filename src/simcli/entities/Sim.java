@@ -1,3 +1,9 @@
+package simcli.entities;
+import simcli.engine.SimulationException;
+import simcli.needs.Energy;
+import simcli.needs.Hunger;
+import simcli.needs.Need;
+
 /**
  * Abstract base class representing any entity in the simulation.
  */

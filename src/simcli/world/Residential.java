@@ -1,3 +1,6 @@
+package simcli.world;
+import simcli.entities.Sim;
+
 public class Residential extends Building {
     public Residential(String name) {
         super(name);

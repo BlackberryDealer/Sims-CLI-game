@@ -1,3 +1,4 @@
+package simcli.needs;
 public class Hunger extends Need {
     public Hunger() {
         super("Hunger");

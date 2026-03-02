@@ -1,5 +1,8 @@
+package simcli.world;
 import java.util.ArrayList;
 import java.util.List;
+
+import simcli.entities.Sim;
 
 public abstract class Building {
     protected String name;

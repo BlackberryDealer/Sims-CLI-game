@@ -1,3 +1,8 @@
+package simcli.world.interactables;
+import simcli.engine.SimulationException;
+import simcli.entities.Sim;
+import simcli.world.Interactable;
+
 public class Computer implements Interactable {
     @Override
     public void interact(Sim sim) throws SimulationException {
