@@ -5,6 +5,9 @@ import simcli.needs.Need;
 import simcli.needs.Hunger;
 import simcli.needs.Energy;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public abstract class Sim {
 
     protected String name;
@@ -13,8 +16,12 @@ public abstract class Sim {
     protected Need hunger;
     protected Need energy;
     protected SimState state;
-    protected int groceries;
+    protected List<Item> inventory;
     protected int starvingTicks;
+    
+    // World Stats trackers
+    protected int totalMoneyEarned;
+    protected int totalItemsBought;
 
     public Sim(String name, int age) {
         this.name = name;
@@ -23,8 +30,11 @@ public abstract class Sim {
         this.hunger = new Hunger();
         this.energy = new Energy();
         this.state = SimState.HEALTHY;
-        this.groceries = 0;
+        this.inventory = new ArrayList<>();
         this.starvingTicks = 0;
+        
+        this.totalMoneyEarned = money; // initial seed counts
+        this.totalItemsBought = 0;
     }
 
     // getters for .txt saving
@@ -40,8 +50,11 @@ public abstract class Sim {
 
     public void tick() {
         if (this.state == SimState.DEAD) return;
-        this.hunger.decay();
-        this.energy.decay();
+        double ageMultiplier = 1.0 + (Math.max(0, this.age - 18) * 0.05); // 5% faster stat decay per year over 18
+        int decayAmount = (int) Math.round(5 * ageMultiplier);
+        
+        this.hunger.decrease(decayAmount);
+        this.energy.decrease(decayAmount);
         this.updateState();
         
         System.out.println("[" + this.name + "] Hunger: " + this.hunger.getValue() + 
@@ -62,8 +75,13 @@ public abstract class Sim {
         }
     }
 
-    public int getGroceries() { return groceries; }
-    public void setGroceries(int amount) { this.groceries = amount; }
+    public List<Item> getInventory() { return inventory; }
+    public void addItem(Item item) { this.inventory.add(item); }
     public int getStarvingTicks() { return starvingTicks; }
     public void setStarvingTicks(int ticks) { this.starvingTicks = ticks; }
+    
+    public int getTotalMoneyEarned() { return totalMoneyEarned; }
+    public void addTotalMoneyEarned(int amount) { this.totalMoneyEarned += amount; }
+    public int getTotalItemsBought() { return totalItemsBought; }
+    public void addTotalItemsBought(int amount) { this.totalItemsBought += amount; }
 }

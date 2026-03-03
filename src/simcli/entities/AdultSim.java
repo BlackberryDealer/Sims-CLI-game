@@ -27,9 +27,10 @@ public class AdultSim extends Sim {
         
         if (activityType.equalsIgnoreCase("Work")) {
             System.out.println(this.name + " works a shift as a " + this.career.getTitle() + " and earns $" + this.career.getSalary() + "!");
-            this.energy.decrease(30);
+            this.energy.decrease(this.career.getEnergyDrain());
             this.hunger.decrease(20);
             this.setMoney(this.getMoney() + this.career.getSalary());
+            this.addTotalMoneyEarned(this.career.getSalary());
         } else {
             System.out.println(this.name + " is idling.");
         }

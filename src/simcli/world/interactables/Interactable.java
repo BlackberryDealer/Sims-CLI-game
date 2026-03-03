@@ -6,6 +6,6 @@ import simcli.entities.Sim;
  * Interface defining objects that Sims can use.
  */
 public interface Interactable {
-    void interact(Sim sim) throws SimulationException;
+    void interact(Sim sim, java.util.Scanner scanner) throws SimulationException;
     String getObjectName();
 }

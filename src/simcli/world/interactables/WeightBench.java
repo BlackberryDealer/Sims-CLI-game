@@ -4,7 +4,7 @@ import simcli.entities.Sim;
 
 public class WeightBench implements Interactable {
     @Override
-    public void interact(Sim sim) throws SimulationException {
+    public void interact(Sim sim, java.util.Scanner scanner) throws SimulationException {
         if (sim.getHunger().getValue() < 30) {
             throw new SimulationException(sim.getName() + " lacks the energy for a hypertrophy strength training session.");
         }

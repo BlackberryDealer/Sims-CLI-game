@@ -5,14 +5,21 @@ import simcli.engine.SimulationException;
 
 public class Fridge implements Interactable {
     @Override
-    public void interact(Sim sim) throws SimulationException {
-        if (sim.getGroceries() <= 0) {
-            throw new SimulationException("The fridge is empty! You need to buy groceries.");
+    public void interact(Sim sim, java.util.Scanner scanner) throws SimulationException {
+        simcli.entities.Food foodToEat = null;
+        for (simcli.entities.Item item : sim.getInventory()) {
+            if (item instanceof simcli.entities.Food) {
+                foodToEat = (simcli.entities.Food) item;
+                break;
+            }
         }
         
-        System.out.println(sim.getName() + " cooks a meal using groceries from the fridge.");
-        sim.setGroceries(sim.getGroceries() - 1);
-        sim.getHunger().increase(40); 
+        if (foodToEat == null) {
+            throw new SimulationException("The fridge is empty! You need to buy food.");
+        }
+        
+        System.out.println(sim.getName() + " decides to eat " + foodToEat.getObjectName() + " from the fridge.");
+        foodToEat.interact(sim, scanner);
     }
     
     @Override
