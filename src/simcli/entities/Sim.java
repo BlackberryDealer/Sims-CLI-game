@@ -14,6 +14,7 @@ public abstract class Sim {
     protected Need energy;
     protected SimState state;
     protected int groceries;
+    protected int starvingTicks;
 
     public Sim(String name, int age) {
         this.name = name;
@@ -23,6 +24,7 @@ public abstract class Sim {
         this.energy = new Energy();
         this.state = SimState.HEALTHY;
         this.groceries = 0;
+        this.starvingTicks = 0;
     }
 
     // getters for .txt saving
@@ -48,12 +50,20 @@ public abstract class Sim {
     }
 
     public void updateState() {
-        if (this.hunger.getValue() <= 0) this.state = SimState.DEAD;
-        else if (this.hunger.getValue() <= 20) this.state = SimState.HUNGRY;
-        else if (this.energy.getValue() <= 20) this.state = SimState.TIRED;
-        else this.state = SimState.HEALTHY;
+        if (this.hunger.getValue() <= 0) {
+            this.state = SimState.STARVING;
+            this.starvingTicks++;
+            if (this.starvingTicks > 3) this.state = SimState.DEAD;
+        } else {
+            this.starvingTicks = 0;
+            if (this.hunger.getValue() <= 20) this.state = SimState.HUNGRY;
+            else if (this.energy.getValue() <= 20) this.state = SimState.TIRED;
+            else this.state = SimState.HEALTHY;
+        }
     }
 
     public int getGroceries() { return groceries; }
     public void setGroceries(int amount) { this.groceries = amount; }
+    public int getStarvingTicks() { return starvingTicks; }
+    public void setStarvingTicks(int ticks) { this.starvingTicks = ticks; }
 }

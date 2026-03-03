@@ -49,7 +49,7 @@ public class MainMenu {
         }
 
         GameEngine newGame = new GameEngine(newName);
-        newGame.init();
+        newGame.init(scanner);
         newGame.run(scanner); 
     }
 
