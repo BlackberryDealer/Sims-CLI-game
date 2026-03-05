@@ -253,6 +253,7 @@ public class GameEngine {
             }
             System.out.print("COMMAND> ");
 
+            int previousDay = timeManager.getCurrentDay();
             String input = scanner.nextLine().toUpperCase();
 
             try {
@@ -547,7 +548,6 @@ public class GameEngine {
             }
 
             if (running && tickForward) {
-                int previousDay = timeManager.getCurrentDay();
                 timeManager.advanceTick();
 
                 // End of day processing (e.g. check truancy, needs, etc.)

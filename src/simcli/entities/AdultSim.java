@@ -42,6 +42,7 @@ public class AdultSim extends Sim {
                     this.name + " works a shift as a " + this.career.getTitle() + " and earns $" + dailyPay + "!");
             this.energy.decrease(this.career.getEnergyDrain());
             this.hunger.decrease(20);
+            this.hygiene.decrease(30);
             this.setMoney(this.getMoney() + dailyPay);
             this.addTotalMoneyEarned(dailyPay);
             this.consecutiveDaysMissed = 0;
