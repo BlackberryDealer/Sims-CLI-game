@@ -12,11 +12,11 @@ public class Residential extends Building {
         super(name);
         this.rooms = new ArrayList<>();
     }
-    
+
     public void addRoom(Room r) {
         this.rooms.add(r);
     }
-    
+
     public List<Room> getRooms() {
         return rooms;
     }
@@ -33,5 +33,9 @@ public class Residential extends Building {
     @Override
     public void enter(Sim sim) {
         System.out.println(sim.getName() + " has arrived at their home: " + this.name);
+        if (!this.rooms.isEmpty()) {
+            sim.setCurrentRoom(this.rooms.get(0));
+            System.out.println("They entered the " + this.rooms.get(0).getName() + ".");
+        }
     }
 }
