@@ -6,6 +6,7 @@ import simcli.needs.Need;
 import simcli.needs.Hunger;
 import simcli.needs.Energy;
 import simcli.needs.Hygiene;
+import simcli.needs.Happiness;
 import simcli.world.Room;
 
 import java.util.ArrayList;
@@ -19,6 +20,8 @@ public abstract class Sim {
     protected Need hunger;
     protected Need energy;
     protected Need hygiene;
+    protected Need happiness;
+    protected int inventoryCapacity;
     protected SimState state;
     protected List<Item> inventory;
     protected int starvingTicks;
@@ -36,6 +39,8 @@ public abstract class Sim {
         this.hunger = new Hunger();
         this.energy = new Energy();
         this.hygiene = new Hygiene();
+        this.happiness = new Happiness();
+        this.inventoryCapacity = 10;
         this.state = SimState.HEALTHY;
         this.inventory = new ArrayList<>();
         this.starvingTicks = 0;
@@ -78,6 +83,18 @@ public abstract class Sim {
         return hygiene;
     }
 
+    public Need getHappiness() {
+        return happiness;
+    }
+    
+    public int getInventoryCapacity() {
+        return inventoryCapacity;
+    }
+    
+    public void setInventoryCapacity(int capacity) {
+        this.inventoryCapacity = capacity;
+    }
+
     public Room getCurrentRoom() {
         return currentRoom;
     }
@@ -97,11 +114,13 @@ public abstract class Sim {
         this.hunger.decrease(decayAmount);
         this.energy.decrease(decayAmount);
         this.hygiene.decrease(decayAmount);
+        this.happiness.decrease(decayAmount);
         this.updateState();
 
         System.out.println("[" + this.name + "] Hunger: " + this.hunger.getValue() +
                 " | Energy: " + this.energy.getValue() +
                 " | Hygiene: " + this.hygiene.getValue() +
+                " | Happiness: " + this.happiness.getValue() +
                 " | Cash: $" + this.money + " | Status: " + this.state);
     }
 
@@ -140,9 +159,13 @@ public abstract class Sim {
 
     public void growOlderDaily() {
         this.daysAlive++;
-        if (this.daysAlive % 7 == 0) {
+        if (this.daysAlive % 3 == 0) {
             this.age++;
             System.out.println("\n*** BIRTHDAY! " + this.name + " has aged up to " + this.age + " years old! ***");
+            if (this.age >= 81) {
+                this.state = SimState.DEAD;
+                System.out.println("\n*** TRAGEDY! " + this.name + " has passed away of old age at 81. ***");
+            }
         }
     }
 

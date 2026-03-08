@@ -22,6 +22,15 @@ public class SaveManager {
     public static boolean saveExists(String worldName) {
         return new File(SAVE_DIR + worldName + ".txt").exists();
     }
+    
+    // Deletes a specific save
+    public static boolean deleteSave(String worldName) {
+        File file = new File(SAVE_DIR + worldName + ".txt");
+        if (file.exists()) {
+            return file.delete();
+        }
+        return false;
+    }
 
     // Gets a list of all current save files (MainMenu needs this!)
     public static List<String> getExistingSaves() {
@@ -53,10 +62,10 @@ public class SaveManager {
             for (Sim sim : engine.getNeighborhood()) {
                 if (sim instanceof AdultSim) {
                     AdultSim aSim = (AdultSim) sim;
-                    // Format: AdultSim:Name,Age,JobName,Money,InventorySize,Hunger,Energy
+                    // Format: AdultSim:Name,Age,JobName,Money,InventoryCapacity,Hunger,Energy,Happiness
                     writer.println("AdultSim:" + aSim.getName() + "," + aSim.getAge() + "," + 
-                                 aSim.getCareer().name() + "," + aSim.getMoney() + ",0," + 
-                                 aSim.getHunger().getValue() + "," + aSim.getEnergy().getValue());
+                                 aSim.getCareer().name() + "," + aSim.getMoney() + "," + aSim.getInventoryCapacity() + "," + 
+                                 aSim.getHunger().getValue() + "," + aSim.getEnergy().getValue() + "," + aSim.getHappiness().getValue());
                 }
             }
         } catch (IOException e) {
@@ -95,11 +104,14 @@ public class SaveManager {
                     
                     // Load the new economy stats
                     sim.setMoney(Integer.parseInt(data[3]));
-                    // Ignored data[4] (old groceries/inventory size)
+                    sim.setInventoryCapacity(Integer.parseInt(data[4]));
                     
                     // Load the needs
                     sim.getHunger().setValue(Integer.parseInt(data[5]));
                     sim.getEnergy().setValue(Integer.parseInt(data[6]));
+                    if (data.length > 7) {
+                        sim.getHappiness().setValue(Integer.parseInt(data[7]));
+                    }
                     sim.updateState(); 
                     
                     loadedNeighborhood.add(sim);

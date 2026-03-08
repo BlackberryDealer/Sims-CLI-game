@@ -76,6 +76,9 @@ public class GameEngine {
         store.addInteractable(new GroceryShelf()); // The new paid food source
         this.cityMap.add(store);
 
+        simcli.world.Park park = new simcli.world.Park("City Park");
+        this.cityMap.add(park);
+
         // Default spawn location
         this.currentLocation = home;
     }
@@ -107,53 +110,7 @@ public class GameEngine {
             }
         }
 
-        System.out.println("Select a Starting Career:");
-        Job[] jobs = Job.values();
-        for (int i = 0; i < jobs.length; i++) {
-            Job j = jobs[i];
-            if (j == Job.UNEMPLOYED)
-                continue;
-            System.out.println("[" + (i + 1) + "] " + j.getTitle() +
-                    "\n    Starting Pay: $" + j.getBaseSalary() + " | Max Potential: $"
-                    + j.getSalaryAtTier(j.getMaxTier()) + " | Hours: " + j.getWorkingHours() + " ticks/shift | Drain: "
-                    + j.getEnergyDrain() + " energy | Req Age: " + j.getMinAge() + "-" + j.getMaxAge());
-        }
-
-        Job selectedJob = Job.SOFTWARE_ENGINEER;
-        while (true) {
-            System.out.print("Choice> ");
-            try {
-                String inputJob = scanner.nextLine().trim();
-                // Default handling
-                if (inputJob.isEmpty()) {
-                    if (age >= selectedJob.getMinAge() && age <= selectedJob.getMaxAge()) {
-                        break;
-                    } else {
-                        System.out.println("Default (Software Engineer) requires age " + selectedJob.getMinAge() + "-"
-                                + selectedJob.getMaxAge() + ". Please choose another.");
-                        continue;
-                    }
-                }
-
-                int jobChoice = Integer.parseInt(inputJob) - 1;
-                if (jobChoice >= 0 && jobChoice < jobs.length) {
-                    Job target = jobs[jobChoice];
-                    if (age >= target.getMinAge() && age <= target.getMaxAge()) {
-                        selectedJob = target;
-                        break;
-                    } else {
-                        System.out.println("Invalid Age! This job requires age " + target.getMinAge() + "-"
-                                + target.getMaxAge() + ".");
-                    }
-                } else {
-                    System.out.println("Invalid choice. Try again.");
-                }
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Try again.");
-            }
-        }
-
-        AdultSim player1 = new AdultSim(name, age, selectedJob);
+        AdultSim player1 = new AdultSim(name, age, Job.UNEMPLOYED);
         this.neighborhood.add(player1);
         System.out.println("\n=== Booting World: " + this.worldName + " ===");
     }
@@ -165,10 +122,11 @@ public class GameEngine {
         this.currentLocation.enter(activePlayer);
 
         while (running) {
-            AsciiArt.clearScreen();
+            simcli.ui.UIManager.clearScreen();
+            simcli.ui.UIManager.printHint();
 
             if (timeManager.getCurrentTick() == 3) {
-                System.out.println("\n[Hint: To keep the UI clean, the screen clears between turns.]");
+                System.out.println("\n[System: The screen clears between turns to keep the UI clean.]");
             }
 
             if (currentLocation.getName().contains("Dorm") || currentLocation.getName().contains("Home")) {
@@ -240,18 +198,9 @@ public class GameEngine {
             } else {
                 items = currentLocation.getInteractables();
             }
-            System.out.println("\nAvailable Actions:");
-            for (int i = 0; i < items.size(); i++) {
-                System.out.print("[" + (i + 1) + "] Use " + items.get(i).getObjectName() + "   ");
-            }
-            if (currentLocation instanceof simcli.world.Residential) {
-                System.out.println(
-                        "\n[W] Go to Work   [T] Travel   [M] Move Room   [H] Inspect House   [J] Job Market   [I] Info / Status   [V] Inventory   [U] Upgrade Room   [S] Save & Exit");
-            } else {
-                System.out.println(
-                        "\n[W] Go to Work   [T] Travel   [J] Job Market   [I] Info / Status   [V] Inventory   [U] Upgrade Room   [S] Save & Exit");
-            }
-            System.out.print("COMMAND> ");
+            
+            simcli.ui.UIManager.printActionGrid(items, currentLocation instanceof simcli.world.Residential);
+            System.out.print("\nCOMMAND> ");
 
             int previousDay = timeManager.getCurrentDay();
             String input = scanner.nextLine().toUpperCase();
@@ -375,7 +324,7 @@ public class GameEngine {
                 } else if (input.equals("H")) {
                     if (currentLocation instanceof simcli.world.Residential) {
                         simcli.world.Residential res = (simcli.world.Residential) currentLocation;
-                        System.out.println("\n=== HOUSE INSPECTION: " + res.getName() + " ===");
+                        System.out.println("\n=== HOUSE INFO: " + res.getName() + " ===");
                         for (simcli.world.Room r : res.getRooms()) {
                             System.out.println("- " + r.getName() + " (Capacity: " + r.getUsedCapacity() + "/"
                                     + r.getMaxCapacity() + ")");
@@ -392,18 +341,20 @@ public class GameEngine {
                     scanner.nextLine();
                     continue;
                 } else if (input.equals("I")) {
-                    System.out.println("\n=== SIM STATUS ===");
+                    System.out.println("\n=== CHARACTER STATUS ===");
                     System.out.println("Name: " + activePlayer.getName());
                     System.out.println("Age: " + activePlayer.getAge());
                     System.out.println("Money: $" + activePlayer.getMoney());
                     if (activePlayer instanceof simcli.entities.AdultSim) {
-                        System.out.println("Job: " + ((simcli.entities.AdultSim) activePlayer).getCareer().getTitle());
+                        System.out.println("Current Job Status: " + ((simcli.entities.AdultSim) activePlayer).getCareer().getTitle());
                     }
                     System.out.println(
                             "Hunger: " + activePlayer.getHunger().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
                     System.out.println(
                             "Energy: " + activePlayer.getEnergy().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
-                    System.out.println("Inventory Items: " + activePlayer.getInventory().size());
+                    System.out.println(
+                            "Happiness: " + activePlayer.getHappiness().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
+                    System.out.println("Inventory Items: " + activePlayer.getInventory().size() + " / " + activePlayer.getInventoryCapacity());
                     System.out.println("Location: " + currentLocation.getName());
                     System.out.println("==================");
                     System.out.print("\nPress ENTER to return...");
@@ -411,73 +362,110 @@ public class GameEngine {
                     tickForward = false;
                     continue;
                 } else if (input.equals("V")) {
-                    System.out.println("\n=== INVENTORY ===");
-                    List<simcli.entities.Item> inv = activePlayer.getInventory();
-                    if (inv.isEmpty()) {
-                        System.out.println("Your inventory is empty.");
-                    } else {
-                        for (int i = 0; i < inv.size(); i++) {
-                            System.out.println("[" + (i + 1) + "] " + inv.get(i).getObjectName());
+                    boolean managingInventory = true;
+                    int pageSize = 10;
+                    int currentPage = 0;
+
+                    while (managingInventory) {
+                        List<simcli.entities.Item> inv = activePlayer.getInventory();
+                        int totalPages = (int) Math.ceil((double) inv.size() / pageSize);
+                        if (totalPages == 0) totalPages = 1;
+                        if (currentPage >= totalPages) currentPage = totalPages - 1;
+
+                        System.out.println("\n=== INVENTORY (Page " + (currentPage + 1) + " of " + totalPages + ") ===");
+                        System.out.println("Capacity: " + inv.size() + " / " + activePlayer.getInventoryCapacity());
+                        
+                        if (inv.isEmpty()) {
+                            System.out.println("Your inventory is empty.");
+                            managingInventory = false;
+                            break;
                         }
-                    }
-                    System.out.println("[0] Back");
-                    System.out.print("Select item to Use/Place> ");
-                    try {
-                        int invChoice = Integer.parseInt(scanner.nextLine().trim());
-                        if (invChoice > 0 && invChoice <= inv.size()) {
-                            simcli.entities.Item selectedItem = inv.get(invChoice - 1);
-                            if (selectedItem instanceof simcli.entities.Furniture
-                                    && currentLocation instanceof simcli.world.Residential) {
-                                simcli.entities.Furniture furn = (simcli.entities.Furniture) selectedItem;
-                                simcli.world.Residential res = (simcli.world.Residential) currentLocation;
-                                System.out.println("Select a room to place " + furn.getObjectName() + " (Requires "
-                                        + furn.getSpaceScore() + " space):");
-                                List<simcli.world.Room> rooms = res.getRooms();
-                                for (int i = 0; i < rooms.size(); i++) {
-                                    simcli.world.Room r = rooms.get(i);
-                                    System.out.println("[" + (i + 1) + "] " + r.getName() + " (Capacity: "
-                                            + r.getUsedCapacity() + "/" + r.getMaxCapacity() + ")");
-                                }
-                                System.out.println("[0] Cancel");
-                                System.out.print("Room> ");
-                                int rChoice = Integer.parseInt(scanner.nextLine().trim());
-                                if (rChoice > 0 && rChoice <= rooms.size()) {
-                                    simcli.world.Room targetRoom = rooms.get(rChoice - 1);
-                                    if (targetRoom.canFit(furn)) {
-                                        Interactable instance = null;
-                                        switch (furn.getObjectName()) {
-                                            case "Bed":
-                                                instance = new simcli.world.interactables.Bed();
-                                                break;
-                                            case "Computer":
-                                                instance = new simcli.world.interactables.Computer();
-                                                break;
-                                            case "Fridge":
-                                                instance = new simcli.world.interactables.Fridge();
-                                                break;
-                                            case "Weight Bench":
-                                                instance = new simcli.world.interactables.WeightBench();
-                                                break;
-                                            case "Shower":
-                                                instance = new simcli.world.interactables.Shower();
-                                                break;
+
+                        int startIdx = currentPage * pageSize;
+                        int endIdx = Math.min(startIdx + pageSize, inv.size());
+
+                        for (int i = startIdx; i < endIdx; i++) {
+                            System.out.println("[" + (i - startIdx + 1) + "] " + inv.get(i).getObjectName());
+                        }
+
+                        System.out.println("\n[N] Next Page   [P] Previous Page");
+                        System.out.println("[0] Back");
+                        System.out.print("Select item to Use/Place> ");
+                        
+                        String invInput = scanner.nextLine().trim().toUpperCase();
+                        
+                        if (invInput.equals("0")) {
+                            managingInventory = false;
+                        } else if (invInput.equals("N")) {
+                            if (currentPage < totalPages - 1) currentPage++;
+                        } else if (invInput.equals("P")) {
+                            if (currentPage > 0) currentPage--;
+                        } else {
+                            try {
+                                int invChoice = Integer.parseInt(invInput);
+                                if (invChoice > 0 && invChoice <= (endIdx - startIdx)) {
+                                    int realIndex = startIdx + invChoice - 1;
+                                    simcli.entities.Item selectedItem = inv.get(realIndex);
+                                    
+                                    if (selectedItem instanceof simcli.entities.Furniture
+                                            && currentLocation instanceof simcli.world.Residential) {
+                                        simcli.entities.Furniture furn = (simcli.entities.Furniture) selectedItem;
+                                        simcli.world.Residential res = (simcli.world.Residential) currentLocation;
+                                        System.out.println("Select a room to place " + furn.getObjectName() + " (Requires "
+                                                + furn.getSpaceScore() + " space):");
+                                        List<simcli.world.Room> rooms = res.getRooms();
+                                        for (int i = 0; i < rooms.size(); i++) {
+                                            simcli.world.Room r = rooms.get(i);
+                                            System.out.println("[" + (i + 1) + "] " + r.getName() + " (Capacity: "
+                                                    + r.getUsedCapacity() + "/" + r.getMaxCapacity() + ")");
                                         }
-                                        if (instance != null) {
-                                            targetRoom.placeFurniture(instance, furn.getSpaceScore());
-                                            activePlayer.getInventory().remove(selectedItem);
-                                            System.out.println("Placed " + furn.getObjectName() + " in "
-                                                    + targetRoom.getName() + "!");
+                                        System.out.println("[0] Cancel");
+                                        System.out.print("Room> ");
+                                        int rChoice = Integer.parseInt(scanner.nextLine().trim());
+                                        if (rChoice > 0 && rChoice <= rooms.size()) {
+                                            simcli.world.Room targetRoom = rooms.get(rChoice - 1);
+                                            if (targetRoom.canFit(furn)) {
+                                                Interactable instance = null;
+                                                switch (furn.getObjectName()) {
+                                                    case "Bed":
+                                                        instance = new simcli.world.interactables.Bed();
+                                                        break;
+                                                    case "Computer":
+                                                        instance = new simcli.world.interactables.Computer();
+                                                        break;
+                                                    case "Fridge":
+                                                        instance = new simcli.world.interactables.Fridge();
+                                                        break;
+                                                    case "Weight Bench":
+                                                        instance = new simcli.world.interactables.WeightBench();
+                                                        break;
+                                                    case "Shower":
+                                                        instance = new simcli.world.interactables.Shower();
+                                                        break;
+                                                    case "Storage Chest":
+                                                        instance = new simcli.world.interactables.StorageChest();
+                                                        break;
+                                                }
+                                                if (instance != null) {
+                                                    targetRoom.placeFurniture(instance, furn.getSpaceScore());
+                                                    activePlayer.getInventory().remove(selectedItem);
+                                                    System.out.println("Placed " + furn.getObjectName() + " in "
+                                                            + targetRoom.getName() + "!");
+                                                }
+                                            } else {
+                                                System.out.println("Not enough space in " + targetRoom.getName() + "!");
+                                            }
                                         }
                                     } else {
-                                        System.out.println("Not enough space in " + targetRoom.getName() + "!");
+                                        selectedItem.interact(activePlayer, scanner);
                                     }
+                                } else {
+                                    System.out.println("Invalid selection.");
                                 }
-                            } else {
-                                selectedItem.interact(activePlayer, scanner);
+                            } catch (NumberFormatException e) {
+                                System.out.println("Invalid input.");
                             }
                         }
-                    } catch (NumberFormatException e) {
-                        System.out.println("Invalid selection.");
                     }
                     tickForward = false;
                     System.out.print("\nPress ENTER to return...");
@@ -533,6 +521,14 @@ public class GameEngine {
                         continue;
                     }
                 }
+            } catch (simcli.engine.SleepEventException e) {
+                int currentInDay = timeManager.getCurrentTick() % 24;
+                int ticksToMorning = (24 - currentInDay + 8) % 24;
+                if (ticksToMorning == 0) ticksToMorning = 24;
+                
+                timeManager.advanceTicks(ticksToMorning - 1);
+                tickForward = true;
+                continue;
             } catch (simcli.engine.SimulationException e) {
                 System.err.println("ACTION REJECTED: " + e.getMessage());
                 tickForward = false;

@@ -1,0 +1,4 @@
+WORLD:testWorld
+TICK:2
+GAME_OVER:false
+AdultSim:Bob,25,SOFTWARE_ENGINEER,500,0,86,71

@@ -83,4 +83,14 @@ public class AdultSim extends Sim {
         this.consecutiveDaysMissed = 0;
         System.out.println(this.name + " has started a new job as a " + newJob.getTitle() + ".");
     }
+    
+    @Override
+    public void growOlderDaily() {
+        super.growOlderDaily();
+        if (this.age >= 65 && this.career != Job.UNEMPLOYED) {
+            System.out.println("\n*** RETIREMENT! " + this.name + " has reached the retirement age of 65 and is officially retired. ***");
+            this.changeJob(Job.UNEMPLOYED);
+            this.setMoney(this.getMoney() + 1000); // 1000 Simoleon pension
+        }
+    }
 }
