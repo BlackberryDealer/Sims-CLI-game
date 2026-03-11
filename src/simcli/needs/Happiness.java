@@ -9,4 +9,9 @@ public class Happiness extends Need {
     public void decay() {
         this.decrease(2); // Happiness decays slightly
     }
+
+    @Override
+    public void decay(double multiplier) {
+        this.decrease((int) Math.round(2 * multiplier));
+    }
 }

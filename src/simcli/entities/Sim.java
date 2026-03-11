@@ -12,7 +12,7 @@ import simcli.world.Room;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class Sim {
+public abstract class Sim implements ISimBehaviour {
 
     protected String name;
     protected int age;
@@ -86,11 +86,11 @@ public abstract class Sim {
     public Need getHappiness() {
         return happiness;
     }
-    
+
     public int getInventoryCapacity() {
         return inventoryCapacity;
     }
-    
+
     public void setInventoryCapacity(int capacity) {
         this.inventoryCapacity = capacity;
     }
@@ -109,12 +109,11 @@ public abstract class Sim {
         if (this.state == SimState.DEAD)
             return;
         double ageMultiplier = 1.0 + (Math.max(0, this.age - 18) * 0.05); // 5% faster stat decay per year over 18
-        int decayAmount = (int) Math.round(5 * ageMultiplier);
 
-        this.hunger.decrease(decayAmount);
-        this.energy.decrease(decayAmount);
-        this.hygiene.decrease(decayAmount);
-        this.happiness.decrease(decayAmount);
+        this.hunger.decay(ageMultiplier);
+        this.energy.decay(ageMultiplier);
+        this.hygiene.decay(ageMultiplier);
+        this.happiness.decay(ageMultiplier);
         this.updateState();
 
         System.out.println("[" + this.name + "] Hunger: " + this.hunger.getValue() +
