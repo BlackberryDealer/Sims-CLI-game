@@ -23,25 +23,25 @@ public class Park extends Building {
         this.addInteractable(new Interactable() {
             @Override
             public void interact(Sim sim, java.util.Scanner scanner, simcli.engine.TimeManager timeManager) throws SimulationException {
-                System.out.println("\n=== Socialize at the Park ===");
+                simcli.ui.UIManager.printMessage("\n=== Socialize at the Park ===");
                 for (int i = 0; i < visitors.size(); i++) {
                     NPCSim npc = visitors.get(i);
-                    System.out.println("[" + (i+1) + "] Talk to " + npc.getName() + " (Relationship: " + npc.getRelationshipScore() + ")");
+                    simcli.ui.UIManager.printMessage("[" + (i+1) + "] Talk to " + npc.getName() + " (Relationship: " + npc.getRelationshipScore() + ")");
                 }
-                System.out.println("[0] Go back");
-                System.out.print("Select person> ");
+                simcli.ui.UIManager.printMessage("[0] Go back");
+                simcli.ui.UIManager.prompt("Select person> ");
                 try {
                     int choice = Integer.parseInt(scanner.nextLine().trim());
                     if (choice > 0 && choice <= visitors.size()) {
                         NPCSim target = visitors.get(choice - 1);
-                        System.out.println(sim.getName() + " talks to " + target.getName() + ". They seem to enjoy the chat!");
+                        simcli.ui.UIManager.printMessage(sim.getName() + " talks to " + target.getName() + ". They seem to enjoy the chat!");
                         target.increaseRelationship(5);
                         sim.getHappiness().increase(15);
                         sim.getEnergy().decrease(10);
-                        System.out.println("Relationship with " + target.getName() + " is now " + target.getRelationshipScore() + ".");
+                        simcli.ui.UIManager.printMessage("Relationship with " + target.getName() + " is now " + target.getRelationshipScore() + ".");
                     }
                 } catch (NumberFormatException e) {
-                    System.out.println("Invalid selection.");
+                    simcli.ui.UIManager.printMessage("Invalid selection.");
                 }
             }
 
@@ -54,11 +54,11 @@ public class Park extends Building {
     
     @Override
     public void enter(Sim sim) {
-        System.out.println(sim.getName() + " has arrived at " + this.name + ".");
-        System.out.print("People currently here: ");
+        simcli.ui.UIManager.printMessage(sim.getName() + " has arrived at " + this.name + ".");
+        simcli.ui.UIManager.prompt("People currently here: ");
         for (NPCSim npc : visitors) {
-            System.out.print(npc.getName() + " ");
+            simcli.ui.UIManager.prompt(npc.getName() + " ");
         }
-        System.out.println();
+        simcli.ui.UIManager.printMessage();
     }
 }

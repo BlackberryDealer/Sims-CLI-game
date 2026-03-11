@@ -9,6 +9,6 @@ public class Commercial extends Building {
     
     @Override
     public void enter(Sim sim) {
-        System.out.println(sim.getName() + " walks into " + this.name + ".");
+        simcli.ui.UIManager.printMessage(sim.getName() + " walks into " + this.name + ".");
     }
 }

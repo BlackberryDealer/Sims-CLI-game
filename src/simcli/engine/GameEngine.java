@@ -50,15 +50,15 @@ public class GameEngine {
     }
 
     public void init(Scanner scanner) {
-        System.out.println("\n=== Character Creation ===");
-        System.out.print("Enter your Sim's Name: ");
+        simcli.ui.UIManager.printMessage("\n=== Character Creation ===");
+        simcli.ui.UIManager.prompt("Enter your Sim's Name: ");
         String name = scanner.nextLine().trim();
         if (name.isEmpty())
             name = "Dylan";
 
         int age = 21;
         while (true) {
-            System.out.print("Enter your Sim's Age (18-80): ");
+            simcli.ui.UIManager.prompt("Enter your Sim's Age (18-80): ");
             try {
                 String inputAge = scanner.nextLine().trim();
                 if (inputAge.isEmpty())
@@ -68,16 +68,16 @@ public class GameEngine {
                     age = parsedAge;
                     break;
                 } else {
-                    System.out.println("Age must be between 18 and 80. Please try again.");
+                    simcli.ui.UIManager.printMessage("Age must be between 18 and 80. Please try again.");
                 }
             } catch (NumberFormatException e) {
-                System.out.println("Invalid age format. Please enter a valid number.");
+                simcli.ui.UIManager.printMessage("Invalid age format. Please enter a valid number.");
             }
         }
 
         AdultSim player1 = new AdultSim(name, age, Job.UNEMPLOYED);
         this.neighborhood.add(player1);
-        System.out.println("\n=== Booting World: " + this.worldName + " ===");
+        simcli.ui.UIManager.printMessage("\n=== Booting World: " + this.worldName + " ===");
     }
 
     public void run(Scanner scanner) {
@@ -95,45 +95,39 @@ public class GameEngine {
             String roomName = inRoom ? activePlayer.getCurrentRoom().getName() : "";
 
             renderer.renderHUD(activePlayer, this.worldManager.getCurrentLocation().getName(),
-                    timeManager.getCurrentDay(), timeManager.getCurrentTick(),
+                    timeManager.getCurrentDay(), timeManager.getFormattedTime(),
                     timeManager.getTimeOfDay(), inRoom, roomName);
 
             if (tickForward) {
                 activePlayer.tick();
 
                 if (activePlayer.getState() == SimState.DEAD) {
-                    System.out.println("Oh no! " + activePlayer.getName() + " has tragically died!");
+                    simcli.ui.UIManager.printMessage("Oh no! " + activePlayer.getName() + " has tragically died!");
                     activePlayer = getNextAliveSim();
                     if (activePlayer == null) {
                         this.isGameOver = true;
                         aggregateStats();
-                        System.out.println("\n*** GAME OVER ***");
-                        System.out.println("All your Sims have passed away.");
-                        System.out.println("--- WORLD STATS ---");
-                        System.out.println("Total Ticks Survived: " + this.timeManager.getCurrentTick());
-                        System.out.println("Total Money Earned: $" + this.sessionTotalMoney);
-                        System.out.println("Total Items Bought: " + this.sessionTotalItems);
-                        System.out.println("-------------------");
-                        System.out.println("Saving final state...");
+                        simcli.ui.UIManager.printGameOverStats(this.timeManager.getCurrentTick(), this.sessionTotalMoney, this.sessionTotalItems);
+                        simcli.ui.UIManager.printMessage("Saving final state...");
                         SaveManager.saveGame(this, this.worldName);
                         running = false;
-                        System.out.print("\nPress ENTER to end simulation...");
+                        simcli.ui.UIManager.prompt("\nPress ENTER to end simulation...");
                         scanner.nextLine();
                         break;
                     } else {
-                        System.out.println("Switching control to " + activePlayer.getName() + ".");
+                        simcli.ui.UIManager.printMessage("Switching control to " + activePlayer.getName() + ".");
                         this.worldManager.getCurrentLocation().enter(activePlayer);
-                        System.out.print("\nPress ENTER to continue...");
+                        simcli.ui.UIManager.prompt("\nPress ENTER to continue...");
                         scanner.nextLine();
                         continue;
                     }
                 } else if (activePlayer.getState() == SimState.STARVING) {
                     int ticksLeft = 4 - activePlayer.getStarvingTicks();
-                    System.out.println("\n[WARNING] " + activePlayer.getName() + " is STARVING! Feed them within "
+                    simcli.ui.UIManager.printMessage("\n[WARNING] " + activePlayer.getName() + " is STARVING! Feed them within "
                             + ticksLeft + " ticks or they will DIE!");
                 }
             } else {
-                System.out.println("[" + activePlayer.getName() + "] Hunger: " + activePlayer.getHunger().getValue() +
+                simcli.ui.UIManager.printMessage("[" + activePlayer.getName() + "] Hunger: " + activePlayer.getHunger().getValue() +
                         " | Energy: " + activePlayer.getEnergy().getValue() +
                         " | Hygiene: " + activePlayer.getHygiene().getValue() +
                         " | Happiness: " + activePlayer.getHappiness().getValue() +
@@ -142,7 +136,7 @@ public class GameEngine {
 
             tickForward = true;
 
-            System.out.println("Inventory Logs: " + activePlayer.getInventory().size() + " items");
+            simcli.ui.UIManager.printMessage("Inventory Logs: " + activePlayer.getInventory().size() + " items");
 
             List<simcli.world.interactables.Interactable> items;
             if (inRoom) {
@@ -152,7 +146,7 @@ public class GameEngine {
             }
 
             renderer.renderActions(items, this.worldManager.getCurrentLocation() instanceof simcli.world.Residential);
-            System.out.print("\nCOMMAND> ");
+            simcli.ui.UIManager.prompt("\nCOMMAND> ");
 
             int previousDay = timeManager.getCurrentDay();
             String input = scanner.nextLine().toUpperCase();
@@ -176,10 +170,10 @@ public class GameEngine {
                     break;
                 case SAVE_AND_EXIT:
                     running = false;
-                    System.out.println("Saving game...");
+                    simcli.ui.UIManager.printMessage("Saving game...");
                     SaveManager.saveGame(this, this.worldName);
-                    System.out.println("Game Saved! Returning to Main Menu...\n");
-                    System.out.print("Press ENTER to exit...");
+                    simcli.ui.UIManager.printMessage("Game Saved! Returning to Main Menu...\n");
+                    simcli.ui.UIManager.prompt("Press ENTER to exit...");
                     scanner.nextLine();
                     continue; // Will break out of loop since running is false
             }
@@ -188,7 +182,7 @@ public class GameEngine {
                 timeManager.advanceTick();
 
                 if (timeManager.getCurrentDay() > previousDay) {
-                    System.out.println("\n*** A new day has begun! (Day " + timeManager.getCurrentDay() + ") ***");
+                    simcli.ui.UIManager.printMessage("\n*** A new day has begun! (Day " + timeManager.getCurrentDay() + ") ***");
                     for (Sim s : neighborhood) {
                         s.growOlderDaily();
                         if (s instanceof AdultSim) {
@@ -198,11 +192,11 @@ public class GameEngine {
                 }
 
                 if (timeManager.getCurrentTick() % 10 == 0) {
-                    System.out.println("[System] Autosaving...");
+                    simcli.ui.UIManager.printMessage("[System] Autosaving...");
                     SaveManager.saveGame(this, this.worldName);
                 }
 
-                System.out.print("\nPress ENTER to continue to the next turn...");
+                simcli.ui.UIManager.prompt("\nPress ENTER to continue to the next turn...");
                 scanner.nextLine();
             }
         }

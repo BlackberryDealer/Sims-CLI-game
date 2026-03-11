@@ -43,4 +43,9 @@ public class TimeManager {
         else
             return "Night";
     }
+
+    public String getFormattedTime() {
+        int timeInDay = currentTick % ticksPerDay;
+        return String.format("%02d:00", timeInDay);
+    }
 }

@@ -22,12 +22,12 @@ public class StorageChest implements Interactable, Container {
     public void interact(Sim sim, java.util.Scanner scanner, simcli.engine.TimeManager timeManager) throws SimulationException {
         boolean inMenu = true;
         while (inMenu) {
-            System.out.println("\n=== STORAGE CHEST ===");
-            System.out.println("Chest Output: " + storedItems.size() + " items");
-            System.out.println("[1] Store Item from Inventory");
-            System.out.println("[2] Take Item from Chest");
-            System.out.println("[0] Close Chest");
-            System.out.print("Action> ");
+            simcli.ui.UIManager.printMessage("\n=== STORAGE CHEST ===");
+            simcli.ui.UIManager.printMessage("Chest Output: " + storedItems.size() + " items");
+            simcli.ui.UIManager.printMessage("[1] Store Item from Inventory");
+            simcli.ui.UIManager.printMessage("[2] Take Item from Chest");
+            simcli.ui.UIManager.printMessage("[0] Close Chest");
+            simcli.ui.UIManager.prompt("Action> ");
             String input = scanner.nextLine().trim();
 
             if (input.equals("0")) {
@@ -37,7 +37,7 @@ public class StorageChest implements Interactable, Container {
                     (item, realIndex) -> {
                         storeItem(item);
                         sim.getInventory().remove(item);
-                        System.out.println("Stored " + item.getObjectName() + " into Chest.");
+                        simcli.ui.UIManager.printMessage("Stored " + item.getObjectName() + " into Chest.");
                     });
             } else if (input.equals("2")) {
                 MenuPagination.displayPaginatedMenu("Chest Contents", storedItems, "Select item to take", scanner, 
@@ -45,13 +45,13 @@ public class StorageChest implements Interactable, Container {
                         if (sim.getInventory().size() < sim.getInventoryCapacity()) {
                             sim.addItem(item);
                             storedItems.remove(item);
-                            System.out.println("Took " + item.getObjectName() + " from Chest.");
+                            simcli.ui.UIManager.printMessage("Took " + item.getObjectName() + " from Chest.");
                         } else {
-                            System.out.println("Your inventory is full!");
+                            simcli.ui.UIManager.printMessage("Your inventory is full!");
                         }
                     });
             } else {
-                System.out.println("Invalid selection.");
+                simcli.ui.UIManager.printMessage("Invalid selection.");
             }
         }
     }

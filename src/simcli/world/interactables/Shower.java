@@ -15,9 +15,9 @@ public class Shower implements Interactable {
 
     @Override
     public void interact(Sim sim, java.util.Scanner scanner, simcli.engine.TimeManager timeManager) throws SimulationException {
-        System.out.println(sim.getName() + " takes a long, refreshing shower.");
+        simcli.ui.UIManager.printMessage(sim.getName() + " takes a long, refreshing shower.");
         sim.getHygiene().increase(50);
-        System.out.println(
+        simcli.ui.UIManager.printMessage(
                 "Hygiene is now " + sim.getHygiene().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
     }
 }

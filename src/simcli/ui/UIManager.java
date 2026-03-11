@@ -62,4 +62,30 @@ public class UIManager {
         System.out.println("[Personal] [I] Character Status   [V] Inventory");
         System.out.println("[General]  [S] Save & Exit");
     }
+
+    public static void printMessage(String message) {
+        System.out.println(message);
+    }
+
+    public static void printMessage() {
+        System.out.println();
+    }
+
+    public static void printWarning(String message) {
+        System.out.println("\n[WARNING] " + message);
+    }
+
+    public static void prompt(String message) {
+        System.out.print(message);
+    }
+
+    public static void printGameOverStats(int totalTicks, int totalMoney, int totalItems) {
+        System.out.println("\n*** GAME OVER ***");
+        System.out.println("All your Sims have passed away.");
+        System.out.println("--- WORLD STATS ---");
+        System.out.println("Total Ticks Survived: " + totalTicks);
+        System.out.println("Total Money Earned: $" + totalMoney);
+        System.out.println("Total Items Bought: " + totalItems);
+        System.out.println("-------------------------");
+    }
 }

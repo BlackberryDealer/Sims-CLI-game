@@ -8,7 +8,7 @@ public class WeightBench implements Interactable {
         if (sim.getHunger().getValue() < 30) {
             throw new SimulationException(sim.getName() + " lacks the energy for a hypertrophy strength training session.");
         }
-        System.out.println(sim.getName() + " hits the gym for a high-intensity full-body workout.");
+        simcli.ui.UIManager.printMessage(sim.getName() + " hits the gym for a high-intensity full-body workout.");
         sim.getEnergy().decrease(25);
         sim.getHunger().decrease(25);
     }

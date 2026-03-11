@@ -116,7 +116,7 @@ public abstract class Sim implements ISimBehaviour {
         this.happiness.decay(ageMultiplier);
         this.updateState();
 
-        System.out.println("[" + this.name + "] Hunger: " + this.hunger.getValue() +
+        simcli.ui.UIManager.printMessage("[" + this.name + "] Hunger: " + this.hunger.getValue() +
                 " | Energy: " + this.energy.getValue() +
                 " | Hygiene: " + this.hygiene.getValue() +
                 " | Happiness: " + this.happiness.getValue() +
@@ -160,10 +160,10 @@ public abstract class Sim implements ISimBehaviour {
         this.daysAlive++;
         if (this.daysAlive % 3 == 0) {
             this.age++;
-            System.out.println("\n*** BIRTHDAY! " + this.name + " has aged up to " + this.age + " years old! ***");
+            simcli.ui.UIManager.printMessage("\n*** BIRTHDAY! " + this.name + " has aged up to " + this.age + " years old! ***");
             if (this.age >= 81) {
                 this.state = SimState.DEAD;
-                System.out.println("\n*** TRAGEDY! " + this.name + " has passed away of old age at 81. ***");
+                simcli.ui.UIManager.printMessage("\n*** TRAGEDY! " + this.name + " has passed away of old age at 81. ***");
             }
         }
     }

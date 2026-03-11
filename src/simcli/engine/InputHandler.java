@@ -34,9 +34,22 @@ public class InputHandler implements IInputHandler {
 
         try {
             if (input.equals("W")) {
-                activePlayer.performActivity("Work");
                 if (activePlayer instanceof AdultSim) {
-                    timeManager.advanceTicks(((AdultSim) activePlayer).getCareer().getWorkingHours() - 1);
+                    AdultSim adult = (AdultSim) activePlayer;
+                    if (adult.getShiftsWorkedToday() >= 1 && !adult.hasWarnedAboutOverwork()) {
+                        simcli.ui.UIManager.printWarning("Working multiple shifts in a single day drains stats significantly faster!");
+                        simcli.ui.UIManager.prompt("Are you sure you want to overwork? (Y/N)> ");
+                        String conf = scanner.nextLine().trim();
+                        adult.setWarnedAboutOverwork(true);
+                        if (!conf.equalsIgnoreCase("Y")) {
+                            simcli.ui.UIManager.printMessage("Work action cancelled.");
+                            return CommandResult.NO_TICK;
+                        }
+                    }
+                    adult.performActivity("Work");
+                    timeManager.advanceTicks(adult.getCareer().getWorkingHours() - 1);
+                } else {
+                    activePlayer.performActivity("Work");
                 }
                 return CommandResult.TICK_FORWARD;
             } else if (input.equals("J")) {
@@ -67,7 +80,7 @@ public class InputHandler implements IInputHandler {
                     items.get(choice).interact(activePlayer, scanner, timeManager);
                     return CommandResult.TICK_FORWARD;
                 } else {
-                    System.out.println("Invalid item choice.");
+                    simcli.ui.UIManager.printMessage("Invalid item choice.");
                     pause(scanner);
                     return CommandResult.NO_TICK;
                 }
@@ -75,36 +88,36 @@ public class InputHandler implements IInputHandler {
         } catch (SleepEventException e) {
             return CommandResult.SLEEP_EVENT;
         } catch (SimulationException e) {
-            System.err.println("ACTION REJECTED: " + e.getMessage());
+            simcli.ui.UIManager.printWarning("ACTION REJECTED: " + e.getMessage());
             pause(scanner);
             return CommandResult.NO_TICK;
         } catch (NumberFormatException e) {
-            System.err.println("Invalid input.");
+            simcli.ui.UIManager.printWarning("Invalid input.");
             pause(scanner);
             return CommandResult.NO_TICK;
         }
     }
 
     private void pause(Scanner scanner) {
-        System.out.print("\nPress ENTER to return...");
+        simcli.ui.UIManager.prompt("\nPress ENTER to return...");
         scanner.nextLine();
     }
 
     private void handleJobMarket(Sim activePlayer, Scanner scanner) {
         if (activePlayer instanceof AdultSim) {
             AdultSim adult = (AdultSim) activePlayer;
-            System.out.println("\n=== JOB MARKET ===");
-            System.out.println("Current Job: " + adult.getCareer().getTitle());
-            System.out.println("[0] Quit Current Job (Become Unemployed)");
+            simcli.ui.UIManager.printMessage("\n=== JOB MARKET ===");
+            simcli.ui.UIManager.printMessage("Current Job: " + adult.getCareer().getTitle());
+            simcli.ui.UIManager.printMessage("[0] Quit Current Job (Become Unemployed)");
 
             Job[] allJobs = Job.values();
             for (int i = 1; i < allJobs.length; i++) {
                 Job j = allJobs[i];
-                System.out.println("[" + i + "] " + j.getTitle() + " (Start: $" + j.getBaseSalary()
+                simcli.ui.UIManager.printMessage("[" + i + "] " + j.getTitle() + " (Start: $" + j.getBaseSalary()
                         + ", Req Age: " + j.getMinAge() + "-" + j.getMaxAge() + ")");
             }
-            System.out.println("[-1] Back");
-            System.out.print("Select Job> ");
+            simcli.ui.UIManager.printMessage("[-1] Back");
+            simcli.ui.UIManager.prompt("Select Job> ");
             try {
                 int jChoice = Integer.parseInt(scanner.nextLine().trim());
                 if (jChoice == -1) {
@@ -116,31 +129,31 @@ public class InputHandler implements IInputHandler {
                     if (adult.getAge() >= targetJob.getMinAge() && adult.getAge() <= targetJob.getMaxAge()) {
                         adult.changeJob(targetJob);
                     } else {
-                        System.out.println("You don't meet the age requirements for this job.");
+                        simcli.ui.UIManager.printMessage("You don't meet the age requirements for this job.");
                         pause(scanner);
                     }
                 } else {
-                    System.out.println("Invalid choice.");
+                    simcli.ui.UIManager.printMessage("Invalid choice.");
                     pause(scanner);
                 }
             } catch (NumberFormatException e) {
-                System.out.println("Invalid input.");
+                simcli.ui.UIManager.printMessage("Invalid input.");
                 pause(scanner);
             }
         } else {
-            System.out.println("Only adults can access the job market.");
+            simcli.ui.UIManager.printMessage("Only adults can access the job market.");
             pause(scanner);
         }
     }
 
     private CommandResult handleTravel(Sim activePlayer, Scanner scanner, Building currentLocation) {
         List<Building> cityMap = worldManager.getCityMap();
-        System.out.println("\nAvailable Locations:");
+        simcli.ui.UIManager.printMessage("\nAvailable Locations:");
         for (int i = 0; i < cityMap.size(); i++) {
-            System.out.println("[" + (i + 1) + "] " + cityMap.get(i).getName());
+            simcli.ui.UIManager.printMessage("[" + (i + 1) + "] " + cityMap.get(i).getName());
         }
-        System.out.println("[0] Cancel");
-        System.out.print("Select destination> ");
+        simcli.ui.UIManager.printMessage("[0] Cancel");
+        simcli.ui.UIManager.prompt("Select destination> ");
 
         try {
             int destStr = Integer.parseInt(scanner.nextLine().trim());
@@ -149,7 +162,7 @@ public class InputHandler implements IInputHandler {
             } else if (destStr > 0 && destStr <= cityMap.size()) {
                 Building target = cityMap.get(destStr - 1);
                 if (currentLocation == target) {
-                    System.out.println("You are already at " + target.getName() + "!");
+                    simcli.ui.UIManager.printMessage("You are already at " + target.getName() + "!");
                     pause(scanner);
                     return CommandResult.NO_TICK;
                 } else {
@@ -159,12 +172,12 @@ public class InputHandler implements IInputHandler {
                     return CommandResult.TICK_FORWARD;
                 }
             } else {
-                System.out.println("Invalid destination.");
+                simcli.ui.UIManager.printMessage("Invalid destination.");
                 pause(scanner);
                 return CommandResult.NO_TICK;
             }
         } catch (NumberFormatException e) {
-            System.out.println("Invalid destination.");
+            simcli.ui.UIManager.printMessage("Invalid destination.");
             pause(scanner);
             return CommandResult.NO_TICK;
         }
@@ -173,24 +186,24 @@ public class InputHandler implements IInputHandler {
     private void handleMoveRoom(Sim activePlayer, Scanner scanner, Building currentLocation) {
         if (currentLocation instanceof Residential) {
             Residential res = (Residential) currentLocation;
-            System.out.println("\n=== MOVE ROOM ===");
+            simcli.ui.UIManager.printMessage("\n=== MOVE ROOM ===");
             List<Room> rooms = res.getRooms();
             for (int i = 0; i < rooms.size(); i++) {
-                System.out.println("[" + (i + 1) + "] " + rooms.get(i).getName());
+                simcli.ui.UIManager.printMessage("[" + (i + 1) + "] " + rooms.get(i).getName());
             }
-            System.out.println("[0] Cancel");
-            System.out.print("Select Room> ");
+            simcli.ui.UIManager.printMessage("[0] Cancel");
+            simcli.ui.UIManager.prompt("Select Room> ");
             try {
                 int rChoice = Integer.parseInt(scanner.nextLine().trim());
                 if (rChoice > 0 && rChoice <= rooms.size()) {
                     activePlayer.setCurrentRoom(rooms.get(rChoice - 1));
-                    System.out.println("Moved to " + activePlayer.getCurrentRoom().getName() + ".");
+                    simcli.ui.UIManager.printMessage("Moved to " + activePlayer.getCurrentRoom().getName() + ".");
                 }
             } catch (NumberFormatException e) {
-                System.out.println("Invalid input.");
+                simcli.ui.UIManager.printMessage("Invalid input.");
             }
         } else {
-            System.out.println("You can only move between rooms at home!");
+            simcli.ui.UIManager.printMessage("You can only move between rooms at home!");
         }
         pause(scanner);
     }
@@ -198,37 +211,37 @@ public class InputHandler implements IInputHandler {
     private void handleHouseInfo(Building currentLocation, Scanner scanner) {
         if (currentLocation instanceof Residential) {
             Residential res = (Residential) currentLocation;
-            System.out.println("\n=== HOUSE INFO: " + res.getName() + " ===");
+            simcli.ui.UIManager.printMessage("\n=== HOUSE INFO: " + res.getName() + " ===");
             for (Room r : res.getRooms()) {
-                System.out.println("- " + r.getName() + " (Capacity: " + r.getUsedCapacity() + "/"
+                simcli.ui.UIManager.printMessage("- " + r.getName() + " (Capacity: " + r.getUsedCapacity() + "/"
                         + r.getMaxCapacity() + ")");
                 for (Interactable it : r.getInteractables()) {
-                    System.out.println("    => " + it.getObjectName());
+                    simcli.ui.UIManager.printMessage("    => " + it.getObjectName());
                 }
             }
-            System.out.println("======================================");
+            simcli.ui.UIManager.printMessage("======================================");
         } else {
-            System.out.println("You can only inspect residential buildings.");
+            simcli.ui.UIManager.printMessage("You can only inspect residential buildings.");
         }
         pause(scanner);
     }
 
     private void handleCharacterStatus(Sim activePlayer, Building currentLocation, Scanner scanner) {
-        System.out.println("\n=== CHARACTER STATUS ===");
-        System.out.println("Name: " + activePlayer.getName());
-        System.out.println("Age: " + activePlayer.getAge());
-        System.out.println("Money: $" + activePlayer.getMoney());
+        simcli.ui.UIManager.printMessage("\n=== CHARACTER STATUS ===");
+        simcli.ui.UIManager.printMessage("Name: " + activePlayer.getName());
+        simcli.ui.UIManager.printMessage("Age: " + activePlayer.getAge());
+        simcli.ui.UIManager.printMessage("Money: $" + activePlayer.getMoney());
         if (activePlayer instanceof AdultSim) {
-            System.out.println("Current Job Status: " + ((AdultSim) activePlayer).getCareer().getTitle());
+            simcli.ui.UIManager.printMessage("Current Job Status: " + ((AdultSim) activePlayer).getCareer().getTitle());
         }
-        System.out.println("Hunger: " + activePlayer.getHunger().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
-        System.out.println("Energy: " + activePlayer.getEnergy().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
+        simcli.ui.UIManager.printMessage("Hunger: " + activePlayer.getHunger().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
+        simcli.ui.UIManager.printMessage("Energy: " + activePlayer.getEnergy().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
         System.out
                 .println("Happiness: " + activePlayer.getHappiness().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
-        System.out.println(
+        simcli.ui.UIManager.printMessage(
                 "Inventory Items: " + activePlayer.getInventory().size() + " / " + activePlayer.getInventoryCapacity());
-        System.out.println("Location: " + currentLocation.getName());
-        System.out.println("==================");
+        simcli.ui.UIManager.printMessage("Location: " + currentLocation.getName());
+        simcli.ui.UIManager.printMessage("==================");
         pause(scanner);
     }
 
@@ -246,11 +259,11 @@ public class InputHandler implements IInputHandler {
             if (currentPage >= totalPages)
                 currentPage = totalPages - 1;
 
-            System.out.println("\n=== INVENTORY (Page " + (currentPage + 1) + " of " + totalPages + ") ===");
-            System.out.println("Capacity: " + inv.size() + " / " + activePlayer.getInventoryCapacity());
+            simcli.ui.UIManager.printMessage("\n=== INVENTORY (Page " + (currentPage + 1) + " of " + totalPages + ") ===");
+            simcli.ui.UIManager.printMessage("Capacity: " + inv.size() + " / " + activePlayer.getInventoryCapacity());
 
             if (inv.isEmpty()) {
-                System.out.println("Your inventory is empty.");
+                simcli.ui.UIManager.printMessage("Your inventory is empty.");
                 managingInventory = false;
                 break;
             }
@@ -259,12 +272,12 @@ public class InputHandler implements IInputHandler {
             int endIdx = Math.min(startIdx + pageSize, inv.size());
 
             for (int i = startIdx; i < endIdx; i++) {
-                System.out.println("[" + (i - startIdx + 1) + "] " + inv.get(i).getObjectName());
+                simcli.ui.UIManager.printMessage("[" + (i - startIdx + 1) + "] " + inv.get(i).getObjectName());
             }
 
-            System.out.println("\n[N] Next Page   [P] Previous Page");
-            System.out.println("[0] Back");
-            System.out.print("Select item to Use/Place> ");
+            simcli.ui.UIManager.printMessage("\n[N] Next Page   [P] Previous Page");
+            simcli.ui.UIManager.printMessage("[0] Back");
+            simcli.ui.UIManager.prompt("Select item to Use/Place> ");
 
             String invInput = scanner.nextLine().trim().toUpperCase();
 
@@ -287,21 +300,21 @@ public class InputHandler implements IInputHandler {
                                 && currentLocation instanceof Residential) {
                             simcli.entities.Furniture furn = (simcli.entities.Furniture) selectedItem;
                             Residential res = (Residential) currentLocation;
-                            System.out.println("Select a room to place " + furn.getObjectName() + " (Requires "
+                            simcli.ui.UIManager.printMessage("Select a room to place " + furn.getObjectName() + " (Requires "
                                     + furn.getSpaceScore() + " space):");
                             List<Room> rooms = res.getRooms();
                             for (int i = 0; i < rooms.size(); i++) {
                                 Room r = rooms.get(i);
-                                System.out.println("[" + (i + 1) + "] " + r.getName() + " (Capacity: "
+                                simcli.ui.UIManager.printMessage("[" + (i + 1) + "] " + r.getName() + " (Capacity: "
                                         + r.getUsedCapacity() + "/" + r.getMaxCapacity() + ")");
                             }
-                            System.out.println("[0] Cancel");
-                            System.out.print("Room> ");
+                            simcli.ui.UIManager.printMessage("[0] Cancel");
+                            simcli.ui.UIManager.prompt("Room> ");
                             int rChoice = Integer.parseInt(scanner.nextLine().trim());
                             if (rChoice > 0 && rChoice <= rooms.size()) {
                                 Room targetRoom = rooms.get(rChoice - 1);
                                 if (targetRoom != activePlayer.getCurrentRoom()) {
-                                    System.out.println("You can only place furniture in the room you are currently in!");
+                                    simcli.ui.UIManager.printMessage("You can only place furniture in the room you are currently in!");
                                 } else if (targetRoom.canFit(furn)) {
                                     Interactable instance = null;
                                     switch (furn.getObjectName()) {
@@ -327,11 +340,11 @@ public class InputHandler implements IInputHandler {
                                     if (instance != null) {
                                         targetRoom.placeFurniture(instance, furn.getSpaceScore());
                                         activePlayer.getInventory().remove(selectedItem);
-                                        System.out.println("Placed " + furn.getObjectName() + " in "
+                                        simcli.ui.UIManager.printMessage("Placed " + furn.getObjectName() + " in "
                                                 + targetRoom.getName() + "!");
                                     }
                                 } else {
-                                    System.out.println("Not enough space in " + targetRoom.getName() + "!");
+                                    simcli.ui.UIManager.printMessage("Not enough space in " + targetRoom.getName() + "!");
                                 }
                             }
                         } else {
@@ -340,14 +353,14 @@ public class InputHandler implements IInputHandler {
                             } catch (SleepEventException e) {
                                 throw e; // rethrow to be caught by handle
                             } catch (SimulationException e) {
-                                System.err.println("ACTION REJECTED: " + e.getMessage());
+                                simcli.ui.UIManager.printWarning("ACTION REJECTED: " + e.getMessage());
                             }
                         }
                     } else {
-                        System.out.println("Invalid selection.");
+                        simcli.ui.UIManager.printMessage("Invalid selection.");
                     }
                 } catch (NumberFormatException e) {
-                    System.out.println("Invalid input.");
+                    simcli.ui.UIManager.printMessage("Invalid input.");
                 } catch (SleepEventException e) {
                     throw e; // properly rethrow to outer
                 }
@@ -359,17 +372,17 @@ public class InputHandler implements IInputHandler {
     private void handleUpgradeRoom(Sim activePlayer, Building currentLocation, Scanner scanner) {
         if (currentLocation instanceof Residential) {
             Residential res = (Residential) currentLocation;
-            System.out.println("\n=== UPGRADE ROOM ===");
-            System.out.println("Cost: $500 for +20 Capacity");
-            System.out.println("Your Cash: $" + activePlayer.getMoney());
+            simcli.ui.UIManager.printMessage("\n=== UPGRADE ROOM ===");
+            simcli.ui.UIManager.printMessage("Cost: $500 for +20 Capacity");
+            simcli.ui.UIManager.printMessage("Your Cash: $" + activePlayer.getMoney());
             List<Room> rooms = res.getRooms();
             for (int i = 0; i < rooms.size(); i++) {
                 Room r = rooms.get(i);
-                System.out.println("[" + (i + 1) + "] " + r.getName() + " (Capacity: " + r.getUsedCapacity()
+                simcli.ui.UIManager.printMessage("[" + (i + 1) + "] " + r.getName() + " (Capacity: " + r.getUsedCapacity()
                         + "/" + r.getMaxCapacity() + ")");
             }
-            System.out.println("[0] Cancel");
-            System.out.print("Room> ");
+            simcli.ui.UIManager.printMessage("[0] Cancel");
+            simcli.ui.UIManager.prompt("Room> ");
             try {
                 int rChoice = Integer.parseInt(scanner.nextLine().trim());
                 if (rChoice > 0 && rChoice <= rooms.size()) {
@@ -377,10 +390,10 @@ public class InputHandler implements IInputHandler {
                     targetRoom.upgradeCapacity(activePlayer, 20, 500);
                 }
             } catch (Exception e) {
-                System.out.println("Invalid selection.");
+                simcli.ui.UIManager.printMessage("Invalid selection.");
             }
         } else {
-            System.out.println("You can only upgrade rooms at home!");
+            simcli.ui.UIManager.printMessage("You can only upgrade rooms at home!");
         }
         pause(scanner);
     }

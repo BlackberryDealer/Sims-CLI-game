@@ -79,7 +79,7 @@ public class SaveManager {
                 }
             }
         } catch (IOException e) {
-            System.err.println("Error saving game: " + e.getMessage());
+            simcli.ui.UIManager.printWarning("Error saving game: " + e.getMessage());
         }
     }
 
@@ -147,19 +147,15 @@ public class SaveManager {
             }
 
             if (isGameOver) {
-                System.out.println("\n--- FINAL WORLD STATS ---");
-                System.out.println("Total Ticks Survived: " + loadedTick);
-                System.out.println("Total Money Earned: $" + statsMoney);
-                System.out.println("Total Items Bought: " + statsItems);
-                System.out.println("-------------------------");
-                System.out.println("This save state is complete. Returning to Main Menu.");
+                simcli.ui.UIManager.printGameOverStats(loadedTick, statsMoney, statsItems);
+                simcli.ui.UIManager.printMessage("This save state is complete. Returning to Main Menu.");
                 return null;
             }
 
             return new GameEngine(loadedWorldName, loadedTick, loadedNeighborhood, isGameOver);
 
         } catch (Exception e) {
-            System.err.println("Error loading game: " + e.getMessage());
+            simcli.ui.UIManager.printWarning("Error loading game: " + e.getMessage());
             return null;
         }
     }

@@ -10,7 +10,7 @@ public class Bed implements Interactable {
         int ticksToMorning = (24 - currentInDay + 8) % 24;
         if (ticksToMorning == 0) ticksToMorning = 24;
 
-        System.out.println(sim.getName() + " sleeps deeply in the bed for " + ticksToMorning + " hours.");
+        simcli.ui.UIManager.printMessage(sim.getName() + " sleeps deeply in the bed for " + ticksToMorning + " hours.");
         simcli.ui.UIManager.sleepAnimation();
         
         int energyGain = Math.min(100, 15 * ticksToMorning);

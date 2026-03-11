@@ -29,69 +29,69 @@ public class Fridge implements Interactable, Container {
         boolean open = true;
         while (open) {
             simcli.ui.UIManager.clearScreen();
-            System.out.println("\n=== FRIDGE INVENTORY ===");
+            simcli.ui.UIManager.printMessage("\n=== FRIDGE INVENTORY ===");
             if (storedFood.isEmpty()) {
-                System.out.println("The fridge is completely empty!");
+                simcli.ui.UIManager.printMessage("The fridge is completely empty!");
             } else {
                 for (int i = 0; i < storedFood.size(); i++) {
-                    System.out.println("[" + (i + 1) + "] " + storedFood.get(i).getObjectName());
+                    simcli.ui.UIManager.printMessage("[" + (i + 1) + "] " + storedFood.get(i).getObjectName());
                 }
             }
-            System.out.println("\n[S] Store Food from Your Personal Inventory");
-            System.out.println("[0] Close Fridge");
-            System.out.print("Action (number to EAT, S to store)> ");
+            simcli.ui.UIManager.printMessage("\n[S] Store Food from Your Personal Inventory");
+            simcli.ui.UIManager.printMessage("[0] Close Fridge");
+            simcli.ui.UIManager.prompt("Action (number to EAT, S to store)> ");
             
             String choice = scanner.nextLine().trim().toUpperCase();
             
             if (choice.equals("0")) {
                 open = false;
             } else if (choice.equals("S")) {
-                System.out.println("Select a food item from your inventory to store:");
+                simcli.ui.UIManager.printMessage("Select a food item from your inventory to store:");
                 List<Item> inv = sim.getInventory();
                 List<Integer> foodIndices = new ArrayList<>();
                 for (int i = 0; i < inv.size(); i++) {
                     if (inv.get(i) instanceof Food) {
-                        System.out.println("[" + (i + 1) + "] " + inv.get(i).getObjectName());
+                        simcli.ui.UIManager.printMessage("[" + (i + 1) + "] " + inv.get(i).getObjectName());
                         foodIndices.add(i);
                     }
                 }
                 if (foodIndices.isEmpty()) {
-                    System.out.println("No food in your personal inventory!");
+                    simcli.ui.UIManager.printMessage("No food in your personal inventory!");
                 } else {
-                    System.out.print("Item to store (0 to cancel)> ");
+                    simcli.ui.UIManager.prompt("Item to store (0 to cancel)> ");
                     try {
                         int st = Integer.parseInt(scanner.nextLine().trim());
                         if (st > 0 && st <= inv.size() && foodIndices.contains(st - 1)) {
                             Item item = inv.get(st - 1);
                             inv.remove(item);
                             storeItem(item);
-                            System.out.println("Stored " + item.getObjectName() + " in the fridge.");
+                            simcli.ui.UIManager.printMessage("Stored " + item.getObjectName() + " in the fridge.");
                         } else if (st != 0) {
-                            System.out.println("Invalid selection.");
+                            simcli.ui.UIManager.printMessage("Invalid selection.");
                         }
                     } catch(Exception e) {
-                        System.out.println("Invalid input.");
+                        simcli.ui.UIManager.printMessage("Invalid input.");
                     }
                 }
-                System.out.print("Press ENTER to return...");
+                simcli.ui.UIManager.prompt("Press ENTER to return...");
                 scanner.nextLine();
             } else {
                 try {
                     int c = Integer.parseInt(choice);
                     if (c > 0 && c <= storedFood.size()) {
                         Item food = retrieveItem(c - 1);
-                        System.out.println(sim.getName() + " takes " + food.getObjectName() + " from the fridge and eats it.");
+                        simcli.ui.UIManager.printMessage(sim.getName() + " takes " + food.getObjectName() + " from the fridge and eats it.");
                             food.interact(sim, scanner, timeManager);
-                        System.out.print("Press ENTER to continue...");
+                        simcli.ui.UIManager.prompt("Press ENTER to continue...");
                         scanner.nextLine();
                     } else {
-                        System.out.println("Invalid choice.");
-                        System.out.print("Press ENTER to continue...");
+                        simcli.ui.UIManager.printMessage("Invalid choice.");
+                        simcli.ui.UIManager.prompt("Press ENTER to continue...");
                         scanner.nextLine();
                     }
                 } catch(Exception e) {
-                    System.out.println("Invalid input.");
-                    System.out.print("Press ENTER to continue...");
+                    simcli.ui.UIManager.printMessage("Invalid input.");
+                    simcli.ui.UIManager.prompt("Press ENTER to continue...");
                     scanner.nextLine();
                 }
             }

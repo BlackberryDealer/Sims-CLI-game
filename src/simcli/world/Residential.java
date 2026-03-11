@@ -32,10 +32,10 @@ public class Residential extends Building {
 
     @Override
     public void enter(Sim sim) {
-        System.out.println(sim.getName() + " has arrived at their home: " + this.name);
+        simcli.ui.UIManager.printMessage(sim.getName() + " has arrived at their home: " + this.name);
         if (!this.rooms.isEmpty()) {
             sim.setCurrentRoom(this.rooms.get(0));
-            System.out.println("They entered the " + this.rooms.get(0).getName() + ".");
+            simcli.ui.UIManager.printMessage("They entered the " + this.rooms.get(0).getName() + ".");
         }
     }
 }
