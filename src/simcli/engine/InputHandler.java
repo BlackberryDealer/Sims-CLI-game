@@ -64,7 +64,7 @@ public class InputHandler implements IInputHandler {
             } else {
                 int choice = Integer.parseInt(input) - 1;
                 if (choice >= 0 && choice < items.size()) {
-                    items.get(choice).interact(activePlayer, scanner);
+                    items.get(choice).interact(activePlayer, scanner, timeManager);
                     return CommandResult.TICK_FORWARD;
                 } else {
                     System.out.println("Invalid item choice.");
@@ -300,7 +300,9 @@ public class InputHandler implements IInputHandler {
                             int rChoice = Integer.parseInt(scanner.nextLine().trim());
                             if (rChoice > 0 && rChoice <= rooms.size()) {
                                 Room targetRoom = rooms.get(rChoice - 1);
-                                if (targetRoom.canFit(furn)) {
+                                if (targetRoom != activePlayer.getCurrentRoom()) {
+                                    System.out.println("You can only place furniture in the room you are currently in!");
+                                } else if (targetRoom.canFit(furn)) {
                                     Interactable instance = null;
                                     switch (furn.getObjectName()) {
                                         case "Bed":
@@ -334,7 +336,7 @@ public class InputHandler implements IInputHandler {
                             }
                         } else {
                             try {
-                                selectedItem.interact(activePlayer, scanner);
+                                selectedItem.interact(activePlayer, scanner, timeManager);
                             } catch (SleepEventException e) {
                                 throw e; // rethrow to be caught by handle
                             } catch (SimulationException e) {

@@ -22,7 +22,7 @@ public class Park extends Building {
         // Add a general "Talk to people" interactable to the building
         this.addInteractable(new Interactable() {
             @Override
-            public void interact(Sim sim, java.util.Scanner scanner) throws SimulationException {
+            public void interact(Sim sim, java.util.Scanner scanner, simcli.engine.TimeManager timeManager) throws SimulationException {
                 System.out.println("\n=== Socialize at the Park ===");
                 for (int i = 0; i < visitors.size(); i++) {
                     NPCSim npc = visitors.get(i);

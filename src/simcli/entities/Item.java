@@ -15,4 +15,6 @@ public abstract class Item implements Interactable {
     
     @Override
     public String getObjectName() { return name; }
+
+    public abstract Item copyItem();
 }

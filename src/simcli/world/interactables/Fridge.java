@@ -25,7 +25,7 @@ public class Fridge implements Interactable, Container {
     }
 
     @Override
-    public void interact(Sim sim, java.util.Scanner scanner) throws SimulationException {
+    public void interact(Sim sim, java.util.Scanner scanner, simcli.engine.TimeManager timeManager) throws SimulationException {
         boolean open = true;
         while (open) {
             simcli.ui.UIManager.clearScreen();
@@ -81,7 +81,7 @@ public class Fridge implements Interactable, Container {
                     if (c > 0 && c <= storedFood.size()) {
                         Item food = retrieveItem(c - 1);
                         System.out.println(sim.getName() + " takes " + food.getObjectName() + " from the fridge and eats it.");
-                        food.interact(sim, scanner);
+                            food.interact(sim, scanner, timeManager);
                         System.out.print("Press ENTER to continue...");
                         scanner.nextLine();
                     } else {

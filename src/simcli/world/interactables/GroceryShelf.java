@@ -6,7 +6,7 @@ import simcli.engine.SimulationException;
 public class GroceryShelf implements Interactable {
 
     @Override
-    public void interact(Sim sim, java.util.Scanner scanner) throws SimulationException {
+    public void interact(Sim sim, java.util.Scanner scanner, simcli.engine.TimeManager timeManager) throws SimulationException {
         java.util.List<simcli.entities.Item> catalog = new java.util.ArrayList<>();
         catalog.add(new simcli.entities.Food("Apple", 10, 15, 5));
         catalog.add(new simcli.entities.Food("Steak", 40, 50, 20));
@@ -85,17 +85,8 @@ public class GroceryShelf implements Interactable {
                             System.out.println("You purchased " + target.getObjectName() + "!");
                             sim.setMoney(sim.getMoney() - target.getPrice());
 
-                            simcli.entities.Item newItem = null;
-                            if (target instanceof simcli.entities.Food) {
-                                simcli.entities.Food f = (simcli.entities.Food) target;
-                                newItem = new simcli.entities.Food(f.getObjectName(), f.getPrice(), 15, 5); 
-                            } else if (target instanceof simcli.entities.Consumable) {
-                                newItem = new simcli.entities.Consumable(target.getObjectName(), target.getPrice(), 0, 0, 30);
-                            } else if (target instanceof simcli.entities.Furniture) {
-                                simcli.entities.Furniture f = (simcli.entities.Furniture) target;
-                                newItem = new simcli.entities.Furniture(f.getObjectName(), f.getPrice(), f.getSpaceScore());
-                            }
-                            sim.addItem(newItem != null ? newItem : target);
+                            simcli.entities.Item newItem = target.copyItem();
+                            sim.addItem(newItem);
                             sim.addTotalItemsBought(1);
                         } else {
                             System.out.println("Not enough Simoleons!");
