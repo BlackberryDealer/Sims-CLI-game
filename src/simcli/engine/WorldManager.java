@@ -27,26 +27,22 @@ public class WorldManager implements IWorldManager {
 
         Room mainRoom = new Room("Bedroom", 100);
         mainRoom.placeFurniture(new Bed(), 30);
-        mainRoom.placeFurniture(new Computer(), 20);
         home.addRoom(mainRoom);
 
         Room kitchen = new Room("Kitchen", 50);
-        kitchen.placeFurniture(new Fridge(), 25);
         home.addRoom(kitchen);
 
         Room gym = new Room("Garage", 60);
-        gym.placeFurniture(new WeightBench(), 40);
         home.addRoom(gym);
 
         Room bathroom = new Room("Bathroom", 30);
-        bathroom.placeFurniture(new Shower(), 10);
         home.addRoom(bathroom);
 
         this.cityMap.add(home);
 
         // Build Supermarket
         Commercial store = new Commercial("Town Supermarket");
-        store.addInteractable(new GroceryShelf()); // The new paid food source
+        store.addInteractable(new GroceryShelf());
         this.cityMap.add(store);
 
         Park park = new Park("City Park");
