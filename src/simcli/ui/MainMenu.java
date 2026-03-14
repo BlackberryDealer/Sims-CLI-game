@@ -7,9 +7,13 @@ import java.util.List;
 import java.util.Scanner;
 
 public class MainMenu {
+    private final Scanner scanner;
 
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
+    public MainMenu(Scanner scanner) {
+        this.scanner = scanner;
+    }
+
+    public void display() {
         boolean inMenu = true;
 
         while (inMenu) {
@@ -35,11 +39,11 @@ public class MainMenu {
             String choice = scanner.nextLine();
 
             if (choice.equals("1")) {
-                createNewWorld(scanner);
+                createNewWorld();
             } else if (choice.equals("2")) {
-                loadWorld(scanner);
+                loadWorld();
             } else if (choice.equals("3")) {
-                deleteWorld(scanner);
+                deleteWorld();
             } else if (choice.equals("4")) {
                 System.out.println("Goodbye!");
                 inMenu = false;
@@ -47,10 +51,9 @@ public class MainMenu {
                 System.out.println("Invalid option. Please enter 1, 2, 3, or 4.");
             }
         }
-        scanner.close();
     }
 
-    private static void createNewWorld(Scanner scanner) {
+    private void createNewWorld() {
         String newName = "";
         while (true) {
             System.out.print("\nEnter a name for your new world: ");
@@ -70,7 +73,7 @@ public class MainMenu {
         newGame.run(scanner); 
     }
 
-    private static void loadWorld(Scanner scanner) {
+    private void loadWorld() {
         List<String> saves = SaveManager.getExistingSaves();
 
         if (saves.isEmpty()) {
@@ -103,7 +106,7 @@ public class MainMenu {
         }
     }
 
-    private static void deleteWorld(Scanner scanner) {
+    private void deleteWorld() {
         List<String> saves = SaveManager.getExistingSaves();
         if (saves.isEmpty()) {
             System.out.println("\nNo saved games found to delete.\n");
