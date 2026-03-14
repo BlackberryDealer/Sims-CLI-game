@@ -1,11 +1,16 @@
 package simcli.entities;
 
 import simcli.engine.SimulationException;
+import simcli.entities.lifecycle.ChildStage; // State Pattern: ChildSim starts in ChildStage
 
 public class ChildSim extends Sim {
 
     public ChildSim(String name, int age) {
         super(name, age);
+        // State Pattern: assign the ChildStage as this Sim's initial lifecycle "brain".
+        // When the Sim turns 18, Sim.ageUp() will swap this for an AdultStage
+        // without ever destroying or recreating the ChildSim object itself.
+        setLifeStage(new ChildStage());
     }
 
     public ChildSim(String name) {
@@ -19,7 +24,8 @@ public class ChildSim extends Sim {
         }
 
         if (activityType.equalsIgnoreCase("Work")) {
-            simcli.ui.UIManager.printMessage(this.name + " is a child and cannot work! Children should study and play.");
+            simcli.ui.UIManager
+                    .printMessage(this.name + " is a child and cannot work! Children should study and play.");
         } else if (activityType.equalsIgnoreCase("Study")) {
             simcli.ui.UIManager.printMessage(this.name + " sits down to study.");
             this.energy.decrease(15);
@@ -45,7 +51,8 @@ public class ChildSim extends Sim {
         // neighborhood,
         // which implies logic in GameEngine. For now, we print a message.
         if (this.age == 18) {
-            simcli.ui.UIManager.printMessage("\n*** AGED UP! " + this.name + " has turned 18 and is now a young adult! ***");
+            simcli.ui.UIManager
+                    .printMessage("\n*** AGED UP! " + this.name + " has turned 18 and is now a young adult! ***");
             // NOTE: In a more complex entity-component system, we would just swap the
             // behaviour.
             // For now, ChildSim becomes a generic adult conceptually, but remains a
