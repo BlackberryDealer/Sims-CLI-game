@@ -79,8 +79,14 @@ public class GameEngine {
         while (true) {
             simcli.ui.UIManager.prompt("Enter your Sim's Gender (M/F): ");
             String gInput = scanner.nextLine().trim().toUpperCase();
-            if (gInput.equals("M")) { gender = Gender.MALE; break; }
-            if (gInput.equals("F")) { gender = Gender.FEMALE; break; }
+            if (gInput.equals("M")) {
+                gender = Gender.MALE;
+                break;
+            }
+            if (gInput.equals("F")) {
+                gender = Gender.FEMALE;
+                break;
+            }
             simcli.ui.UIManager.printMessage("Please enter M or F.");
         }
 
@@ -116,7 +122,8 @@ public class GameEngine {
                     if (activePlayer == null) {
                         this.isGameOver = true;
                         aggregateStats();
-                        simcli.ui.UIManager.printGameOverStats(this.timeManager.getCurrentTick(), this.sessionTotalMoney, this.sessionTotalItems);
+                        simcli.ui.UIManager.printGameOverStats(this.timeManager.getCurrentTick(),
+                                this.sessionTotalMoney, this.sessionTotalItems);
                         simcli.ui.UIManager.printMessage("Saving final state...");
                         SaveManager.saveGame(this, this.worldName);
                         running = false;
@@ -132,15 +139,17 @@ public class GameEngine {
                     }
                 } else if (activePlayer.getState() == SimState.STARVING) {
                     int ticksLeft = 4 - activePlayer.getStarvingTicks();
-                    simcli.ui.UIManager.printMessage("\n[WARNING] " + activePlayer.getName() + " is STARVING! Feed them within "
-                            + ticksLeft + " ticks or they will DIE!");
+                    simcli.ui.UIManager
+                            .printMessage("\n[WARNING] " + activePlayer.getName() + " is STARVING! Feed them within "
+                                    + ticksLeft + " ticks or they will DIE!");
                 }
             } else {
-                simcli.ui.UIManager.printMessage("[" + activePlayer.getName() + "] Hunger: " + activePlayer.getHunger().getValue() +
-                        " | Energy: " + activePlayer.getEnergy().getValue() +
-                        " | Hygiene: " + activePlayer.getHygiene().getValue() +
-                        " | Happiness: " + activePlayer.getHappiness().getValue() +
-                        " | Cash: $" + activePlayer.getMoney() + " | Status: " + activePlayer.getState());
+                simcli.ui.UIManager.printMessage(
+                        "[" + activePlayer.getName() + "] Hunger: " + activePlayer.getHunger().getValue() +
+                                " | Energy: " + activePlayer.getEnergy().getValue() +
+                                " | Hygiene: " + activePlayer.getHygiene().getValue() +
+                                " | Happiness: " + activePlayer.getHappiness().getValue() +
+                                " | Cash: $" + activePlayer.getMoney() + " | Status: " + activePlayer.getState());
             }
 
             tickForward = true;
@@ -170,10 +179,20 @@ public class GameEngine {
                     tickForward = false;
                     break;
                 case SLEEP_EVENT:
+                    renderer.clear();
+                    renderer.renderHUD(activePlayer, this.worldManager.getCurrentLocation(),
+                            timeManager.getCurrentDay(), timeManager.getFormattedTime(),
+                            timeManager.getTimeOfDay(), inRoom, roomName);
+
                     int currentInDay = timeManager.getCurrentTick() % 24;
                     int ticksToMorning = (24 - currentInDay + 8) % 24;
                     if (ticksToMorning == 0)
                         ticksToMorning = 24;
+
+                    simcli.ui.UIManager.printMessage("\n" + activePlayer.getName() + " sleeps deeply in the bed for "
+                            + ticksToMorning + " hours.");
+                    simcli.ui.UIManager.sleepAnimation();
+
                     timeManager.advanceTicks(ticksToMorning - 1);
                     tickForward = true;
                     break;
@@ -191,7 +210,8 @@ public class GameEngine {
                 timeManager.advanceTick();
 
                 if (timeManager.getCurrentDay() > previousDay) {
-                    simcli.ui.UIManager.printMessage("\n*** A new day has begun! (Day " + timeManager.getCurrentDay() + ") ***");
+                    simcli.ui.UIManager
+                            .printMessage("\n*** A new day has begun! (Day " + timeManager.getCurrentDay() + ") ***");
                     for (Sim s : neighborhood) {
                         s.growOlderDaily();
                         s.checkTruancy();

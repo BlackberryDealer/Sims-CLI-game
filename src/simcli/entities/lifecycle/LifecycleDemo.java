@@ -1,24 +1,27 @@
 package simcli.entities.lifecycle;
 
 import simcli.engine.LifecycleManager;
-import simcli.entities.ChildSim;
+import simcli.entities.Sim;
+import simcli.entities.Gender;
 
 /**
  * LifecycleDemo — a standalone CLI demonstration of the State Design Pattern
  * applied to a Sim's aging and life cycle system.
  *
  * <h2>What this demo proves</h2>
- * <ol>
- *   <li><strong>One object, forever:</strong> {@code bob} is a {@link ChildSim}
- *       created once and never replaced. The Java identity hash never changes.</li>
- *   <li><strong>Polymorphic behaviour change:</strong> Before age 18 the Sim cannot
- *       work; after turning 18 it can — with no {@code instanceof}, no type cast,
- *       and no subclass swap required.</li>
- *   <li><strong>Clean separation:</strong> {@link LifecycleManager} tracks time;
- *       {@link simcli.entities.Sim#ageUp()} owns the transition; the concrete
+ * l>
+ * <strong>One object, forever:</strong> {@code bob} is a {@link Sim}
+ *     created once and never replaced. The Java identity hash never change
+ * .</li>
+ * <strong>Polymorphic behaviour change:</strong> Before age 18 the Sim cannot
+ * work; after turning 18 it can — with no {@code instanceof}, no type cast,
+ *     and no subclass swap required.</li>
+ * <strong>Clean separation:</strong> {@link LifecycleManager} tracks time;
+ * {@link simcli.entities.Sim#ageUp()} owns the transition; the concrete
  *       stages own the rules. Each class has exactly one responsibility.</li>
  * </ol>
  *
+ * 
  * <h2>Compile and run (no GUI, no database — pure CLI)</h2>
  * <pre>
  *   javac -d bin -sourcepath src src\simcli\entities\lifecycle\LifecycleDemo.java
@@ -30,16 +33,16 @@ public class LifecycleDemo {
     public static void main(String[] args) {
 
         // ====================================================================
-        // STEP 1 — Create the Sim ONCE.
-        //          Using the existing ChildSim which now sets ChildStage inside.
+        // Create the Sim ONCE.
+        // Using the unified Sim class which sets ChildStage inside based on age.
         //          This single object will live for Bob's entire simulated life.
         // ====================================================================
         System.out.println("============================================================");
         System.out.println("  Sims CLI — State Pattern Lifecycle Demo");
         System.out.println("============================================================\n");
 
-        // ChildSim constructor now calls setLifeStage(new ChildStage()) internally.
-        ChildSim bob = new ChildSim("Bob", 0);
+        // Sim constructor now sets ChildStage or AdultStage based on age.
+        Sim bob = new Sim("Bob", 0, Gender.MALE);
 
         int bobIdentityHash = System.identityHashCode(bob);
         System.out.println(">>> Sim created:");
@@ -51,15 +54,15 @@ public class LifecycleDemo {
         System.out.println();
 
         // ====================================================================
-        // STEP 2 — LifecycleManager with ticksPerYear = 1
-        //          1 tick = 1 year for demo brevity. In a real game this would
+        // LifecycleManager with ticksPerYear = 1
+        // 1 tick = 1 year for demo brevity. In a real game this would
         //          be 24 * 365 or similar.
         // ====================================================================
         LifecycleManager manager = new LifecycleManager(1);
 
         // ====================================================================
-        // STEP 3 — Age Bob from 0 → 17.
-        //          Each processTick() call crosses a year boundary (ticksPerYear=1),
+        // Age Bob from 0 → 17.
+        // Each processTick() call crosses a year boundary (ticksPerYear=1),
         //          so ageUp() fires every tick. Bob stays in ChildStage.
         // ====================================================================
         System.out.println("------------------------------------------------------------");
@@ -77,10 +80,10 @@ public class LifecycleDemo {
         System.out.println();
 
         // ====================================================================
-        // STEP 4 — The 18th birthday tick.
-        //          ChildStage.getNextStage(18) returns a NEW AdultStage object.
-        //          Sim.ageUp() detects the new instance (identity check !=)
-        //          and executes the "brain swap": currentStage = new AdultStage().
+        // The 18th birthday tick.
+        // ChildStage.getNextStage(18) returns a NEW AdultStage object.
+        // Sim.ageUp() detects the new instance (identity check !=)
+        // and executes the "brain swap": currentStage = new AdultStage().
         //          BOB IS THE EXACT SAME JAVA OBJECT BEFORE AND AFTER THIS LINE.
         // ====================================================================
         System.out.println("------------------------------------------------------------");
@@ -123,14 +126,14 @@ public class LifecycleDemo {
      * Prints a behaviour summary for a Sim using only the base {@code Sim} API.
      * No {@code instanceof}, no casting — pure polymorphism.
      */
-    private static void printBehaviourSummary(ChildSim sim) {
+    private static void printBehaviourSummary(Sim sim) {
         System.out.println("  Stage       : " + sim.getCurrentStageName());
         if (sim.canWork()) {
             System.out.println("  Work status : ✔ CAN WORK — eligible for jobs and income.");
         } else {
             System.out.println("  Work status : ✘ CANNOT WORK — children should study and play.");
         }
-        System.out.printf("  Energy decay: %.1fx the normal adult rate.%n",
+        System.out.printf("  Energy decay: %.1fx the normal rate.%n",
                 sim.getLifeStage().getEnergyDecayModifier());
     }
 }

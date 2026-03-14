@@ -11,10 +11,14 @@ public class Fridge implements Interactable, Container {
     private List<Item> storedFood = new ArrayList<>();
 
     @Override
-    public List<Item> getStoredItems() { return storedFood; }
+    public List<Item> getStoredItems() {
+        return storedFood;
+    }
 
     @Override
-    public void storeItem(Item item) { storedFood.add(item); }
+    public void storeItem(Item item) {
+        storedFood.add(item);
+    }
 
     @Override
     public Item retrieveItem(int index) {
@@ -25,7 +29,8 @@ public class Fridge implements Interactable, Container {
     }
 
     @Override
-    public void interact(Sim sim, java.util.Scanner scanner, simcli.engine.TimeManager timeManager) throws SimulationException {
+    public void interact(Sim sim, java.util.Scanner scanner, simcli.engine.TimeManager timeManager)
+            throws SimulationException {
         boolean open = true;
         while (open) {
             simcli.ui.UIManager.clearScreen();
@@ -40,9 +45,9 @@ public class Fridge implements Interactable, Container {
             simcli.ui.UIManager.printMessage("\n[S] Store Food from Your Personal Inventory");
             simcli.ui.UIManager.printMessage("[0] Close Fridge");
             simcli.ui.UIManager.prompt("Action (number to EAT, S to store)> ");
-            
+
             String choice = scanner.nextLine().trim().toUpperCase();
-            
+
             if (choice.equals("0")) {
                 open = false;
             } else if (choice.equals("S")) {
@@ -69,7 +74,7 @@ public class Fridge implements Interactable, Container {
                         } else if (st != 0) {
                             simcli.ui.UIManager.printMessage("Invalid selection.");
                         }
-                    } catch(Exception e) {
+                    } catch (Exception e) {
                         simcli.ui.UIManager.printMessage("Invalid input.");
                     }
                 }
@@ -80,8 +85,11 @@ public class Fridge implements Interactable, Container {
                     int c = Integer.parseInt(choice);
                     if (c > 0 && c <= storedFood.size()) {
                         Item food = retrieveItem(c - 1);
-                        simcli.ui.UIManager.printMessage(sim.getName() + " takes " + food.getObjectName() + " from the fridge and eats it.");
-                            food.interact(sim, scanner, timeManager);
+                        sim.setCurrentAction(simcli.entities.ActionState.EATING);
+                        simcli.ui.UIManager.displayActionAnimation(sim);
+                        simcli.ui.UIManager.printMessage(
+                                sim.getName() + " takes " + food.getObjectName() + " from the fridge and eats it.");
+                        food.interact(sim, scanner, timeManager);
                         simcli.ui.UIManager.prompt("Press ENTER to continue...");
                         scanner.nextLine();
                     } else {
@@ -89,7 +97,7 @@ public class Fridge implements Interactable, Container {
                         simcli.ui.UIManager.prompt("Press ENTER to continue...");
                         scanner.nextLine();
                     }
-                } catch(Exception e) {
+                } catch (Exception e) {
                     simcli.ui.UIManager.printMessage("Invalid input.");
                     simcli.ui.UIManager.prompt("Press ENTER to continue...");
                     scanner.nextLine();
@@ -97,7 +105,9 @@ public class Fridge implements Interactable, Container {
             }
         }
     }
-    
+
     @Override
-    public String getObjectName() { return "Fridge"; }
+    public String getObjectName() {
+        return "Fridge";
+    }
 }

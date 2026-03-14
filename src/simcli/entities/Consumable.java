@@ -15,15 +15,17 @@ public class Consumable extends Item {
     }
 
     @Override
-    public void interact(Sim sim, java.util.Scanner scanner, simcli.engine.TimeManager timeManager) throws SimulationException {
-        simcli.ui.UIManager.printMessage(sim.getName() + " uses the " + this.name + ".");
+    public void interact(Sim sim, java.util.Scanner scanner, simcli.engine.TimeManager timeManager)
+            throws SimulationException {
         sim.setCurrentAction(simcli.entities.ActionState.EATING);
+        simcli.ui.UIManager.displayActionAnimation(sim);
+        simcli.ui.UIManager.printMessage(sim.getName() + " consumes the " + this.name + ".");
         sim.getHunger().increase(this.satiationValue);
         sim.getEnergy().increase(this.energyValue);
         sim.getHappiness().increase(this.happinessValue);
         sim.getInventory().remove(this);
     }
-    
+
     @Override
     public Item copyItem() {
         return new Consumable(this.name, this.price, this.satiationValue, this.energyValue, this.happinessValue);

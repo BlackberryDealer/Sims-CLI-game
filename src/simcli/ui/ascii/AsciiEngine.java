@@ -23,6 +23,7 @@ public class AsciiEngine {
         actionProviders.put(ActionState.WORKING, new WorkingAsciiProvider());
         actionProviders.put(ActionState.STUDYING, new StudyingAsciiProvider());
         actionProviders.put(ActionState.SOCIALIZING, new SocializingAsciiProvider());
+        actionProviders.put(ActionState.PLAYING, new PlayingAsciiProvider()); // was missing
 
         houseProvider = new HouseAsciiProvider();
         storeProvider = new StoreAsciiProvider();
@@ -42,7 +43,7 @@ public class AsciiEngine {
             if (location instanceof Residential) {
                 return houseProvider.getAsciiArt(player, location);
             }
-            
+
             String locName = location.getName().toLowerCase();
             if (locName.contains("dorm") || locName.contains("home")) {
                 return houseProvider.getAsciiArt(player, location);

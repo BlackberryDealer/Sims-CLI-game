@@ -1,7 +1,33 @@
 package simcli.ui;
 
+/**
+ * AsciiArt — utility class for one-off static art not tied to a Sim action or
+ * location.
+ *
+ * <h2>Design note — no duplicates</h2>
+ * <p>
+ * This class intentionally contains ONLY art that has no equivalent elsewhere:
+ * </p>
+ * <ul>
+ * <li>{@link #printLogo()} — the game title banner shown on the main menu.</li>
+ * <li>{@link #printTravelAnimation()} — a short animated travel spinner.</li>
+ * </ul>
+ *
+ * <p>
+ * Location and action ASCII art lives exclusively in the
+ * {@code simcli.ui.ascii.providers} package, rendered through
+ * {@link simcli.ui.ascii.AsciiEngine}. Screen clearing is handled exclusively
+ * by {@link UIManager#clearScreen()}. Those methods
+ * (printHouse, printStore, clearScreen) have been removed from this class
+ * to eliminate duplication.
+ * </p>
+ */
 public class AsciiArt {
-    
+
+    /**
+     * Prints the SIMS CLI game title logo.
+     * Called once by {@link MainMenu} at the top of each menu render cycle.
+     */
     public static void printLogo() {
         System.out.println("==================================================");
         System.out.println("   _____ _____ __  __  _____ ");
@@ -14,46 +40,18 @@ public class AsciiArt {
         System.out.println("==================================================");
     }
 
-    public static void printMenuOptions() {
-        System.out.println("  [1] Create New World");
-        System.out.println("  [2] Load Existing World");
-        System.out.println("  [3] Exit Game");
-        System.out.println("==================================================");
-    }
-
-    public static void clearScreen() {
-        try {
-            if (System.getProperty("os.name").contains("Windows")) {
-                new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
-            } else {
-                new ProcessBuilder("clear").inheritIO().start().waitFor();
-            }
-        } catch (Exception e) {
-            for (int i = 0; i < 50; i++) System.out.println();
-        }
-    }
-
-    public static void printHouse() {
-        System.out.println("      ~+~");
-        System.out.println("     /   \\");
-        System.out.println("    /_____\\");
-        System.out.println("    |  _  |");
-        System.out.println("    | | | |");
-        System.out.println("    |_|_|_|");
-    }
-
-    public static void printStore() {
-        System.out.println("   [MARKET]");
-        System.out.println("   /______\\");
-        System.out.println("   | OPEN |");
-        System.out.println("   |  $$  |");
-        System.out.println("   |______|");
-    }
-    
+    /**
+     * Prints a short animated travel message with progressive dots.
+     * Called by {@link simcli.engine.InputHandler} when the player travels
+     * between locations.
+     */
     public static void printTravelAnimation() {
         System.out.print("Traveling");
         for (int i = 0; i < 3; i++) {
-            try { Thread.sleep(300); } catch(Exception ignored) {}
+            try {
+                Thread.sleep(300);
+            } catch (Exception ignored) {
+            }
             System.out.print(".");
         }
         System.out.println();
