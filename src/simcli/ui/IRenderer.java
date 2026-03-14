@@ -22,7 +22,7 @@ public interface IRenderer {
      * Renders the main HUD showing day, time, location, and the
      * active player's current need values.
      */
-    void renderHUD(Sim player, String locationName, int day, String formattedTime,
+    void renderHUD(Sim player, simcli.world.Building location, int day, String formattedTime,
             String timeOfDay, boolean inRoom, String roomName);
 
     /**

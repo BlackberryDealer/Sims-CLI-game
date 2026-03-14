@@ -1,0 +1,56 @@
+package simcli.ui.ascii;
+
+import simcli.entities.ActionState;
+import simcli.entities.Sim;
+import simcli.world.Building;
+import simcli.world.Residential;
+import simcli.ui.ascii.providers.*;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class AsciiEngine {
+
+    private Map<ActionState, IAsciiProvider> actionProviders;
+    private IAsciiProvider houseProvider;
+    private IAsciiProvider storeProvider;
+    private IAsciiProvider defaultBuildingProvider;
+
+    public AsciiEngine() {
+        actionProviders = new HashMap<>();
+        actionProviders.put(ActionState.SLEEPING, new SleepingAsciiProvider());
+        actionProviders.put(ActionState.EATING, new EatingAsciiProvider());
+        actionProviders.put(ActionState.WORKING, new WorkingAsciiProvider());
+        actionProviders.put(ActionState.STUDYING, new StudyingAsciiProvider());
+        actionProviders.put(ActionState.SOCIALIZING, new SocializingAsciiProvider());
+
+        houseProvider = new HouseAsciiProvider();
+        storeProvider = new StoreAsciiProvider();
+        defaultBuildingProvider = new DefaultBuildingAsciiProvider();
+    }
+
+    public String render(Sim player, Building location) {
+        ActionState action = player.getCurrentAction();
+
+        // Render Action if one is active
+        if (action != null && action != ActionState.IDLE && actionProviders.containsKey(action)) {
+            return actionProviders.get(action).getAsciiArt(player, location);
+        }
+
+        // Render Location if IDLE
+        if (location != null) {
+            if (location instanceof Residential) {
+                return houseProvider.getAsciiArt(player, location);
+            }
+            
+            String locName = location.getName().toLowerCase();
+            if (locName.contains("dorm") || locName.contains("home")) {
+                return houseProvider.getAsciiArt(player, location);
+            } else if (locName.contains("supermarket") || locName.contains("market")) {
+                return storeProvider.getAsciiArt(player, location);
+            }
+        }
+
+        return defaultBuildingProvider.getAsciiArt(player, location);
+    }
+}

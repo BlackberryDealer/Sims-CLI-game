@@ -103,7 +103,7 @@ public class GameEngine {
                     && activePlayer.getCurrentRoom() != null;
             String roomName = inRoom ? activePlayer.getCurrentRoom().getName() : "";
 
-            renderer.renderHUD(activePlayer, this.worldManager.getCurrentLocation().getName(),
+            renderer.renderHUD(activePlayer, this.worldManager.getCurrentLocation(),
                     timeManager.getCurrentDay(), timeManager.getFormattedTime(),
                     timeManager.getTimeOfDay(), inRoom, roomName);
 
