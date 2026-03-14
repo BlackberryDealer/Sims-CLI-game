@@ -17,6 +17,7 @@ public class Consumable extends Item {
     @Override
     public void interact(Sim sim, java.util.Scanner scanner, simcli.engine.TimeManager timeManager) throws SimulationException {
         simcli.ui.UIManager.printMessage(sim.getName() + " uses the " + this.name + ".");
+        sim.setCurrentAction(simcli.entities.ActionState.EATING);
         sim.getHunger().increase(this.satiationValue);
         sim.getEnergy().increase(this.energyValue);
         sim.getHappiness().increase(this.happinessValue);

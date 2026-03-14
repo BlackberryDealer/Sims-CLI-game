@@ -1,6 +1,5 @@
 package simcli.engine;
 
-import simcli.entities.AdultSim;
 import simcli.entities.Job;
 import simcli.entities.Sim;
 import simcli.ui.AsciiArt;
@@ -34,20 +33,19 @@ public class InputHandler implements IInputHandler {
 
         try {
             if (input.equals("W")) {
-                if (activePlayer instanceof AdultSim) {
-                    AdultSim adult = (AdultSim) activePlayer;
-                    if (adult.getShiftsWorkedToday() >= 1 && !adult.hasWarnedAboutOverwork()) {
+                if (activePlayer.canWork()) {
+                    if (activePlayer.getShiftsWorkedToday() >= 1 && !activePlayer.hasWarnedAboutOverwork()) {
                         simcli.ui.UIManager.printWarning("Working multiple shifts in a single day drains stats significantly faster!");
                         simcli.ui.UIManager.prompt("Are you sure you want to overwork? (Y/N)> ");
                         String conf = scanner.nextLine().trim();
-                        adult.setWarnedAboutOverwork(true);
+                        activePlayer.setWarnedAboutOverwork(true);
                         if (!conf.equalsIgnoreCase("Y")) {
                             simcli.ui.UIManager.printMessage("Work action cancelled.");
                             return CommandResult.NO_TICK;
                         }
                     }
-                    adult.performActivity("Work");
-                    timeManager.advanceTicks(adult.getCareer().getWorkingHours() - 1);
+                    activePlayer.performActivity("Work");
+                    timeManager.advanceTicks(activePlayer.getCareer().getWorkingHours() - 1);
                 } else {
                     activePlayer.performActivity("Work");
                 }
@@ -104,10 +102,9 @@ public class InputHandler implements IInputHandler {
     }
 
     private void handleJobMarket(Sim activePlayer, Scanner scanner) {
-        if (activePlayer instanceof AdultSim) {
-            AdultSim adult = (AdultSim) activePlayer;
+        if (activePlayer.canWork()) {
             simcli.ui.UIManager.printMessage("\n=== JOB MARKET ===");
-            simcli.ui.UIManager.printMessage("Current Job: " + adult.getCareer().getTitle());
+            simcli.ui.UIManager.printMessage("Current Job: " + activePlayer.getCareer().getTitle());
             simcli.ui.UIManager.printMessage("[0] Quit Current Job (Become Unemployed)");
 
             Job[] allJobs = Job.values();
@@ -123,11 +120,11 @@ public class InputHandler implements IInputHandler {
                 if (jChoice == -1) {
                     // Do nothing
                 } else if (jChoice == 0) {
-                    adult.changeJob(Job.UNEMPLOYED);
+                    activePlayer.changeJob(Job.UNEMPLOYED);
                 } else if (jChoice > 0 && jChoice < allJobs.length) {
                     Job targetJob = allJobs[jChoice];
-                    if (adult.getAge() >= targetJob.getMinAge() && adult.getAge() <= targetJob.getMaxAge()) {
-                        adult.changeJob(targetJob);
+                    if (activePlayer.getAge() >= targetJob.getMinAge() && activePlayer.getAge() <= targetJob.getMaxAge()) {
+                        activePlayer.changeJob(targetJob);
                     } else {
                         simcli.ui.UIManager.printMessage("You don't meet the age requirements for this job.");
                         pause(scanner);
@@ -231,8 +228,8 @@ public class InputHandler implements IInputHandler {
         simcli.ui.UIManager.printMessage("Name: " + activePlayer.getName());
         simcli.ui.UIManager.printMessage("Age: " + activePlayer.getAge());
         simcli.ui.UIManager.printMessage("Money: $" + activePlayer.getMoney());
-        if (activePlayer instanceof AdultSim) {
-            simcli.ui.UIManager.printMessage("Current Job Status: " + ((AdultSim) activePlayer).getCareer().getTitle());
+        if (activePlayer.canWork()) {
+            simcli.ui.UIManager.printMessage("Current Job Status: " + activePlayer.getCareer().getTitle());
         }
         simcli.ui.UIManager.printMessage("Hunger: " + activePlayer.getHunger().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
         simcli.ui.UIManager.printMessage("Energy: " + activePlayer.getEnergy().getValue() + " / " + simcli.needs.Need.MAX_VALUE);

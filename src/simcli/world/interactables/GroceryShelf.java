@@ -8,7 +8,6 @@ import simcli.entities.Item;
 import simcli.entities.Food;
 import simcli.entities.Consumable;
 import simcli.entities.Furniture;
-import simcli.entities.AdultSim;
 import simcli.entities.Job;
 
 public class GroceryShelf extends AbstractShop {
@@ -36,11 +35,8 @@ public class GroceryShelf extends AbstractShop {
         }
 
         boolean isEngineerOrRich = false;
-        if (sim instanceof AdultSim) {
-            AdultSim adult = (AdultSim) sim;
-            if (adult.getCareer() == Job.SOFTWARE_ENGINEER) {
-                isEngineerOrRich = true;
-            }
+        if (sim.getCareer() == Job.SOFTWARE_ENGINEER) {
+            isEngineerOrRich = true;
         }
         if (sim.getMoney() >= 1000) {
             isEngineerOrRich = true;

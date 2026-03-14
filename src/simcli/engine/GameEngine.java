@@ -1,6 +1,6 @@
 package simcli.engine;
 
-import simcli.entities.AdultSim;
+import simcli.entities.Gender;
 import simcli.entities.Job;
 import simcli.entities.Sim;
 import simcli.entities.SimState;
@@ -75,7 +75,16 @@ public class GameEngine {
             }
         }
 
-        AdultSim player1 = new AdultSim(name, age, Job.UNEMPLOYED);
+        Gender gender = Gender.MALE;
+        while (true) {
+            simcli.ui.UIManager.prompt("Enter your Sim's Gender (M/F): ");
+            String gInput = scanner.nextLine().trim().toUpperCase();
+            if (gInput.equals("M")) { gender = Gender.MALE; break; }
+            if (gInput.equals("F")) { gender = Gender.FEMALE; break; }
+            simcli.ui.UIManager.printMessage("Please enter M or F.");
+        }
+
+        Sim player1 = new Sim(name, age, gender, Job.UNEMPLOYED);
         this.neighborhood.add(player1);
         simcli.ui.UIManager.printMessage("\n=== Booting World: " + this.worldName + " ===");
     }
@@ -185,9 +194,7 @@ public class GameEngine {
                     simcli.ui.UIManager.printMessage("\n*** A new day has begun! (Day " + timeManager.getCurrentDay() + ") ***");
                     for (Sim s : neighborhood) {
                         s.growOlderDaily();
-                        if (s instanceof AdultSim) {
-                            ((AdultSim) s).checkTruancy();
-                        }
+                        s.checkTruancy();
                     }
                 }
 
