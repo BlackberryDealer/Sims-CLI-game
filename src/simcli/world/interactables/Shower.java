@@ -2,11 +2,8 @@ package simcli.world.interactables;
 
 import simcli.engine.SimulationException;
 import simcli.entities.Sim;
-import java.util.Scanner;
 
 public class Shower implements Interactable {
-    public Shower() {
-    }
 
     @Override
     public String getObjectName() {
@@ -15,6 +12,7 @@ public class Shower implements Interactable {
 
     @Override
     public void interact(Sim sim, java.util.Scanner scanner, simcli.engine.TimeManager timeManager) throws SimulationException {
+        sim.setCurrentAction(simcli.entities.ActionState.PLAYING); // closest match for a refreshing activity
         simcli.ui.UIManager.printMessage(sim.getName() + " takes a long, refreshing shower.");
         sim.getHygiene().increase(50);
         simcli.ui.UIManager.printMessage(

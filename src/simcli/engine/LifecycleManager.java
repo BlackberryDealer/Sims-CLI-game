@@ -76,7 +76,7 @@ public class LifecycleManager {
      * <p>Game-loop usage:</p>
      * <pre>
      *   LifecycleManager lm = new LifecycleManager(365);
-     *   ChildSim alice = new ChildSim("Alice", 17);
+     *   Sim alice = new Sim("Alice", 17, Gender.FEMALE);
      *   for (int i = 0; i &lt; 365; i++) {
      *       lm.processTick(alice); // after 365 ticks, Alice.ageUp() fires
      *   }

@@ -4,8 +4,8 @@ package simcli.needs;
  * Abstract representation of a Sim's biological or emotional need.
  */
 public abstract class Need {
-    protected String name;
-    protected int value;
+    private String name;
+    private int value;
     public static final int MAX_VALUE = 100;
 
     public Need(String name) {

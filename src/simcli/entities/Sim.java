@@ -19,21 +19,21 @@ import java.util.Map;
 
 public class Sim implements ISimBehaviour {
 
-    protected String name;
-    protected int age;
-    protected Gender gender;
-    protected int money;
-    protected Need hunger;
-    protected Need energy;
-    protected Need hygiene;
-    protected Need happiness;
-    protected int inventoryCapacity;
-    protected SimState state;
-    protected List<Item> inventory;
-    protected int starvingTicks;
-    protected Room currentRoom;
-    protected int daysAlive;
-    protected ActionState currentAction;
+    private String name;
+    private int age;
+    private Gender gender;
+    private int money;
+    private Need hunger;
+    private Need energy;
+    private Need hygiene;
+    private Need happiness;
+    private int inventoryCapacity;
+    private SimState state;
+    private List<Item> inventory;
+    private int starvingTicks;
+    private Room currentRoom;
+    private int daysAlive;
+    private ActionState currentAction;
 
     private LifeStage currentStage;
 
@@ -49,8 +49,8 @@ public class Sim implements ISimBehaviour {
     private Sim spouse;
 
     // World Stats trackers
-    protected int totalMoneyEarned;
-    protected int totalItemsBought;
+    private int totalMoneyEarned;
+    private int totalItemsBought;
 
     public Sim(String name, int age, Gender gender) {
         this.name = name;
@@ -321,11 +321,6 @@ public class Sim implements ISimBehaviour {
     public void tick() {
         if (this.state == SimState.DEAD)
             return;
-
-        // Reset action state to IDLE at start of each tick, or maybe the logic depends
-        // on other components
-        // For right now, ActionState is transient, but wait, if it's rendered during
-        // the turn, IDLE happens after.
 
         double ageMultiplier = 1.0 + (Math.max(0, this.age - 18) * 0.05);
         double stageEnergyModifier = (this.currentStage != null) ? this.currentStage.getEnergyDecayModifier() : 1.0;

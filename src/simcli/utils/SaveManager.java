@@ -61,12 +61,12 @@ public class SaveManager {
             }
 
             for (Sim sim : engine.getNeighborhood()) {
-                // Format: Sim:Name,Age,Gender,JobName,Money,InventoryCapacity,Hunger,Energy,Happiness
+                // Format: Sim:Name,Age,Gender,JobName,Money,InventoryCapacity,Hunger,Energy,Happiness,Hygiene
                 writer.println("Sim:" + sim.getName() + "," + sim.getAge() + "," +
                         sim.getGender().name() + "," + sim.getCareer().name() + "," + 
                         sim.getMoney() + "," + sim.getInventoryCapacity() + "," +
                         sim.getHunger().getValue() + "," + sim.getEnergy().getValue() + ","
-                        + sim.getHappiness().getValue());
+                        + sim.getHappiness().getValue() + "," + sim.getHygiene().getValue());
             }
         } catch (IOException e) {
             simcli.ui.UIManager.printWarning("Error saving game: " + e.getMessage());
@@ -111,6 +111,9 @@ public class SaveManager {
                     sim.getEnergy().setValue(Integer.parseInt(data[7]));
                     if (data.length > 8) {
                         sim.getHappiness().setValue(Integer.parseInt(data[8]));
+                    }
+                    if (data.length > 9) {
+                        sim.getHygiene().setValue(Integer.parseInt(data[9]));
                     }
                     sim.updateState();
 

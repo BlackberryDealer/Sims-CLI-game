@@ -7,6 +7,6 @@ public class Food extends Consumable {
     
     @Override
     public Item copyItem() {
-        return new Food(this.name, this.price, this.satiationValue, this.energyValue);
+        return new Food(getObjectName(), getPrice(), getSatiationValue(), getEnergyValue());
     }
 }

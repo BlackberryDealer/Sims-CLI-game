@@ -5,12 +5,28 @@ import simcli.entities.Item;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * Reusable paginated menu utility for displaying lists of Items.
+ * Used by shops, inventory, and storage containers.
+ */
 public class MenuPagination {
+
+    /** Callback interface for handling item selection. */
     public interface MenuAction {
         void onSelect(Item item, int realIndex);
     }
 
-    public static void displayPaginatedMenu(String title, List<? extends Item> catalog, String actionPrompt, Scanner scanner, MenuAction action) {
+    /**
+     * Displays a paginated menu of items and processes user selection.
+     *
+     * @param title        title shown at the top of the menu
+     * @param catalog      the list of items to display
+     * @param actionPrompt prompt shown to the user
+     * @param scanner      for reading user input
+     * @param action       callback executed when an item is selected
+     */
+    public static void displayPaginatedMenu(String title, List<? extends Item> catalog,
+            String actionPrompt, Scanner scanner, MenuAction action) {
         int pageSize = 10;
         int currentPage = 0;
         boolean inMenu = true;
@@ -20,24 +36,24 @@ public class MenuPagination {
             if (totalPages == 0) totalPages = 1;
             if (currentPage >= totalPages) currentPage = totalPages - 1;
 
-            System.out.println("\n=== " + title + " (Page " + (currentPage + 1) + " of " + totalPages + ") ===");
+            UIManager.printMessage("\n=== " + title + " (Page " + (currentPage + 1) + " of " + totalPages + ") ===");
             
             if (catalog.isEmpty()) {
-                System.out.println("Nothing to display here.");
+                UIManager.printMessage("Nothing to display here.");
             } else {
                 int startIdx = currentPage * pageSize;
                 int endIdx = Math.min(startIdx + pageSize, catalog.size());
 
                 for (int i = startIdx; i < endIdx; i++) {
                     Item item = catalog.get(i);
-                    System.out.println("[" + (i - startIdx + 1) + "] " + item.getObjectName() + 
+                    UIManager.printMessage("[" + (i - startIdx + 1) + "] " + item.getObjectName() + 
                                      (item.getPrice() > 0 ? " - $" + item.getPrice() : ""));
                 }
             }
 
-            System.out.println("\n[N] Next Page   [P] Previous Page");
-            System.out.println("[0] Back / Exit");
-            System.out.print(actionPrompt + "> ");
+            UIManager.printMessage("\n[N] Next Page   [P] Previous Page");
+            UIManager.printMessage("[0] Back / Exit");
+            UIManager.prompt(actionPrompt + "> ");
 
             String input = scanner.nextLine().trim().toUpperCase();
 
@@ -58,10 +74,10 @@ public class MenuPagination {
                         Item target = catalog.get(realIndex);
                         action.onSelect(target, realIndex);
                     } else {
-                        System.out.println("Invalid selection.");
+                        UIManager.printMessage("Invalid selection.");
                     }
                 } catch (NumberFormatException e) {
-                    System.out.println("Invalid input. Use numbers or N/P.");
+                    UIManager.printMessage("Invalid input. Use numbers or N/P.");
                 }
             }
         }

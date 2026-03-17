@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.Scanner;
 
 public class InputHandler implements IInputHandler {
-    private IWorldManager worldManager;
-    private TimeManager timeManager;
+    private final IWorldManager worldManager;
+    private final TimeManager timeManager;
 
     public InputHandler(IWorldManager worldManager, TimeManager timeManager) {
         this.worldManager = worldManager;
@@ -233,8 +233,8 @@ public class InputHandler implements IInputHandler {
         }
         simcli.ui.UIManager.printMessage("Hunger: " + activePlayer.getHunger().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
         simcli.ui.UIManager.printMessage("Energy: " + activePlayer.getEnergy().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
-        System.out
-                .println("Happiness: " + activePlayer.getHappiness().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
+        simcli.ui.UIManager.printMessage("Hygiene: " + activePlayer.getHygiene().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
+        simcli.ui.UIManager.printMessage("Happiness: " + activePlayer.getHappiness().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
         simcli.ui.UIManager.printMessage(
                 "Inventory Items: " + activePlayer.getInventory().size() + " / " + activePlayer.getInventoryCapacity());
         simcli.ui.UIManager.printMessage("Location: " + currentLocation.getName());

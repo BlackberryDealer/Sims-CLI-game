@@ -6,6 +6,10 @@ import simcli.utils.SaveManager;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * Main menu controller — handles new game creation, loading, and deletion.
+ * All output is routed through {@link UIManager} for consistency.
+ */
 public class MainMenu {
     private final Scanner scanner;
 
@@ -17,24 +21,24 @@ public class MainMenu {
         boolean inMenu = true;
 
         while (inMenu) {
-            simcli.ui.UIManager.clearScreen();
+            UIManager.clearScreen();
             AsciiArt.printLogo();
-            System.out.println("  [1] Create New World");
-            System.out.println("  [2] Load Existing World");
-            System.out.println("  [3] Delete Saved World");
-            System.out.println("  [4] Exit Game");
-            System.out.println("==================================================");
+            UIManager.printMessage("  [1] Create New World");
+            UIManager.printMessage("  [2] Load Existing World");
+            UIManager.printMessage("  [3] Delete Saved World");
+            UIManager.printMessage("  [4] Exit Game");
+            UIManager.printMessage("==================================================");
 
             List<String> saves = SaveManager.getExistingSaves();
             if (!saves.isEmpty()) {
-                System.out.println("--- Saved Worlds ---");
+                UIManager.printMessage("--- Saved Worlds ---");
                 for (String save : saves) {
-                    System.out.println("- " + save);
+                    UIManager.printMessage("- " + save);
                 }
-                System.out.println("--------------------");
+                UIManager.printMessage("--------------------");
             }
 
-            System.out.print("COMMAND> ");
+            UIManager.prompt("COMMAND> ");
 
             String choice = scanner.nextLine();
 
@@ -45,10 +49,10 @@ public class MainMenu {
             } else if (choice.equals("3")) {
                 deleteWorld();
             } else if (choice.equals("4")) {
-                System.out.println("Goodbye!");
+                UIManager.printMessage("Goodbye!");
                 inMenu = false;
             } else {
-                System.out.println("Invalid option. Please enter 1, 2, 3, or 4.");
+                UIManager.printMessage("Invalid option. Please enter 1, 2, 3, or 4.");
             }
         }
     }
@@ -56,13 +60,13 @@ public class MainMenu {
     private void createNewWorld() {
         String newName = "";
         while (true) {
-            System.out.print("\nEnter a name for your new world: ");
+            UIManager.prompt("\nEnter a name for your new world: ");
             newName = scanner.nextLine().trim();
 
             if (newName.isEmpty()) {
-                System.out.println("Error: World name cannot be blank!");
+                UIManager.printMessage("Error: World name cannot be blank!");
             } else if (SaveManager.saveExists(newName)) {
-                System.out.println("Error: World '" + newName + "' already exists!");
+                UIManager.printMessage("Error: World '" + newName + "' already exists!");
             } else {
                 break;
             }
@@ -70,38 +74,38 @@ public class MainMenu {
 
         GameEngine newGame = new GameEngine(newName);
         newGame.init(scanner);
-        newGame.run(scanner); 
+        newGame.run(scanner);
     }
 
     private void loadWorld() {
         List<String> saves = SaveManager.getExistingSaves();
 
         if (saves.isEmpty()) {
-            System.out.println("\nNo saved games found! Please create a new world.\n");
-            System.out.print("Press ENTER to return...");
+            UIManager.printMessage("\nNo saved games found! Please create a new world.\n");
+            UIManager.prompt("Press ENTER to return...");
             scanner.nextLine();
             return;
         }
 
-        System.out.println("\n--- Existing Worlds ---");
+        UIManager.printMessage("\n--- Existing Worlds ---");
         for (String save : saves) {
-            System.out.println("- " + save);
+            UIManager.printMessage("- " + save);
         }
 
-        System.out.print("Enter world name to load (or press Enter to cancel): ");
+        UIManager.prompt("Enter world name to load (or press Enter to cancel): ");
         String loadName = scanner.nextLine().trim();
 
         if (loadName.isEmpty()) return;
 
         if (SaveManager.saveExists(loadName)) {
-            System.out.println("Loading '" + loadName + "'...");
+            UIManager.printMessage("Loading '" + loadName + "'...");
             GameEngine loadedGame = SaveManager.loadGame(loadName);
             if (loadedGame != null) {
-                loadedGame.run(scanner); 
+                loadedGame.run(scanner);
             }
         } else {
-            System.out.println("Error: World '" + loadName + "' does not exist.\n");
-            System.out.print("Press ENTER to return...");
+            UIManager.printMessage("Error: World '" + loadName + "' does not exist.\n");
+            UIManager.prompt("Press ENTER to return...");
             scanner.nextLine();
         }
     }
@@ -109,33 +113,33 @@ public class MainMenu {
     private void deleteWorld() {
         List<String> saves = SaveManager.getExistingSaves();
         if (saves.isEmpty()) {
-            System.out.println("\nNo saved games found to delete.\n");
-            System.out.print("Press ENTER to return...");
+            UIManager.printMessage("\nNo saved games found to delete.\n");
+            UIManager.prompt("Press ENTER to return...");
             scanner.nextLine();
             return;
         }
 
-        System.out.print("\nEnter world name to delete (or press Enter to cancel): ");
+        UIManager.prompt("\nEnter world name to delete (or press Enter to cancel): ");
         String deleteName = scanner.nextLine().trim();
 
         if (deleteName.isEmpty()) return;
 
         if (SaveManager.saveExists(deleteName)) {
-            System.out.print("Are you sure you want to delete this world? (Y/N): ");
+            UIManager.prompt("Are you sure you want to delete this world? (Y/N): ");
             String confirm = scanner.nextLine().trim().toUpperCase();
             if (confirm.equals("Y")) {
                 if (SaveManager.deleteSave(deleteName)) {
-                    System.out.println("World '" + deleteName + "' has been deleted.\n");
+                    UIManager.printMessage("World '" + deleteName + "' has been deleted.\n");
                 } else {
-                    System.out.println("Error deleting '" + deleteName + "'.\n");
+                    UIManager.printMessage("Error deleting '" + deleteName + "'.\n");
                 }
             } else {
-                System.out.println("Deletion canceled.\n");
+                UIManager.printMessage("Deletion canceled.\n");
             }
         } else {
-            System.out.println("Error: World '" + deleteName + "' does not exist.\n");
+            UIManager.printMessage("Error: World '" + deleteName + "' does not exist.\n");
         }
-        System.out.print("Press ENTER to return...");
+        UIManager.prompt("Press ENTER to return...");
         scanner.nextLine();
     }
 }

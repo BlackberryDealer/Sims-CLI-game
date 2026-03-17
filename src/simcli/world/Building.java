@@ -6,8 +6,8 @@ import simcli.entities.Sim;
 import simcli.world.interactables.Interactable;
 
 public abstract class Building {
-    protected String name;
-    protected List<Interactable> interactables;
+    private String name;
+    private List<Interactable> interactables;
     
     public Building(String name) {
         this.name = name;

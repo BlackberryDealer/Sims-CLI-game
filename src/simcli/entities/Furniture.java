@@ -15,11 +15,11 @@ public class Furniture extends Item {
     @Override
     public void interact(Sim sim, java.util.Scanner scanner, simcli.engine.TimeManager timeManager) throws SimulationException {
         // Will be handed by the Room system later. For now, it just sits in inventory.
-        throw new SimulationException("You must place " + this.name + " in a room to use it!");
+        throw new SimulationException("You must place " + getObjectName() + " in a room to use it!");
     }
 
     @Override
     public Item copyItem() {
-        return new Furniture(this.name, this.price, this.spaceScore);
+        return new Furniture(getObjectName(), getPrice(), this.spaceScore);
     }
 }
