@@ -5,7 +5,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import simcli.entities.Gender;
-import simcli.entities.Item;
 import simcli.entities.Job;
 import simcli.entities.Sim;
 import simcli.entities.lifecycle.LifeStage;

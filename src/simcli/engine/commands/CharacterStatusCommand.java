@@ -1,0 +1,47 @@
+package simcli.engine.commands;
+
+import simcli.engine.CommandResult;
+import simcli.entities.Sim;
+import simcli.ui.UIManager;
+import simcli.world.Building;
+
+import java.util.Scanner;
+
+public class CharacterStatusCommand implements ICommand {
+    private final Sim activePlayer;
+    private final Scanner scanner;
+    private final Building currentLocation;
+
+    public CharacterStatusCommand(Sim activePlayer, Scanner scanner, Building currentLocation) {
+        this.activePlayer = activePlayer;
+        this.scanner = scanner;
+        this.currentLocation = currentLocation;
+    }
+
+    @Override
+    public CommandResult execute() {
+        UIManager.printMessage("\n=== CHARACTER STATUS ===");
+        UIManager.printMessage("Name: " + activePlayer.getName());
+        UIManager.printMessage("Age: " + activePlayer.getAge());
+        UIManager.printMessage("Money: $" + activePlayer.getMoney());
+        if (activePlayer.canWork()) {
+            UIManager.printMessage("Current Job Status: " + activePlayer.getCareer().getTitle());
+        }
+        UIManager.printMessage("Hunger: " + activePlayer.getHunger().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
+        UIManager.printMessage("Energy: " + activePlayer.getEnergy().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
+        UIManager.printMessage("Hygiene: " + activePlayer.getHygiene().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
+        UIManager.printMessage("Happiness: " + activePlayer.getHappiness().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
+        UIManager.printMessage(
+                "Inventory Items: " + activePlayer.getInventory().size() + " / " + activePlayer.getInventoryCapacity());
+        UIManager.printMessage("Location: " + currentLocation.getName());
+        UIManager.printMessage("==================");
+        
+        pause();
+        return CommandResult.NO_TICK;
+    }
+
+    private void pause() {
+        UIManager.prompt("\nPress ENTER to return...");
+        scanner.nextLine();
+    }
+}
