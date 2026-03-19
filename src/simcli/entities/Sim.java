@@ -133,13 +133,21 @@ public class Sim implements ISimBehaviour {
     public void interactSocially(Sim otherSim) {
         if (otherSim == this) return;
         relationships.putIfAbsent(otherSim, 0);
-        relationships.put(otherSim, relationships.get(otherSim) + 10);
+        int relBonus = 10;
+        int socialBonus = 25;
+        int funBonus = 10;
+        if (this.hasTrait(Trait.SOCIALITE)) {
+            relBonus = 15;   // 50% more relationship
+            socialBonus = 38; // 50% more social recovery
+            funBonus = 15;
+        }
+        relationships.put(otherSim, relationships.get(otherSim) + relBonus);
         this.currentAction = ActionState.SOCIALIZING;
         
         SimulationLogger.log(this.name + " socializes with " + otherSim.getName() + ".");
-        this.getSocial().increase(25);
+        this.getSocial().increase(socialBonus);
         this.getEnergy().decrease(10);
-        this.getFun().increase(10);
+        this.getFun().increase(funBonus);
     }
 
     public boolean marry(Sim otherSim) {

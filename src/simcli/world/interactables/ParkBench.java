@@ -6,6 +6,7 @@ import simcli.entities.ActionState;
 import simcli.entities.NPCSim;
 import simcli.entities.Sim;
 import simcli.entities.SkillType;
+import simcli.entities.Trait;
 
 import java.util.List;
 import java.util.Scanner;
@@ -37,18 +38,21 @@ public class ParkBench implements Interactable {
                 SimulationLogger.prompt("\n[1] Chat\n[2] Joke\n[3] Argue\nSelect action> ");
                 int actionChoice = Integer.parseInt(scanner.nextLine().trim());
                 
+                boolean isSocialite = sim.hasTrait(Trait.SOCIALITE);
                 if (actionChoice == 1) {
+                    int relGain = isSocialite ? 8 : 5;
                     SimulationLogger.log(sim.getName() + " chats politely with " + target.getName() + ".");
-                    sim.increaseRelationship(target, 5);
+                    sim.increaseRelationship(target, relGain);
                     sim.getFun().increase(10);
                     sim.getEnergy().decrease(5);
-                    sim.getSkillManager().addSkillExperience(SkillType.CHARISMA, 5, sim.getName(), false);
+                    sim.getSkillManager().addSkillExperience(SkillType.CHARISMA, isSocialite ? 8 : 5, sim.getName(), false);
                 } else if (actionChoice == 2) {
+                    int relGain = isSocialite ? 15 : 10;
                     SimulationLogger.log(sim.getName() + " tells a funny joke to " + target.getName() + "!");
-                    sim.increaseRelationship(target, 10);
+                    sim.increaseRelationship(target, relGain);
                     sim.getFun().increase(15);
                     sim.getEnergy().decrease(10);
-                    sim.getSkillManager().addSkillExperience(SkillType.CHARISMA, 10, sim.getName(), false);
+                    sim.getSkillManager().addSkillExperience(SkillType.CHARISMA, isSocialite ? 15 : 10, sim.getName(), false);
                 } else if (actionChoice == 3) {
                     SimulationLogger.log(sim.getName() + " argues bitterly with " + target.getName() + ".");
                     sim.increaseRelationship(target, -15);

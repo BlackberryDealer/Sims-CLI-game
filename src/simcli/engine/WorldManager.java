@@ -30,12 +30,15 @@ public class WorldManager implements IWorldManager {
         home.addRoom(mainRoom);
 
         Room kitchen = new Room("Kitchen", 50);
+        kitchen.placeFurniture(new Fridge(), 25);
         home.addRoom(kitchen);
 
         Room gym = new Room("Garage", 60);
+        gym.placeFurniture(new WeightBench(), 40);
         home.addRoom(gym);
 
         Room bathroom = new Room("Bathroom", 30);
+        bathroom.placeFurniture(new Shower(), 10);
         home.addRoom(bathroom);
 
         this.cityMap.add(home);

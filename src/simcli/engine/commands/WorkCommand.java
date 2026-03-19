@@ -76,6 +76,13 @@ public class WorkCommand implements ICommand {
         activePlayer.incrementShiftsWorkedToday();
         activePlayer.resetConsecutiveDaysMissed();
 
+        // Promotion chance after completing a shift
+        if (activePlayer.getJobTier() < activePlayer.getCareer().getMaxTier()) {
+            if (simcli.utils.GameRandom.RANDOM.nextDouble() < 0.25) {
+                activePlayer.promote();
+            }
+        }
+
         timeManager.advanceTicks(activePlayer.getCareer().getWorkingHours() - 1);
         
         return CommandResult.TICK_FORWARD;
