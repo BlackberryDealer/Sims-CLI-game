@@ -4,6 +4,8 @@ import simcli.engine.SimulationException;
 import simcli.engine.SimulationLogger;
 import simcli.entities.lifecycle.LifeStage;
 import simcli.entities.lifecycle.AdultStage;
+import simcli.entities.lifecycle.TeenStage;
+import simcli.entities.lifecycle.ElderStage;
 import simcli.entities.lifecycle.ChildStage;
 import simcli.needs.Need;
 import simcli.world.Room;
@@ -53,17 +55,21 @@ public class Sim implements ISimBehaviour {
         this.skillManager = new SkillManager();
         this.traits = new ArrayList<>();
         Trait[] allTraits = Trait.values();
-        this.traits.add(allTraits[(int)(Math.random() * allTraits.length)]);
+        this.traits.add(allTraits[simcli.utils.GameRandom.RANDOM.nextInt(allTraits.length)]);
 
         this.relationships = new HashMap<>();
         this.spouse = null;
         this.totalMoneyEarned = money;
         this.totalItemsBought = 0;
 
-        if (this.age < 18) {
+        if (this.age < 13) {
             this.setLifeStage(new ChildStage());
-        } else {
+        } else if (this.age < 18) {
+            this.setLifeStage(new TeenStage());
+        } else if (this.age < 65) {
             this.setLifeStage(new AdultStage());
+        } else {
+            this.setLifeStage(new ElderStage());
         }
     }
 
@@ -86,11 +92,13 @@ public class Sim implements ISimBehaviour {
     public Need getHunger() { return needsTracker.getHunger(); }
     public Need getEnergy() { return needsTracker.getEnergy(); }
     public Need getHygiene() { return needsTracker.getHygiene(); }
-    public Need getHappiness() { return needsTracker.getHappiness(); }
+    public Need getFun() { return needsTracker.getFun(); }
+    public Need getSocial() { return needsTracker.getSocial(); }
     public SimState getState() { return needsTracker.getState(); }
     public void updateState() { needsTracker.updateState(); }
+    public int getHealth() { return needsTracker.getHealth(); }
     public int getStarvingTicks() { return needsTracker.getStarvingTicks(); }
-    public void setStarvingTicks(int ticks) { needsTracker.setStarvingTicks(ticks); }
+    public void setHealth(int health) { needsTracker.setHealth(health); }
     
     public Job getCareer() { return careerProfile.getCareer(); }
     public int getJobTier() { return careerProfile.getJobTier(); }
@@ -113,6 +121,14 @@ public class Sim implements ISimBehaviour {
     public Map<Sim, Integer> getRelationships() { return relationships; }
     public Sim getSpouse() { return spouse; }
 
+    public int getRelationship(Sim otherSim) {
+        return relationships.getOrDefault(otherSim, 0);
+    }
+
+    public void increaseRelationship(Sim otherSim, int amount) {
+        relationships.put(otherSim, getRelationship(otherSim) + amount);
+    }
+
     // --- Social Logic ---
     public void interactSocially(Sim otherSim) {
         if (otherSim == this) return;
@@ -121,8 +137,9 @@ public class Sim implements ISimBehaviour {
         this.currentAction = ActionState.SOCIALIZING;
         
         SimulationLogger.log(this.name + " socializes with " + otherSim.getName() + ".");
+        this.getSocial().increase(25);
         this.getEnergy().decrease(10);
-        this.getHappiness().increase(10);
+        this.getFun().increase(10);
     }
 
     public boolean marry(Sim otherSim) {
@@ -145,7 +162,7 @@ public class Sim implements ISimBehaviour {
             throw new SimulationException(this.name + " and " + this.spouse.getName() + " are of the same gender and cannot reproduce biologically.");
         }
         SimulationLogger.log("\n*** NEW LIFE! " + this.name + " and " + this.spouse.getName() + " have had a baby! ***");
-        return new Sim("Baby", 0, Math.random() < 0.5 ? Gender.MALE : Gender.FEMALE);
+        return new Sim("Baby", 0, simcli.utils.GameRandom.RANDOM.nextBoolean() ? Gender.MALE : Gender.FEMALE);
     }
 
     // --- Activity Logic ---

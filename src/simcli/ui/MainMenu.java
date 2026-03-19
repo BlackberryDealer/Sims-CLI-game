@@ -2,6 +2,9 @@ package simcli.ui;
 
 import simcli.engine.GameEngine;
 import simcli.utils.SaveManager;
+import simcli.entities.Gender;
+import simcli.entities.Job;
+import simcli.entities.Sim;
 
 import java.util.List;
 import java.util.Scanner;
@@ -72,8 +75,48 @@ public class MainMenu {
             }
         }
 
-        GameEngine newGame = new GameEngine(newName);
-        newGame.init(scanner);
+        UIManager.printMessage("\n=== Character Creation ===");
+        UIManager.prompt("Enter your Sim's Name: ");
+        String name = scanner.nextLine().trim();
+        if (name.isEmpty()) name = "Dylan";
+
+        int age = 21;
+        while (true) {
+            UIManager.prompt("Enter your Sim's Age (18-80): ");
+            try {
+                String inputAge = scanner.nextLine().trim();
+                if (inputAge.isEmpty()) break;
+                int parsedAge = Integer.parseInt(inputAge);
+                if (parsedAge >= 18 && parsedAge <= 80) {
+                    age = parsedAge;
+                    break;
+                } else {
+                    UIManager.printMessage("Age must be between 18 and 80. Please try again.");
+                }
+            } catch (NumberFormatException e) {
+                UIManager.printMessage("Invalid age format. Please enter a valid number.");
+            }
+        }
+
+        Gender gender = Gender.MALE;
+        while (true) {
+            UIManager.prompt("Enter your Sim's Gender (M/F): ");
+            String gInput = scanner.nextLine().trim().toUpperCase();
+            if (gInput.equals("M")) {
+                gender = Gender.MALE;
+                break;
+            }
+            if (gInput.equals("F")) {
+                gender = Gender.FEMALE;
+                break;
+            }
+            UIManager.printMessage("Please enter M or F.");
+        }
+
+        Sim player1 = new Sim(name, age, gender, Job.UNEMPLOYED);
+        UIManager.printMessage("\n=== Booting World: " + newName + " ===");
+
+        GameEngine newGame = new GameEngine(newName, player1);
         newGame.run(scanner);
     }
 

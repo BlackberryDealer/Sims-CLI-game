@@ -14,7 +14,7 @@ import simcli.world.interactables.Interactable;
 import java.util.List;
 import java.util.Scanner;
 
-public class InventoryCommand implements ICommand {
+public class InventoryCommand extends BaseCommand {
 
     private final Sim activePlayer;
     private final Scanner scanner;
@@ -80,7 +80,7 @@ public class InventoryCommand implements ICommand {
                         simcli.entities.Item selectedItem = inv.get(realIndex);
 
                         if (selectedItem instanceof simcli.entities.Furniture
-                                && currentLocation instanceof Residential) {
+                                && currentLocation.isResidential()) {
                             simcli.entities.Furniture furn = (simcli.entities.Furniture) selectedItem;
                             Residential res = (Residential) currentLocation;
                             UIManager.printMessage("Select a room to place " + furn.getObjectName() + " (Requires "
@@ -99,27 +99,7 @@ public class InventoryCommand implements ICommand {
                                 if (targetRoom != activePlayer.getCurrentRoom()) {
                                     UIManager.printMessage("You can only place furniture in the room you are currently in!");
                                 } else if (targetRoom.canFit(furn)) {
-                                    Interactable instance = null;
-                                    switch (furn.getObjectName()) {
-                                        case "Bed":
-                                            instance = new simcli.world.interactables.Bed();
-                                            break;
-                                        case "Computer":
-                                            instance = new simcli.world.interactables.Computer();
-                                            break;
-                                        case "Fridge":
-                                            instance = new simcli.world.interactables.Fridge();
-                                            break;
-                                        case "Weight Bench":
-                                            instance = new simcli.world.interactables.WeightBench();
-                                            break;
-                                        case "Shower":
-                                            instance = new simcli.world.interactables.Shower();
-                                            break;
-                                        case "Storage Chest":
-                                            instance = new simcli.world.interactables.StorageChest();
-                                            break;
-                                    }
+                                    Interactable instance = furn.createInteractable();
                                     if (instance != null) {
                                         targetRoom.placeFurniture(instance, furn.getSpaceScore());
                                         activePlayer.getInventory().remove(selectedItem);
@@ -142,12 +122,8 @@ public class InventoryCommand implements ICommand {
                 }
             }
         }
-        pause();
+        pause(scanner);
         return CommandResult.NO_TICK;
     }
 
-    private void pause() {
-        UIManager.prompt("\nPress ENTER to return...");
-        scanner.nextLine();
-    }
 }

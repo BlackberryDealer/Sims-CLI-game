@@ -7,7 +7,7 @@ import simcli.world.Building;
 
 import java.util.Scanner;
 
-public class CharacterStatusCommand implements ICommand {
+public class CharacterStatusCommand extends BaseCommand {
     private final Sim activePlayer;
     private final Scanner scanner;
     private final Building currentLocation;
@@ -30,18 +30,15 @@ public class CharacterStatusCommand implements ICommand {
         UIManager.printMessage("Hunger: " + activePlayer.getHunger().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
         UIManager.printMessage("Energy: " + activePlayer.getEnergy().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
         UIManager.printMessage("Hygiene: " + activePlayer.getHygiene().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
-        UIManager.printMessage("Happiness: " + activePlayer.getHappiness().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
+        UIManager.printMessage("Fun: " + activePlayer.getFun().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
+        UIManager.printMessage("Social: " + activePlayer.getSocial().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
         UIManager.printMessage(
                 "Inventory Items: " + activePlayer.getInventory().size() + " / " + activePlayer.getInventoryCapacity());
         UIManager.printMessage("Location: " + currentLocation.getName());
         UIManager.printMessage("==================");
         
-        pause();
+        pause(scanner);
         return CommandResult.NO_TICK;
     }
 
-    private void pause() {
-        UIManager.prompt("\nPress ENTER to return...");
-        scanner.nextLine();
-    }
 }

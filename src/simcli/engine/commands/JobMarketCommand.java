@@ -7,7 +7,7 @@ import simcli.ui.UIManager;
 
 import java.util.Scanner;
 
-public class JobMarketCommand implements ICommand {
+public class JobMarketCommand extends BaseCommand {
     private final Sim activePlayer;
     private final Scanner scanner;
 
@@ -43,25 +43,21 @@ public class JobMarketCommand implements ICommand {
                         activePlayer.changeJob(targetJob);
                     } else {
                         UIManager.printMessage("You don't meet the age requirements for this job.");
-                        pause();
+                        pause(scanner);
                     }
                 } else {
                     UIManager.printMessage("Invalid choice.");
-                    pause();
+                    pause(scanner);
                 }
             } catch (NumberFormatException e) {
                 UIManager.printMessage("Invalid input.");
-                pause();
+                pause(scanner);
             }
         } else {
             UIManager.printMessage("Only adults can access the job market.");
-            pause();
+            pause(scanner);
         }
         return CommandResult.NO_TICK;
     }
 
-    private void pause() {
-        UIManager.prompt("\nPress ENTER to return...");
-        scanner.nextLine();
-    }
 }

@@ -10,7 +10,7 @@ import simcli.world.Building;
 import java.util.List;
 import java.util.Scanner;
 
-public class TravelCommand implements ICommand {
+public class TravelCommand extends BaseCommand {
     private final Sim activePlayer;
     private final Scanner scanner;
     private final Building currentLocation;
@@ -41,7 +41,7 @@ public class TravelCommand implements ICommand {
                 Building target = cityMap.get(destStr - 1);
                 if (currentLocation == target) {
                     UIManager.printMessage("You are already at " + target.getName() + "!");
-                    pause();
+                    pause(scanner);
                     return CommandResult.NO_TICK;
                 } else {
                     worldManager.setCurrentLocation(target);
@@ -51,18 +51,14 @@ public class TravelCommand implements ICommand {
                 }
             } else {
                 UIManager.printMessage("Invalid destination.");
-                pause();
+                pause(scanner);
                 return CommandResult.NO_TICK;
             }
         } catch (NumberFormatException e) {
             UIManager.printMessage("Invalid destination.");
-            pause();
+            pause(scanner);
             return CommandResult.NO_TICK;
         }
     }
 
-    private void pause() {
-        UIManager.prompt("\nPress ENTER to return...");
-        scanner.nextLine();
-    }
 }

@@ -26,7 +26,7 @@ public class UIManager {
     }
 
     public static void printHint() {
-        int index = (int) (Math.random() * HINTS.length);
+        int index = simcli.utils.GameRandom.RANDOM.nextInt(HINTS.length);
         System.out.println("[" + HINTS[index] + "]");
     }
 
@@ -80,9 +80,7 @@ public class UIManager {
         System.out.println(message);
     }
 
-    public static void printMessage() {
-        System.out.println();
-    }
+
 
     public static void printWarning(String message) {
         System.out.println("\n[WARNING] " + message);

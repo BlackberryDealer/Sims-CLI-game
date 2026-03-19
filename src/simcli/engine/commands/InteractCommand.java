@@ -11,7 +11,7 @@ import simcli.world.interactables.Interactable;
 import java.util.List;
 import java.util.Scanner;
 
-public class InteractCommand implements ICommand {
+public class InteractCommand extends BaseCommand {
     private final Sim activePlayer;
     private final Scanner scanner;
     private final TimeManager timeManager;
@@ -33,13 +33,9 @@ public class InteractCommand implements ICommand {
             return CommandResult.TICK_FORWARD;
         } else {
             UIManager.printMessage("Invalid item choice.");
-            pause();
+            pause(scanner);
             return CommandResult.NO_TICK;
         }
     }
 
-    private void pause() {
-        UIManager.prompt("\nPress ENTER to return...");
-        scanner.nextLine();
-    }
 }

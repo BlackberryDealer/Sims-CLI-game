@@ -26,7 +26,7 @@ public class ParkBench implements Interactable {
         for (int i = 0; i < visitors.size(); i++) {
             NPCSim npc = visitors.get(i);
             SimulationLogger.prompt("[" + (i + 1) + "] Talk to " + npc.getName()
-                    + " (Relationship: " + npc.getRelationshipScore() + ")\n");
+                    + " (Relationship: " + sim.getRelationship(npc) + ")\n");
         }
         SimulationLogger.prompt("[0] Go back\nSelect person> ");
         try {
@@ -39,27 +39,27 @@ public class ParkBench implements Interactable {
                 
                 if (actionChoice == 1) {
                     SimulationLogger.log(sim.getName() + " chats politely with " + target.getName() + ".");
-                    target.increaseRelationship(5);
-                    sim.getHappiness().increase(10);
+                    sim.increaseRelationship(target, 5);
+                    sim.getFun().increase(10);
                     sim.getEnergy().decrease(5);
                     sim.getSkillManager().addSkillExperience(SkillType.CHARISMA, 5, sim.getName(), false);
                 } else if (actionChoice == 2) {
                     SimulationLogger.log(sim.getName() + " tells a funny joke to " + target.getName() + "!");
-                    target.increaseRelationship(10);
-                    sim.getHappiness().increase(15);
+                    sim.increaseRelationship(target, 10);
+                    sim.getFun().increase(15);
                     sim.getEnergy().decrease(10);
                     sim.getSkillManager().addSkillExperience(SkillType.CHARISMA, 10, sim.getName(), false);
                 } else if (actionChoice == 3) {
                     SimulationLogger.log(sim.getName() + " argues bitterly with " + target.getName() + ".");
-                    target.increaseRelationship(-15);
-                    sim.getHappiness().decrease(10);
+                    sim.increaseRelationship(target, -15);
+                    sim.getFun().decrease(10);
                     sim.getEnergy().decrease(15);
                 } else {
                     SimulationLogger.logWarning("Invalid action selection.");
                     return;
                 }
                 
-                SimulationLogger.log("Relationship with " + target.getName() + " is now " + target.getRelationshipScore() + ".");
+                SimulationLogger.log("Relationship with " + target.getName() + " is now " + sim.getRelationship(target) + ".");
             }
         } catch (NumberFormatException e) {
             SimulationLogger.logWarning("Invalid selection.");

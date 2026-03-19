@@ -20,7 +20,7 @@ public class Computer implements Interactable {
         
         sim.getEnergy().decrease(15);
         sim.getHunger().decrease(10);
-        sim.getHappiness().increase(5);
+        sim.getFun().increase(5);
         
         sim.getSkillManager().addSkillExperience(SkillType.LOGIC, 15, sim.getName(), sim.hasTrait(Trait.FAST_LEARNER));
     }

@@ -1,33 +1,24 @@
 package simcli.entities.lifecycle;
 
-
-public class AdultStage implements LifeStage {
-
-    private static final int ELDER_AGE = 65;
+public class ElderStage implements LifeStage {
 
     @Override
     public boolean canWork() {
-        return true;
+        return false;
     }
 
- 
     @Override
     public double getEnergyDecayModifier() {
-        return 1.0;
+        return 0.8;
     }
-
 
     @Override
     public String getStageName() {
-        return "Adult";
+        return "Elder";
     }
-
 
     @Override
     public LifeStage getNextStage(int currentAge) {
-        if (currentAge >= ELDER_AGE) {
-            return new ElderStage();
-        }
         return this;
     }
 }

@@ -10,7 +10,7 @@ import simcli.world.Room;
 import java.util.List;
 import java.util.Scanner;
 
-public class MoveRoomCommand implements ICommand {
+public class MoveRoomCommand extends BaseCommand {
     private final Sim activePlayer;
     private final Scanner scanner;
     private final Building currentLocation;
@@ -23,7 +23,7 @@ public class MoveRoomCommand implements ICommand {
 
     @Override
     public CommandResult execute() {
-        if (currentLocation instanceof Residential) {
+        if (currentLocation.isResidential()) {
             Residential res = (Residential) currentLocation;
             UIManager.printMessage("\n=== MOVE ROOM ===");
             List<Room> rooms = res.getRooms();
@@ -44,12 +44,8 @@ public class MoveRoomCommand implements ICommand {
         } else {
             UIManager.printMessage("You can only move between rooms at home!");
         }
-        pause();
+        pause(scanner);
         return CommandResult.NO_TICK;
     }
 
-    private void pause() {
-        UIManager.prompt("\nPress ENTER to return...");
-        scanner.nextLine();
-    }
 }

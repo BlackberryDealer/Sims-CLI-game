@@ -1,7 +1,5 @@
 package simcli.engine;
 
-import simcli.entities.Gender;
-import simcli.entities.Job;
 import simcli.entities.Sim;
 import simcli.entities.SimState;
 import simcli.ui.IRenderer;
@@ -20,21 +18,24 @@ public class GameEngine {
     private String worldName;
     private TimeManager timeManager;
     private boolean isGameOver;
+    private RandomEventManager randomEventManager;
 
     // World Stats tracking (aggregated upon save/game over)
     private int sessionTotalMoney;
     private int sessionTotalItems;
 
     // CONSTRUCTOR: For Creating a New World
-    public GameEngine(String worldName) {
+    public GameEngine(String worldName, Sim activePlayer) {
         this.worldName = worldName;
         this.timeManager = new TimeManager(1, 24); // 24 ticks per day
         this.isGameOver = false;
         this.neighborhood = new ArrayList<>();
+        this.neighborhood.add(activePlayer);
         this.worldManager = new WorldManager();
         this.worldManager.setupWorld();
         this.inputHandler = new InputHandler(this.worldManager, this.timeManager);
         this.renderer = new TerminalRenderer();
+        this.randomEventManager = new RandomEventManager();
     }
 
     // CONSTRUCTOR: For Loading an Existing World
@@ -47,53 +48,10 @@ public class GameEngine {
         this.worldManager.setupWorld();
         this.inputHandler = new InputHandler(this.worldManager, this.timeManager);
         this.renderer = new TerminalRenderer();
+        this.randomEventManager = new RandomEventManager();
     }
 
-    public void init(Scanner scanner) {
-        simcli.ui.UIManager.printMessage("\n=== Character Creation ===");
-        simcli.ui.UIManager.prompt("Enter your Sim's Name: ");
-        String name = scanner.nextLine().trim();
-        if (name.isEmpty())
-            name = "Dylan";
 
-        int age = 21;
-        while (true) {
-            simcli.ui.UIManager.prompt("Enter your Sim's Age (18-80): ");
-            try {
-                String inputAge = scanner.nextLine().trim();
-                if (inputAge.isEmpty())
-                    break;
-                int parsedAge = Integer.parseInt(inputAge);
-                if (parsedAge >= 18 && parsedAge <= 80) {
-                    age = parsedAge;
-                    break;
-                } else {
-                    simcli.ui.UIManager.printMessage("Age must be between 18 and 80. Please try again.");
-                }
-            } catch (NumberFormatException e) {
-                simcli.ui.UIManager.printMessage("Invalid age format. Please enter a valid number.");
-            }
-        }
-
-        Gender gender = Gender.MALE;
-        while (true) {
-            simcli.ui.UIManager.prompt("Enter your Sim's Gender (M/F): ");
-            String gInput = scanner.nextLine().trim().toUpperCase();
-            if (gInput.equals("M")) {
-                gender = Gender.MALE;
-                break;
-            }
-            if (gInput.equals("F")) {
-                gender = Gender.FEMALE;
-                break;
-            }
-            simcli.ui.UIManager.printMessage("Please enter M or F.");
-        }
-
-        Sim player1 = new Sim(name, age, gender, Job.UNEMPLOYED);
-        this.neighborhood.add(player1);
-        simcli.ui.UIManager.printMessage("\n=== Booting World: " + this.worldName + " ===");
-    }
 
     public void run(Scanner scanner) {
         boolean running = true;
@@ -148,7 +106,7 @@ public class GameEngine {
                         "[" + activePlayer.getName() + "] Hunger: " + activePlayer.getHunger().getValue() +
                                 " | Energy: " + activePlayer.getEnergy().getValue() +
                                 " | Hygiene: " + activePlayer.getHygiene().getValue() +
-                                " | Happiness: " + activePlayer.getHappiness().getValue() +
+                                " | Fun: " + activePlayer.getFun().getValue() +
                                 " | Cash: $" + activePlayer.getMoney() + " | Status: " + activePlayer.getState());
             }
 
@@ -209,7 +167,7 @@ public class GameEngine {
 
             if (running && tickForward) {
                 timeManager.advanceTick();
-                simcli.engine.RandomEventManager.trigger(activePlayer, timeManager);
+                this.randomEventManager.trigger(activePlayer, timeManager);
 
                 if (timeManager.getCurrentDay() > previousDay) {
                     simcli.ui.UIManager
@@ -261,7 +219,7 @@ public class GameEngine {
         return neighborhood;
     }
 
-    public boolean getIsGameOver() {
+    public boolean isGameOver() {
         return isGameOver;
     }
 

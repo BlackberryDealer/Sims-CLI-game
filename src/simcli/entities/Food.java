@@ -2,7 +2,7 @@ package simcli.entities;
 
 public class Food extends Consumable {
     public Food(String name, int price, int satiationValue, int energyValue) {
-        super(name, price, satiationValue, energyValue, 0); // Food does not provide happiness
+        super(name, price, satiationValue, energyValue, 0); // Food does not provide fun
     }
     
     @Override

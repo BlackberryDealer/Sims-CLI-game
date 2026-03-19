@@ -3,7 +3,7 @@ package simcli.ui.ascii;
 import simcli.entities.ActionState;
 import simcli.entities.Sim;
 import simcli.world.Building;
-import simcli.world.Residential;
+
 import simcli.ui.ascii.providers.*;
 
 import java.util.HashMap;
@@ -40,7 +40,7 @@ public class AsciiEngine {
 
         // Render Location if IDLE
         if (location != null) {
-            if (location instanceof Residential) {
+            if (location.isResidential()) {
                 return houseProvider.getAsciiArt(player, location);
             }
 

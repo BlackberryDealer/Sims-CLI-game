@@ -22,6 +22,11 @@ public class Residential extends Building {
     }
 
     @Override
+    public boolean isResidential() {
+        return true;
+    }
+
+    @Override
     public List<Interactable> getInteractables() {
         List<Interactable> all = new ArrayList<>(super.getInteractables());
         for (Room r : rooms) {

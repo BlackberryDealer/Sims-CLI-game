@@ -9,7 +9,7 @@ import simcli.world.interactables.Interactable;
 
 import java.util.Scanner;
 
-public class HouseInfoCommand implements ICommand {
+public class HouseInfoCommand extends BaseCommand {
     private final Scanner scanner;
     private final Building currentLocation;
 
@@ -20,7 +20,7 @@ public class HouseInfoCommand implements ICommand {
 
     @Override
     public CommandResult execute() {
-        if (currentLocation instanceof Residential) {
+        if (currentLocation.isResidential()) {
             Residential res = (Residential) currentLocation;
             UIManager.printMessage("\n=== HOUSE INFO: " + res.getName() + " ===");
             for (Room r : res.getRooms()) {
@@ -34,12 +34,8 @@ public class HouseInfoCommand implements ICommand {
         } else {
             UIManager.printMessage("You can only inspect residential buildings.");
         }
-        pause();
+        pause(scanner);
         return CommandResult.NO_TICK;
     }
 
-    private void pause() {
-        UIManager.prompt("\nPress ENTER to return...");
-        scanner.nextLine();
-    }
 }

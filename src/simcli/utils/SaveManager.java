@@ -54,19 +54,20 @@ public class SaveManager {
         try (PrintWriter writer = new PrintWriter(new FileWriter(SAVE_DIR + worldName + ".txt"))) {
             writer.println("WORLD:" + engine.getWorldName());
             writer.println("TICK:" + engine.getCurrentTick());
-            writer.println("GAME_OVER:" + engine.getIsGameOver());
-            if (engine.getIsGameOver()) {
+            writer.println("GAME_OVER:" + engine.isGameOver());
+            if (engine.isGameOver()) {
                 writer.println("STATS_MONEY:" + engine.getSessionTotalMoney());
                 writer.println("STATS_ITEMS:" + engine.getSessionTotalItems());
             }
 
             for (Sim sim : engine.getNeighborhood()) {
-                // Format: Sim:Name,Age,Gender,JobName,Money,InventoryCapacity,Hunger,Energy,Happiness,Hygiene
+                // Format: Sim:Name,Age,Gender,JobName,Money,InventoryCapacity,Hunger,Energy,Fun,Hygiene,Social
                 writer.println("Sim:" + sim.getName() + "," + sim.getAge() + "," +
                         sim.getGender().name() + "," + sim.getCareer().name() + "," + 
                         sim.getMoney() + "," + sim.getInventoryCapacity() + "," +
                         sim.getHunger().getValue() + "," + sim.getEnergy().getValue() + ","
-                        + sim.getHappiness().getValue() + "," + sim.getHygiene().getValue());
+                        + sim.getFun().getValue() + "," + sim.getHygiene().getValue() + ","
+                        + sim.getSocial().getValue());
             }
         } catch (IOException e) {
             simcli.ui.UIManager.printWarning("Error saving game: " + e.getMessage());
@@ -110,10 +111,13 @@ public class SaveManager {
                     sim.getHunger().setValue(Integer.parseInt(data[6]));
                     sim.getEnergy().setValue(Integer.parseInt(data[7]));
                     if (data.length > 8) {
-                        sim.getHappiness().setValue(Integer.parseInt(data[8]));
+                        sim.getFun().setValue(Integer.parseInt(data[8]));
                     }
                     if (data.length > 9) {
                         sim.getHygiene().setValue(Integer.parseInt(data[9]));
+                    }
+                    if (data.length > 10) {
+                        sim.getSocial().setValue(Integer.parseInt(data[10]));
                     }
                     sim.updateState();
 

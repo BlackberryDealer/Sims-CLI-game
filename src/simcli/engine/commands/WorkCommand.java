@@ -73,14 +73,8 @@ public class WorkCommand implements ICommand {
         activePlayer.setMoney(activePlayer.getMoney() + dailyPay);
         activePlayer.addTotalMoneyEarned(dailyPay);
         
-        // Reflection-safe field resets inside the domain
         activePlayer.incrementShiftsWorkedToday();
-        // Since we refactored Truancy earlier, wait: Sim.java doesn't expose `setConsecutiveDaysMissed`.
-        // Let's invoke a method on career profile instead.
-        // But since we can't easily, we just add `workShift` logic.
-        // For simplicity, we assume we want to reset consecutive days missed:
-        // Let's add that to Sim.java or extract it.
-        // Actually, we'll fix missing methods in Sim if needed later.
+        activePlayer.resetConsecutiveDaysMissed();
 
         timeManager.advanceTicks(activePlayer.getCareer().getWorkingHours() - 1);
         

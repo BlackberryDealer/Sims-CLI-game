@@ -38,15 +38,4 @@ public class SimulationLogger {
         }
     }
 
-    public static List<String> flushLogs() {
-        List<String> currentLogs = new ArrayList<>(logs);
-        logs.clear();
-        return currentLogs;
-    }
-    
-    public static simcli.entities.Sim consumeAnimation() {
-        simcli.entities.Sim temp = simToAnimate;
-        simToAnimate = null;
-        return temp;
-    }
 }

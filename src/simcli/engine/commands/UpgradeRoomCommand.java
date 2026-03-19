@@ -10,7 +10,7 @@ import simcli.world.Room;
 import java.util.List;
 import java.util.Scanner;
 
-public class UpgradeRoomCommand implements ICommand {
+public class UpgradeRoomCommand extends BaseCommand {
     private final Sim activePlayer;
     private final Scanner scanner;
     private final Building currentLocation;
@@ -23,7 +23,7 @@ public class UpgradeRoomCommand implements ICommand {
 
     @Override
     public CommandResult execute() {
-        if (currentLocation instanceof Residential) {
+        if (currentLocation.isResidential()) {
             Residential res = (Residential) currentLocation;
             UIManager.printMessage("\n=== UPGRADE ROOM ===");
             UIManager.printMessage("Cost: $500 for +20 Capacity");
@@ -48,12 +48,8 @@ public class UpgradeRoomCommand implements ICommand {
         } else {
             UIManager.printMessage("You can only upgrade rooms at home!");
         }
-        pause();
+        pause(scanner);
         return CommandResult.NO_TICK;
     }
 
-    private void pause() {
-        UIManager.prompt("\nPress ENTER to return...");
-        scanner.nextLine();
-    }
 }

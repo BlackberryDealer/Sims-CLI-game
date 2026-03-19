@@ -4,7 +4,7 @@ import simcli.engine.commands.*;
 import simcli.entities.Sim;
 import simcli.ui.UIManager;
 import simcli.world.Building;
-import simcli.world.Residential;
+
 import simcli.world.interactables.Interactable;
 
 import java.util.List;
@@ -24,7 +24,7 @@ public class InputHandler implements IInputHandler {
         Building currentLocation = worldManager.getCurrentLocation();
         List<Interactable> items;
 
-        if (currentLocation instanceof Residential && activePlayer.getCurrentRoom() != null) {
+        if (currentLocation.isResidential() && activePlayer.getCurrentRoom() != null) {
             items = activePlayer.getCurrentRoom().getInteractables();
         } else {
             items = currentLocation.getInteractables();
@@ -72,18 +72,16 @@ public class InputHandler implements IInputHandler {
             return CommandResult.SLEEP_EVENT;
         } catch (SimulationException e) {
             UIManager.printWarning("ACTION REJECTED: " + e.getMessage());
-            pause(scanner);
+            UIManager.prompt("\nPress ENTER to return...");
+            scanner.nextLine();
             return CommandResult.NO_TICK;
         } catch (NumberFormatException e) {
             UIManager.printWarning("Invalid input.");
-            pause(scanner);
+            UIManager.prompt("\nPress ENTER to return...");
+            scanner.nextLine();
             return CommandResult.NO_TICK;
         }
 
     }
 
-    private void pause(Scanner scanner) {
-        UIManager.prompt("\nPress ENTER to return...");
-        scanner.nextLine();
-    }
 }

@@ -15,6 +15,9 @@ public abstract class Building {
     }
 
     public String getName () {return this.name;}
+
+    public boolean isResidential() { return false; }
+
     
     public abstract void enter(Sim sim);
     

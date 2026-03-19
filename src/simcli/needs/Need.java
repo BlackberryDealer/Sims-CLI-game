@@ -6,16 +6,18 @@ package simcli.needs;
 public abstract class Need {
     private String name;
     private int value;
+    private final int baseDecayRate;
     public static final int MAX_VALUE = 100;
 
-    public Need(String name) {
+    public Need(String name, int baseDecayRate) {
         this.name = name;
+        this.baseDecayRate = baseDecayRate;
         this.value = MAX_VALUE;
     }
 
-    public abstract void decay();
-
-    public abstract void decay(double multiplier);
+    public void decay(double multiplier) {
+        this.decrease((int) Math.round(baseDecayRate * multiplier));
+    }
 
     public void increase(int amount) {
         this.value = Math.min(this.value + amount, MAX_VALUE);
