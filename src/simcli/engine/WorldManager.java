@@ -43,10 +43,33 @@ public class WorldManager implements IWorldManager {
 
         this.cityMap.add(home);
 
+        // Build the Bungalow — purchasable for $5000 (proposal Slide 7)
+        Residential bungalow = new Residential("The Bungalow", 5000);
+
+        Room livingRoom = new Room("Living Room", 120);
+        livingRoom.placeFurniture(new Bed(), 30);
+        livingRoom.placeFurniture(new Fridge(), 25);
+        bungalow.addRoom(livingRoom);
+
+        Room study = new Room("Study", 80);
+        study.placeFurniture(new Computer(), 20);
+        bungalow.addRoom(study);
+
+        Room bungalowBath = new Room("Ensuite Bathroom", 40);
+        bungalowBath.placeFurniture(new Shower(), 10);
+        bungalow.addRoom(bungalowBath);
+
+        this.cityMap.add(bungalow);
+
         // Build Supermarket
         Commercial store = new Commercial("Town Supermarket");
         store.addInteractable(new GroceryShelf());
         this.cityMap.add(store);
+
+        // Build Bookshop (proposal Slide 7 — different interactables from Supermarket)
+        Commercial bookshop = new Commercial("The Bookshop");
+        bookshop.addInteractable(new BookshopShelf());
+        this.cityMap.add(bookshop);
 
         Park park = new Park("City Park");
         this.cityMap.add(park);

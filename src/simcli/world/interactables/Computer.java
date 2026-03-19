@@ -10,6 +10,10 @@ import simcli.entities.Trait;
 public class Computer implements Interactable {
     @Override
     public void interact(Sim sim, java.util.Scanner scanner, simcli.engine.TimeManager timeManager) throws SimulationException {
+        // Slide 5: TIRED state blocks studying
+        if (sim.getState() == simcli.entities.SimState.TIRED) {
+            throw new SimulationException(sim.getName() + " is too tired to study! Get some sleep first.");
+        }
         if (sim.getEnergy().getValue() < 15) {
             throw new SimulationException(sim.getName() + " is too exhausted to focus on algorithms and time complexity.");
         }

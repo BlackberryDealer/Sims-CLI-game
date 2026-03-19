@@ -7,10 +7,21 @@ import java.util.List;
 
 public class Residential extends Building {
     private List<Room> rooms;
+    private int purchasePrice;
+    private boolean isOwned;
 
     public Residential(String name) {
         super(name);
         this.rooms = new ArrayList<>();
+        this.purchasePrice = 0;
+        this.isOwned = true; // Free residential — owned by default
+    }
+
+    public Residential(String name, int purchasePrice) {
+        super(name);
+        this.rooms = new ArrayList<>();
+        this.purchasePrice = purchasePrice;
+        this.isOwned = false; // Must be purchased
     }
 
     public void addRoom(Room r) {
@@ -19,6 +30,18 @@ public class Residential extends Building {
 
     public List<Room> getRooms() {
         return rooms;
+    }
+
+    public int getPurchasePrice() { return purchasePrice; }
+    public boolean isOwned() { return isOwned; }
+
+    public boolean purchase(Sim sim) {
+        if (sim.getMoney() >= purchasePrice) {
+            sim.setMoney(sim.getMoney() - purchasePrice);
+            this.isOwned = true;
+            return true;
+        }
+        return false;
     }
 
     @Override

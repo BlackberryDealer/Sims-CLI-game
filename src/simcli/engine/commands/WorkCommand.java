@@ -32,6 +32,16 @@ public class WorkCommand implements ICommand {
             return CommandResult.NO_TICK;
         }
 
+        // Slide 5: HUNGRY state restricts work
+        if (activePlayer.getState() == simcli.entities.SimState.HUNGRY
+                || activePlayer.getState() == simcli.entities.SimState.STARVING
+                || activePlayer.getState() == simcli.entities.SimState.CRITICAL) {
+            SimulationLogger.logWarning(activePlayer.getName() + " is too hungry to focus on work! Eat something first.");
+            SimulationLogger.prompt("\nPress ENTER to return...");
+            scanner.nextLine();
+            return CommandResult.NO_TICK;
+        }
+
         // Check for overwork warning
         if (activePlayer.getShiftsWorkedToday() >= 1 && !activePlayer.hasWarnedAboutOverwork()) {
             SimulationLogger.logWarning("Working multiple shifts in a single day drains stats significantly faster!");

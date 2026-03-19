@@ -32,6 +32,22 @@ public class NeedsTracker {
         this.hygiene.decay(ageMultiplier);
         this.fun.decay(ageMultiplier);
         this.social.decay(ageMultiplier);
+
+        // Slide 6: Need cross-penalties
+        if (this.hygiene.getValue() <= 10) {
+            // Hygiene ≤ 10 → Social penalty (people avoid the Sim)
+            this.social.decrease(5);
+        }
+        if (this.fun.getValue() <= 15) {
+            // Fun ≤ 15 → Mood decreases (drains energy faster)
+            this.energy.decrease(3);
+        }
+        if (this.social.getValue() <= 10) {
+            // Social ≤ 10 → Isolation penalty (loneliness drains fun and energy)
+            this.fun.decrease(3);
+            this.energy.decrease(2);
+        }
+
         this.updateState();
 
         SimulationLogger.log("[" + simName + "] Hunger: " + this.hunger.getValue() +

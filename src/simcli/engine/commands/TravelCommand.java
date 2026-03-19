@@ -6,6 +6,7 @@ import simcli.entities.Sim;
 import simcli.ui.AsciiArt;
 import simcli.ui.UIManager;
 import simcli.world.Building;
+import simcli.world.Residential;
 
 import java.util.List;
 import java.util.Scanner;
@@ -28,7 +29,16 @@ public class TravelCommand extends BaseCommand {
         List<Building> cityMap = worldManager.getCityMap();
         UIManager.printMessage("\nAvailable Locations:");
         for (int i = 0; i < cityMap.size(); i++) {
-            UIManager.printMessage("[" + (i + 1) + "] " + cityMap.get(i).getName());
+            Building b = cityMap.get(i);
+            String label = b.getName();
+            // Show "FOR SALE" tag for unowned residential properties
+            if (b instanceof Residential) {
+                Residential res = (Residential) b;
+                if (!res.isOwned()) {
+                    label += " [FOR SALE - $" + res.getPurchasePrice() + "]";
+                }
+            }
+            UIManager.printMessage("[" + (i + 1) + "] " + label);
         }
         UIManager.printMessage("[0] Cancel");
         UIManager.prompt("Select destination> ");
@@ -43,12 +53,36 @@ public class TravelCommand extends BaseCommand {
                     UIManager.printMessage("You are already at " + target.getName() + "!");
                     pause(scanner);
                     return CommandResult.NO_TICK;
-                } else {
-                    worldManager.setCurrentLocation(target);
-                    AsciiArt.printTravelAnimation();
-                    target.enter(activePlayer);
-                    return CommandResult.TICK_FORWARD;
                 }
+
+                // Check if target is an unowned residential — prompt to purchase
+                if (target instanceof Residential) {
+                    Residential res = (Residential) target;
+                    if (!res.isOwned()) {
+                        UIManager.printMessage("\n'" + res.getName() + "' is for sale at $"
+                                + res.getPurchasePrice() + ". You have $" + activePlayer.getMoney() + ".");
+                        UIManager.prompt("Would you like to buy it? (Y/N)> ");
+                        String answer = scanner.nextLine().trim();
+                        if (answer.equalsIgnoreCase("Y")) {
+                            if (res.purchase(activePlayer)) {
+                                UIManager.printMessage("\n*** CONGRATULATIONS! You purchased " + res.getName() + "! ***");
+                            } else {
+                                UIManager.printMessage("Not enough money! You need $" + res.getPurchasePrice() + ".");
+                                pause(scanner);
+                                return CommandResult.NO_TICK;
+                            }
+                        } else {
+                            UIManager.printMessage("Maybe next time.");
+                            pause(scanner);
+                            return CommandResult.NO_TICK;
+                        }
+                    }
+                }
+
+                worldManager.setCurrentLocation(target);
+                AsciiArt.printTravelAnimation();
+                target.enter(activePlayer);
+                return CommandResult.TICK_FORWARD;
             } else {
                 UIManager.printMessage("Invalid destination.");
                 pause(scanner);
@@ -60,5 +94,4 @@ public class TravelCommand extends BaseCommand {
             return CommandResult.NO_TICK;
         }
     }
-
 }

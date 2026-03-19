@@ -7,6 +7,11 @@ public class WeightBench implements Interactable {
     @Override
     public void interact(Sim sim, java.util.Scanner scanner, simcli.engine.TimeManager timeManager)
             throws SimulationException {
+        // Slide 5: TIRED state blocks exercise
+        if (sim.getState() == simcli.entities.SimState.TIRED) {
+            throw new SimulationException(
+                    sim.getName() + " is too tired to exercise! Get some sleep first.");
+        }
         if (sim.getHunger().getValue() < 30) {
             throw new SimulationException(
                     sim.getName() + " lacks the energy for a hypertrophy strength training session.");
