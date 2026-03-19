@@ -1,16 +1,15 @@
 package simcli.world.interactables;
 
 import simcli.engine.SimulationException;
+import simcli.engine.SimulationLogger;
+import simcli.entities.ActionState;
 import simcli.entities.NPCSim;
 import simcli.entities.Sim;
+import simcli.entities.SkillType;
 
 import java.util.List;
 import java.util.Scanner;
 
-/**
- * Interactable placed inside a Park that allows the player to socialize with NPCs.
- * Extracted from the anonymous inner class that was previously in Park.java.
- */
 public class ParkBench implements Interactable {
     private final List<NPCSim> visitors;
 
@@ -20,31 +19,50 @@ public class ParkBench implements Interactable {
 
     @Override
     public void interact(Sim sim, Scanner scanner, simcli.engine.TimeManager timeManager) throws SimulationException {
-        sim.setCurrentAction(simcli.entities.ActionState.SOCIALIZING);
-        simcli.ui.UIManager.displayActionAnimation(sim);
+        sim.setCurrentAction(ActionState.SOCIALIZING);
+        SimulationLogger.logAnimation(sim);
 
-        simcli.ui.UIManager.printMessage("\n=== Socialize at the Park ===");
+        SimulationLogger.prompt("\n=== Socialize at the Park ===\n");
         for (int i = 0; i < visitors.size(); i++) {
             NPCSim npc = visitors.get(i);
-            simcli.ui.UIManager.printMessage("[" + (i + 1) + "] Talk to " + npc.getName()
-                    + " (Relationship: " + npc.getRelationshipScore() + ")");
+            SimulationLogger.prompt("[" + (i + 1) + "] Talk to " + npc.getName()
+                    + " (Relationship: " + npc.getRelationshipScore() + ")\n");
         }
-        simcli.ui.UIManager.printMessage("[0] Go back");
-        simcli.ui.UIManager.prompt("Select person> ");
+        SimulationLogger.prompt("[0] Go back\nSelect person> ");
         try {
             int choice = Integer.parseInt(scanner.nextLine().trim());
             if (choice > 0 && choice <= visitors.size()) {
                 NPCSim target = visitors.get(choice - 1);
-                simcli.ui.UIManager.printMessage(
-                        sim.getName() + " talks to " + target.getName() + ". They seem to enjoy the chat!");
-                target.increaseRelationship(5);
-                sim.getHappiness().increase(15);
-                sim.getEnergy().decrease(10);
-                simcli.ui.UIManager.printMessage(
-                        "Relationship with " + target.getName() + " is now " + target.getRelationshipScore() + ".");
+                
+                SimulationLogger.prompt("\n[1] Chat\n[2] Joke\n[3] Argue\nSelect action> ");
+                int actionChoice = Integer.parseInt(scanner.nextLine().trim());
+                
+                if (actionChoice == 1) {
+                    SimulationLogger.log(sim.getName() + " chats politely with " + target.getName() + ".");
+                    target.increaseRelationship(5);
+                    sim.getHappiness().increase(10);
+                    sim.getEnergy().decrease(5);
+                    sim.getSkillManager().addSkillExperience(SkillType.CHARISMA, 5, sim.getName(), false);
+                } else if (actionChoice == 2) {
+                    SimulationLogger.log(sim.getName() + " tells a funny joke to " + target.getName() + "!");
+                    target.increaseRelationship(10);
+                    sim.getHappiness().increase(15);
+                    sim.getEnergy().decrease(10);
+                    sim.getSkillManager().addSkillExperience(SkillType.CHARISMA, 10, sim.getName(), false);
+                } else if (actionChoice == 3) {
+                    SimulationLogger.log(sim.getName() + " argues bitterly with " + target.getName() + ".");
+                    target.increaseRelationship(-15);
+                    sim.getHappiness().decrease(10);
+                    sim.getEnergy().decrease(15);
+                } else {
+                    SimulationLogger.logWarning("Invalid action selection.");
+                    return;
+                }
+                
+                SimulationLogger.log("Relationship with " + target.getName() + " is now " + target.getRelationshipScore() + ".");
             }
         } catch (NumberFormatException e) {
-            simcli.ui.UIManager.printMessage("Invalid selection.");
+            SimulationLogger.logWarning("Invalid selection.");
         }
     }
 

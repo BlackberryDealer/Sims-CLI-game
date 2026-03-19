@@ -164,6 +164,7 @@ public class GameEngine {
             }
 
             renderer.renderActions(items, this.worldManager.getCurrentLocation() instanceof simcli.world.Residential);
+            simcli.engine.SimulationLogger.flushAndPrint();
             simcli.ui.UIManager.prompt("\nCOMMAND> ");
 
             int previousDay = timeManager.getCurrentDay();
@@ -208,6 +209,7 @@ public class GameEngine {
 
             if (running && tickForward) {
                 timeManager.advanceTick();
+                simcli.engine.RandomEventManager.trigger(activePlayer, timeManager);
 
                 if (timeManager.getCurrentDay() > previousDay) {
                     simcli.ui.UIManager

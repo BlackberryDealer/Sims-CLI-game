@@ -1,21 +1,17 @@
 package simcli.entities;
 
 import simcli.engine.SimulationException;
+import simcli.engine.SimulationLogger;
 import simcli.entities.lifecycle.LifeStage;
 import simcli.entities.lifecycle.AdultStage;
 import simcli.entities.lifecycle.ChildStage;
-
 import simcli.needs.Need;
-import simcli.needs.Hunger;
-import simcli.needs.Energy;
-import simcli.needs.Hygiene;
-import simcli.needs.Happiness;
 import simcli.world.Room;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
 
 public class Sim implements ISimBehaviour {
 
@@ -23,26 +19,17 @@ public class Sim implements ISimBehaviour {
     private int age;
     private Gender gender;
     private int money;
-    private Need hunger;
-    private Need energy;
-    private Need hygiene;
-    private Need happiness;
-    private int inventoryCapacity;
-    private SimState state;
-    private List<Item> inventory;
-    private int starvingTicks;
+    private ActionState currentAction;
     private Room currentRoom;
     private int daysAlive;
-    private ActionState currentAction;
-
     private LifeStage currentStage;
 
-    // Career tracking
-    private Job career;
-    private int jobTier;
-    private int consecutiveDaysMissed;
-    private int shiftsWorkedToday;
-    private boolean hasWarnedAboutOverwork;
+    // Component Managers
+    private NeedsTracker needsTracker;
+    private CareerProfile careerProfile;
+    private InventoryManager inventoryManager;
+    private SkillManager skillManager;
+    private List<Trait> traits;
 
     // Social Mechanics
     private Map<Sim, Integer> relationships;
@@ -57,26 +44,19 @@ public class Sim implements ISimBehaviour {
         this.age = age;
         this.gender = gender;
         this.money = 500;
-        this.hunger = new Hunger();
-        this.energy = new Energy();
-        this.hygiene = new Hygiene();
-        this.happiness = new Happiness();
-        this.inventoryCapacity = 10;
-        this.state = SimState.HEALTHY;
-        this.inventory = new ArrayList<>();
-        this.starvingTicks = 0;
         this.daysAlive = 0;
         this.currentAction = ActionState.IDLE;
 
-        this.career = Job.UNEMPLOYED;
-        this.jobTier = 1;
-        this.consecutiveDaysMissed = 0;
-        this.shiftsWorkedToday = 0;
-        this.hasWarnedAboutOverwork = false;
+        this.needsTracker = new NeedsTracker();
+        this.careerProfile = new CareerProfile();
+        this.inventoryManager = new InventoryManager(10);
+        this.skillManager = new SkillManager();
+        this.traits = new ArrayList<>();
+        Trait[] allTraits = Trait.values();
+        this.traits.add(allTraits[(int)(Math.random() * allTraits.length)]);
 
         this.relationships = new HashMap<>();
         this.spouse = null;
-
         this.totalMoneyEarned = money;
         this.totalItemsBought = 0;
 
@@ -89,122 +69,69 @@ public class Sim implements ISimBehaviour {
 
     public Sim(String name, int age, Gender gender, Job career) {
         this(name, age, gender);
-        this.career = career;
+        this.careerProfile.setCareer(career);
     }
 
-    public String getName() {
-        return name;
-    }
+    // --- Property Getters ---
+    public String getName() { return name; }
+    public int getAge() { return age; }
+    public Gender getGender() { return gender; }
+    public int getMoney() { return money; }
+    public void setMoney(int money) { this.money = money; }
+    public SkillManager getSkillManager() { return skillManager; }
+    public List<Trait> getTraits() { return traits; }
+    public boolean hasTrait(Trait t) { return traits.contains(t); }
+    
+    // --- Delegate Getters for Exterior Compatibility ---
+    public Need getHunger() { return needsTracker.getHunger(); }
+    public Need getEnergy() { return needsTracker.getEnergy(); }
+    public Need getHygiene() { return needsTracker.getHygiene(); }
+    public Need getHappiness() { return needsTracker.getHappiness(); }
+    public SimState getState() { return needsTracker.getState(); }
+    public void updateState() { needsTracker.updateState(); }
+    public int getStarvingTicks() { return needsTracker.getStarvingTicks(); }
+    public void setStarvingTicks(int ticks) { needsTracker.setStarvingTicks(ticks); }
+    
+    public Job getCareer() { return careerProfile.getCareer(); }
+    public int getJobTier() { return careerProfile.getJobTier(); }
+    public int getShiftsWorkedToday() { return careerProfile.getShiftsWorkedToday(); }
+    public void incrementShiftsWorkedToday() { careerProfile.incrementShiftsWorkedToday(); }
+    public void resetConsecutiveDaysMissed() { careerProfile.setConsecutiveDaysMissed(0); }
+    public boolean hasWarnedAboutOverwork() { return careerProfile.hasWarnedAboutOverwork(); }
+    public void setWarnedAboutOverwork(boolean warned) { careerProfile.setWarnedAboutOverwork(warned); }
 
-    public int getAge() {
-        return age;
-    }
+    public int getInventoryCapacity() { return inventoryManager.getCapacity(); }
+    public void setInventoryCapacity(int capacity) { inventoryManager.setCapacity(capacity); }
+    public List<Item> getInventory() { return inventoryManager.getItems(); }
+    public void addItem(Item item) { inventoryManager.addItem(item); }
 
-    public Gender getGender() {
-        return gender;
-    }
+    public Room getCurrentRoom() { return currentRoom; }
+    public void setCurrentRoom(Room room) { this.currentRoom = room; }
+    public ActionState getCurrentAction() { return currentAction; }
+    public void setCurrentAction(ActionState action) { this.currentAction = action; }
 
-    public int getMoney() {
-        return money;
-    }
+    public Map<Sim, Integer> getRelationships() { return relationships; }
+    public Sim getSpouse() { return spouse; }
 
-    public void setMoney(int money) {
-        this.money = money;
-    }
-
-    public Need getHunger() {
-        return hunger;
-    }
-
-    public Need getEnergy() {
-        return energy;
-    }
-
-    public SimState getState() {
-        return state;
-    }
-
-    public Need getHygiene() {
-        return hygiene;
-    }
-
-    public Need getHappiness() {
-        return happiness;
-    }
-
-    public int getInventoryCapacity() {
-        return inventoryCapacity;
-    }
-
-    public void setInventoryCapacity(int capacity) {
-        this.inventoryCapacity = capacity;
-    }
-
-    public Room getCurrentRoom() {
-        return currentRoom;
-    }
-
-    public void setCurrentRoom(Room room) {
-        this.currentRoom = room;
-    }
-
-    public Job getCareer() {
-        return career;
-    }
-
-    public int getJobTier() {
-        return jobTier;
-    }
-
-    public ActionState getCurrentAction() {
-        return currentAction;
-    }
-
-    public void setCurrentAction(ActionState action) {
-        this.currentAction = action;
-    }
-
-    public int getShiftsWorkedToday() {
-        return shiftsWorkedToday;
-    }
-
-    public boolean hasWarnedAboutOverwork() {
-        return hasWarnedAboutOverwork;
-    }
-
-    public void setWarnedAboutOverwork(boolean warned) {
-        this.hasWarnedAboutOverwork = warned;
-    }
-
-    public Map<Sim, Integer> getRelationships() {
-        return relationships;
-    }
-
-    public Sim getSpouse() {
-        return spouse;
-    }
-
+    // --- Social Logic ---
     public void interactSocially(Sim otherSim) {
-        if (otherSim == this)
-            return;
+        if (otherSim == this) return;
         relationships.putIfAbsent(otherSim, 0);
-        int currentRelationship = relationships.get(otherSim);
-        relationships.put(otherSim, currentRelationship + 10);
+        relationships.put(otherSim, relationships.get(otherSim) + 10);
         this.currentAction = ActionState.SOCIALIZING;
-        simcli.ui.UIManager.printMessage(this.name + " socializes with " + otherSim.getName() + ".");
-        this.energy.decrease(10);
-        this.happiness.increase(10);
+        
+        SimulationLogger.log(this.name + " socializes with " + otherSim.getName() + ".");
+        this.getEnergy().decrease(10);
+        this.getHappiness().increase(10);
     }
 
     public boolean marry(Sim otherSim) {
-        if (otherSim == this)
-            return false;
+        if (otherSim == this) return false;
         relationships.putIfAbsent(otherSim, 0);
         if (relationships.get(otherSim) >= 50 && this.spouse == null && otherSim.getSpouse() == null) {
             this.spouse = otherSim;
             otherSim.spouse = this;
-            simcli.ui.UIManager.printMessage(
-                    "\n*** WEDDING BELLS! " + this.name + " and " + otherSim.getName() + " are now married! ***");
+            SimulationLogger.log("\n*** WEDDING BELLS! " + this.name + " and " + otherSim.getName() + " are now married! ***");
             return true;
         }
         return false;
@@ -215,209 +142,56 @@ public class Sim implements ISimBehaviour {
             throw new SimulationException(this.name + " is not married and cannot reproduce.");
         }
         if (this.gender == this.spouse.getGender()) {
-            throw new SimulationException(this.name + " and " + this.spouse.getName()
-                    + " are of the same gender and cannot reproduce biologically.");
+            throw new SimulationException(this.name + " and " + this.spouse.getName() + " are of the same gender and cannot reproduce biologically.");
         }
-        // Success
-        simcli.ui.UIManager.printMessage(
-                "\n*** NEW LIFE! " + this.name + " and " + this.spouse.getName() + " have had a baby! ***");
-        Sim childObj = new Sim("Baby", 0, Math.random() < 0.5 ? Gender.MALE : Gender.FEMALE);
-        // The GameEngine / WorldManager would normally add this child to the household.
-        // For now we return it.
-        return childObj;
+        SimulationLogger.log("\n*** NEW LIFE! " + this.name + " and " + this.spouse.getName() + " have had a baby! ***");
+        return new Sim("Baby", 0, Math.random() < 0.5 ? Gender.MALE : Gender.FEMALE);
     }
 
-    @Override
-    public void performActivity(String activityType) throws SimulationException {
-        if (this.state == SimState.DEAD || this.state == SimState.CRITICAL) {
-            throw new SimulationException(this.name + " is in critical condition and refuses to act.");
-        }
-
-        if (activityType.equalsIgnoreCase("Work")) {
-            if (!canWork()) {
-                simcli.ui.UIManager.printMessage(
-                        this.name + " is in the " + this.getCurrentStageName() + " stage and cannot work!");
-                return;
-            }
-            if (this.career == Job.UNEMPLOYED) {
-                simcli.ui.UIManager.printMessage(this.name + " is unemployed and cannot work!");
-                return;
-            }
-            this.currentAction = ActionState.WORKING;
-            simcli.ui.UIManager.displayActionAnimation(this);
-
-            int dailyPay = this.career.getSalaryAtTier(this.jobTier);
-            simcli.ui.UIManager.printMessage(
-                    this.name + " works a shift as a " + this.career.getTitle() + " and earns $" + dailyPay + "!");
-
-            int multiplier = 1 + this.shiftsWorkedToday;
-            if (multiplier > 1) {
-                simcli.ui.UIManager.printMessage(this.name + " feels the heavy strain of overworking!");
-            }
-            this.energy.decrease(this.career.getEnergyDrain() * multiplier);
-            this.hunger.decrease(20 * multiplier);
-            this.hygiene.decrease(30 * multiplier);
-
-            this.setMoney(this.getMoney() + dailyPay);
-            this.addTotalMoneyEarned(dailyPay);
-            this.consecutiveDaysMissed = 0;
-            this.shiftsWorkedToday++;
-        } else if (activityType.equalsIgnoreCase("Study")) {
-            this.currentAction = ActionState.STUDYING;
-            simcli.ui.UIManager.displayActionAnimation(this);
-            simcli.ui.UIManager.printMessage(this.name + " sits down to study.");
-            this.energy.decrease(15);
-            this.hunger.decrease(10);
-            this.happiness.increase(5);
-        } else if (activityType.equalsIgnoreCase("Play")) {
-            this.currentAction = ActionState.PLAYING;
-            simcli.ui.UIManager.displayActionAnimation(this);
-            simcli.ui.UIManager.printMessage(this.name + " goes out to play!");
-            this.energy.decrease(25);
-            this.hunger.decrease(20);
-            this.hygiene.decrease(30);
-            this.happiness.increase(20);
-        } else {
-            this.currentAction = ActionState.IDLE;
-            simcli.ui.UIManager.printMessage(this.name + " is idling.");
-        }
-    }
-
-    public void checkTruancy() {
-        if (this.career == Job.UNEMPLOYED)
-            return;
-        this.consecutiveDaysMissed++;
-        if (this.consecutiveDaysMissed > 3) {
-            simcli.ui.UIManager.printWarning("Oh no! " + this.name + " missed too many days of work and was fired from "
-                    + this.career.getTitle() + ".");
-            this.career = Job.UNEMPLOYED;
-            this.jobTier = 1;
-            this.consecutiveDaysMissed = 0;
-            this.shiftsWorkedToday = 0;
-        } else if (this.consecutiveDaysMissed > 0) {
-            simcli.ui.UIManager
-                    .printWarning(this.name + " missed work! Consecutive days missed: " + this.consecutiveDaysMissed);
-        }
-    }
-
-    public void promote() {
-        if (this.career == Job.UNEMPLOYED)
-            return;
-        if (this.jobTier < this.career.getMaxTier()) {
-            this.jobTier++;
-            simcli.ui.UIManager.printMessage("\n*** PROMOTION! " + this.name + " has been promoted to tier "
-                    + this.jobTier + " in " + this.career.getTitle() + "! ***");
-        }
-    }
-
-    public void changeJob(Job newJob) {
-        this.career = newJob;
-        this.jobTier = 1;
-        this.consecutiveDaysMissed = 0;
-        this.shiftsWorkedToday = 0;
-        simcli.ui.UIManager.printMessage(this.name + " has started a new job as a " + newJob.getTitle() + ".");
-    }
+    // --- Activity Logic ---
+    public void checkTruancy() { careerProfile.checkTruancy(this.name); }
+    public void promote() { careerProfile.promote(this.name); }
+    public void changeJob(Job newJob) { careerProfile.changeJob(newJob, this.name); }
 
     public void tick() {
-        if (this.state == SimState.DEAD)
-            return;
-
         double ageMultiplier = 1.0 + (Math.max(0, this.age - 18) * 0.05);
         double stageEnergyModifier = (this.currentStage != null) ? this.currentStage.getEnergyDecayModifier() : 1.0;
-
-        this.hunger.decay(ageMultiplier);
-        this.energy.decay(ageMultiplier * stageEnergyModifier);
-        this.hygiene.decay(ageMultiplier);
-        this.happiness.decay(ageMultiplier);
-        this.updateState();
-
-        simcli.ui.UIManager.printMessage("[" + this.name + "] Hunger: " + this.hunger.getValue() +
-                " | Energy: " + this.energy.getValue() +
-                " | Hygiene: " + this.hygiene.getValue() +
-                " | Happiness: " + this.happiness.getValue() +
-                " | Cash: $" + this.money + " | Status: " + this.state);
-    }
-
-    public void updateState() {
-        if (this.hunger.getValue() <= 0) {
-            this.state = SimState.STARVING;
-            this.starvingTicks++;
-            if (this.starvingTicks > 3)
-                this.state = SimState.DEAD;
-        } else {
-            this.starvingTicks = 0;
-            if (this.hunger.getValue() <= 20)
-                this.state = SimState.HUNGRY;
-            else if (this.energy.getValue() <= 20)
-                this.state = SimState.TIRED;
-            else
-                this.state = SimState.HEALTHY;
-        }
-    }
-
-    public List<Item> getInventory() {
-        return inventory;
-    }
-
-    public void addItem(Item item) {
-        this.inventory.add(item);
-    }
-
-    public int getStarvingTicks() {
-        return starvingTicks;
-    }
-
-    public void setStarvingTicks(int ticks) {
-        this.starvingTicks = ticks;
+        double traitEnergyMod = 1.0;
+        for(Trait t : traits) { traitEnergyMod *= t.getEnergyDecayModifier(); }
+        needsTracker.tick(ageMultiplier, stageEnergyModifier * traitEnergyMod, this.name, this.money);
     }
 
     public void growOlderDaily() {
         this.daysAlive++;
-        this.shiftsWorkedToday = 0;
-        this.hasWarnedAboutOverwork = false;
+        careerProfile.resetDaily(true);
 
         if (this.daysAlive % 3 == 0) {
-            this.ageUp(); // Delegate the actual birthday and brain swap logic to ageUp()
+            this.ageUp();
             if (this.age >= 81) {
-                this.state = SimState.DEAD;
-                simcli.ui.UIManager.printMessage(
-                        "\n*** TRAGEDY! " + this.name + " has passed away of old age at " + this.age + ". ***");
-            } else if (this.age >= 65 && this.career != Job.UNEMPLOYED) {
-                simcli.ui.UIManager.printMessage("\n*** RETIREMENT! " + this.name
-                        + " has reached the retirement age of 65 and is officially retired. ***");
+                needsTracker.setState(SimState.DEAD);
+                SimulationLogger.log("\n*** TRAGEDY! " + this.name + " has passed away of old age at " + this.age + ". ***");
+            } else if (this.age >= 65 && this.getCareer() != Job.UNEMPLOYED) {
+                SimulationLogger.log("\n*** RETIREMENT! " + this.name + " has reached the retirement age of 65 and is officially retired. ***");
                 this.changeJob(Job.UNEMPLOYED);
                 this.setMoney(this.getMoney() + 1000);
             }
         }
     }
 
-    protected void setLifeStage(LifeStage stage) {
-        this.currentStage = stage;
-    }
-
-    public LifeStage getLifeStage() {
-        return this.currentStage;
-    }
-
-    public boolean canWork() {
-        return (this.currentStage != null) && this.currentStage.canWork();
-    }
-
-    public String getCurrentStageName() {
-        return (this.currentStage != null) ? this.currentStage.getStageName() : "Unknown";
-    }
+    protected void setLifeStage(LifeStage stage) { this.currentStage = stage; }
+    public LifeStage getLifeStage() { return this.currentStage; }
+    public boolean canWork() { return (this.currentStage != null) && this.currentStage.canWork(); }
+    public String getCurrentStageName() { return (this.currentStage != null) ? this.currentStage.getStageName() : "Unknown"; }
 
     public void ageUp() {
         this.age++;
         if (this.currentStage == null) {
-            simcli.ui.UIManager
-                    .printMessage("[" + this.name + "] Birthday! Age: " + this.age + " (no life stage assigned yet).");
+            SimulationLogger.log("[" + this.name + "] Birthday! Age: " + this.age + " (no life stage assigned yet).");
             return;
         }
-
         LifeStage nextStage = this.currentStage.getNextStage(this.age);
         if (nextStage != this.currentStage) {
-            simcli.ui.UIManager.printMessage(
+            SimulationLogger.log(
                     "\n*** LIFE STAGE TRANSITION ***"
                             + "\n    Sim   : " + this.name
                             + "\n    Age   : " + this.age
@@ -426,24 +200,12 @@ public class Sim implements ISimBehaviour {
                             + "\n*****************************");
             this.currentStage = nextStage;
         } else {
-            simcli.ui.UIManager
-                    .printMessage("\n*** BIRTHDAY! " + this.name + " has aged up to " + this.age + " years old! ***");
+            SimulationLogger.log("\n*** BIRTHDAY! " + this.name + " has aged up to " + this.age + " years old! ***");
         }
     }
 
-    public int getTotalMoneyEarned() {
-        return totalMoneyEarned;
-    }
-
-    public void addTotalMoneyEarned(int amount) {
-        this.totalMoneyEarned += amount;
-    }
-
-    public int getTotalItemsBought() {
-        return totalItemsBought;
-    }
-
-    public void addTotalItemsBought(int amount) {
-        this.totalItemsBought += amount;
-    }
+    public int getTotalMoneyEarned() { return totalMoneyEarned; }
+    public void addTotalMoneyEarned(int amount) { this.totalMoneyEarned += amount; }
+    public int getTotalItemsBought() { return totalItemsBought; }
+    public void addTotalItemsBought(int amount) { this.totalItemsBought += amount; }
 }
