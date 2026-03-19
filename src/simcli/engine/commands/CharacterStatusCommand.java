@@ -23,6 +23,7 @@ public class CharacterStatusCommand extends BaseCommand {
         UIManager.printMessage("\n=== CHARACTER STATUS ===");
         UIManager.printMessage("Name: " + activePlayer.getName());
         UIManager.printMessage("Age: " + activePlayer.getAge());
+        UIManager.printMessage("Traits: " + activePlayer.getTraits());
         UIManager.printMessage("Money: $" + activePlayer.getMoney());
         if (activePlayer.canWork()) {
             UIManager.printMessage("Current Job Status: " + activePlayer.getCareer().getTitle());
