@@ -103,10 +103,12 @@ public class GameEngine {
                 }
             } else {
                 simcli.ui.UIManager.printMessage(
-                        "[" + activePlayer.getName() + "] Hunger: " + activePlayer.getHunger().getValue() +
+                        "[" + activePlayer.getName() + "] Health: " + activePlayer.getHealth() + "%" +
+                                " | Hunger: " + activePlayer.getHunger().getValue() +
                                 " | Energy: " + activePlayer.getEnergy().getValue() +
                                 " | Hygiene: " + activePlayer.getHygiene().getValue() +
                                 " | Fun: " + activePlayer.getFun().getValue() +
+                                " | Social: " + activePlayer.getSocial().getValue() +
                                 " | Cash: $" + activePlayer.getMoney() + " | Status: " + activePlayer.getState());
             }
 
