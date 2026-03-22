@@ -78,14 +78,20 @@ public class MainMenu {
         UIManager.printMessage("\n=== Character Creation ===");
         UIManager.prompt("Enter your Sim's Name: ");
         String name = scanner.nextLine().trim();
-        if (name.isEmpty()) name = "Dylan";
+        if (name.isEmpty()) {
+            name = "Dylan";
+            UIManager.printMessage("Sim's name set to Dylan.");
+        }
 
         int age = 21;
         while (true) {
             UIManager.prompt("Enter your Sim's Age (18-80): ");
             try {
                 String inputAge = scanner.nextLine().trim();
-                if (inputAge.isEmpty()) break;
+                if (inputAge.isEmpty()) {
+                    UIManager.printMessage("Sim's age set to 21 years old.");
+                    break;
+                }
                 int parsedAge = Integer.parseInt(inputAge);
                 if (parsedAge >= 18 && parsedAge <= 80) {
                     age = parsedAge;
