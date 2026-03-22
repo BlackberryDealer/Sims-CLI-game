@@ -36,10 +36,22 @@ public class JobMarketCommand extends BaseCommand {
                 if (jChoice == -1) {
                     // Do nothing
                 } else if (jChoice == 0) {
-                    activePlayer.changeJob(Job.UNEMPLOYED);
+                    Job targetJob = allJobs[jChoice];
+                    if (targetJob == activePlayer.getCareer()) {
+                        UIManager.printMessage("You are already unemployed.");
+                        pause(scanner);
+                    } else {
+                        activePlayer.changeJob(Job.UNEMPLOYED);
+                    }
                 } else if (jChoice > 0 && jChoice < allJobs.length) {
                     Job targetJob = allJobs[jChoice];
-                    if (activePlayer.getAge() >= targetJob.getMinAge() && activePlayer.getAge() <= targetJob.getMaxAge()) {
+
+                    // Do not allow Sim to reapply for the same job
+                    if (targetJob == activePlayer.getCareer()) {
+                        UIManager.printMessage("You already have this job.");
+                        pause(scanner);
+                    } else if (activePlayer.getAge() >= targetJob.getMinAge()
+                            && activePlayer.getAge() <= targetJob.getMaxAge()) {
                         activePlayer.changeJob(targetJob);
                     } else {
                         UIManager.printMessage("You don't meet the age requirements for this job.");
