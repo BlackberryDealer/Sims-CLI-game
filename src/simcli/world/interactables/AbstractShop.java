@@ -39,6 +39,7 @@ public abstract class AbstractShop implements Interactable {
                 sim.addTotalItemsBought(1);
                 sim.getInventory().add(item.copyItem());
                 UIManager.printMessage("Purchased " + item.getObjectName() + " for $" + item.getPrice() + "!");
+                UIManager.printMessage("You are now left with $" + sim.getMoney() + "!");
             } else {
                 UIManager.printMessage("Not enough money for " + item.getObjectName() + ".");
             }

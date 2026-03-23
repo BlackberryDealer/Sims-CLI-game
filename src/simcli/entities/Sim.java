@@ -193,7 +193,7 @@ public class Sim implements ISimBehaviour {
 
         if (this.daysAlive % 3 == 0) {
             this.ageUp();
-            if (this.age >= 81) {
+            if (this.age >= GameConstants.DEATH_AGE) {
                 needsTracker.setState(SimState.DEAD);
                 SimulationLogger.log("\n*** TRAGEDY! " + this.name + " has passed away of old age at " + this.age + ". ***");
             } else if (this.age >= GameConstants.ELDER_AGE && this.getCareer() != Job.UNEMPLOYED) {
