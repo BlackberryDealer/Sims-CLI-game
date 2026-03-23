@@ -9,6 +9,7 @@ import simcli.entities.lifecycle.ElderStage;
 import simcli.entities.lifecycle.ChildStage;
 import simcli.needs.Need;
 import simcli.world.Room;
+import simcli.utils.GameConstants;
 
 import java.util.HashMap;
 import java.util.List;
@@ -45,7 +46,7 @@ public class Sim implements ISimBehaviour {
         this.name = name;
         this.age = age;
         this.gender = gender;
-        this.money = 500;
+        this.money = GameConstants.STARTING_MONEY;
         this.daysAlive = 0;
         this.currentAction = ActionState.IDLE;
 
