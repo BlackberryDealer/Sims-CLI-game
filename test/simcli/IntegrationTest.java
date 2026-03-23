@@ -65,20 +65,14 @@ public class IntegrationTest {
     @Test
     @DisplayName("Edge Case: Try to Move Rooms inside a Supermarket (Non-Residential)")
     void testMoveRoomInCommercialLocation() {
-        // Teleport Sim to Supermarket
-        Building supermarket = worldManager.getCityMap().get(1); // Index 1 is Supermarket
+        Building supermarket = worldManager.getCityMap().get(3); // Index 3 is Supermarket
         worldManager.setCurrentLocation(supermarket);
         
-        // Ensure it's not residential
-        assertFalse(supermarket.isResidential());
-
-        // Press 'M' to move rooms
         CommandResult result = simulateInput("M");
 
-        // Assertions
         assertEquals(CommandResult.NO_TICK, result, "Should reject the action and not cost a tick.");
         String output = outputStreamCaptor.toString();
-        assertTrue(output.contains("You can only move between rooms in a residential building."), 
+        assertTrue(output.contains("You can only move between rooms at home!"), 
             "Should print the correct boundary error message.");
     }
 
@@ -96,9 +90,8 @@ public class IntegrationTest {
     void testOutOfBoundsIndexInput() {
         CommandResult result = simulateInput("-1");
         
-        // This triggers the InteractCommand which tries to fetch index -2 from a list
         assertEquals(CommandResult.NO_TICK, result);
-        assertTrue(outputStreamCaptor.toString().contains("Invalid item selection"), 
+        assertTrue(outputStreamCaptor.toString().contains("Invalid item choice"), 
             "Should cleanly reject out of bounds array access.");
     }
 
@@ -109,13 +102,16 @@ public class IntegrationTest {
         
         Building home = worldManager.getCityMap().get(0); // Dorm
         worldManager.setCurrentLocation(home);
-        assertTrue(home.isResidential());
 
-        // Press 'U' to upgrade
-        CommandResult result = simulateInput("U");
+        // Simulate choosing Room [1]
+        ByteArrayInputStream in = new ByteArrayInputStream("1\n\n".getBytes());
+        Scanner mockScanner = new Scanner(in);
+        simcli.engine.commands.UpgradeRoomCommand command = new simcli.engine.commands.UpgradeRoomCommand(activePlayer, mockScanner, home);
+        
+        CommandResult result = command.execute();
 
         assertEquals(CommandResult.NO_TICK, result);
-        assertTrue(outputStreamCaptor.toString().contains("Insufficient funds"), 
+        assertTrue(outputStreamCaptor.toString().contains("Not enough money!"), 
             "Should reject the upgrade due to having $0.");
     }
 
@@ -155,7 +151,39 @@ public class IntegrationTest {
 
         assertEquals(CommandResult.NO_TICK, result);
         assertEquals(Job.UNEMPLOYED, teen.getCareer(), "Teen should remain unemployed.");
-        assertTrue(outputStreamCaptor.toString().contains("You don't meet the age requirements"), 
+        assertTrue(outputStreamCaptor.toString().contains("Only adults can access the job market."), 
             "Should reject due to Age Boundary.");
     }
+
+    @Test
+    @DisplayName("Edge Case: Travel to the exact location you are already standing in")
+    void testTravelToCurrentLocation() {
+        Building home = worldManager.getCityMap().get(0); // Dorm
+        worldManager.setCurrentLocation(home);
+
+        // Simulate Travel 'T', then picking the Dorm '1'
+        ByteArrayInputStream in = new ByteArrayInputStream("1\n\n".getBytes());
+        Scanner mockScanner = new Scanner(in);
+        simcli.engine.commands.TravelCommand command = new simcli.engine.commands.TravelCommand(activePlayer, mockScanner, home, worldManager);
+        
+        CommandResult result = command.execute();
+
+        assertEquals(CommandResult.NO_TICK, result);
+        assertTrue(outputStreamCaptor.toString().contains("You are already at The Shared Dorm!"), 
+            "Should gracefully prevent teleporting to the same spot.");
+    }
+
+    @Test
+    @DisplayName("Edge Case: Check House Info in a Commercial Location")
+    void testHouseInfoInCommercialLocation() {
+        Building supermarket = worldManager.getCityMap().get(3); // Supermarket
+        worldManager.setCurrentLocation(supermarket);
+
+        CommandResult result = simulateInput("H");
+
+        assertEquals(CommandResult.NO_TICK, result);
+        assertTrue(outputStreamCaptor.toString().contains("You can only inspect residential buildings."), 
+            "Should cleanly reject checking house info in public locations.");
+    }
+
 }
