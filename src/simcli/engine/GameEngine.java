@@ -53,11 +53,19 @@ public class GameEngine {
 
 
 
+    public IWorldManager getWorldManager() {
+        return worldManager;
+    }
+
     public void run(Scanner scanner) {
         boolean running = true;
         boolean tickForward = true;
         Sim activePlayer = this.neighborhood.get(0);
-        this.worldManager.getCurrentLocation().enter(activePlayer);
+        
+        // Only trigger entry sequence if they don't already have an assigned room from a loaded save
+        if (activePlayer.getCurrentRoom() == null) {
+            this.worldManager.getCurrentLocation().enter(activePlayer);
+        }
 
         while (running) {
             renderer.clear();

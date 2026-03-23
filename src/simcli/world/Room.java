@@ -21,6 +21,7 @@ public class Room {
 
     public String getName() { return name; }
     public int getMaxCapacity() { return maxCapacity; }
+    public void setMaxCapacity(int capacity) { this.maxCapacity = capacity; }
     public int getUsedCapacity() { return currentCapacityUsed; }
     public List<Interactable> getInteractables() { return interactablesList; }
 

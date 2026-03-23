@@ -103,6 +103,7 @@ public class Sim implements ISimBehaviour {
     
     public Job getCareer() { return careerProfile.getCareer(); }
     public int getJobTier() { return careerProfile.getJobTier(); }
+    public void setJobTier(int tier) { careerProfile.setJobTier(tier); }
     public int getShiftsWorkedToday() { return careerProfile.getShiftsWorkedToday(); }
     public void incrementShiftsWorkedToday() { careerProfile.incrementShiftsWorkedToday(); }
     public void resetConsecutiveDaysMissed() { careerProfile.setConsecutiveDaysMissed(0); }

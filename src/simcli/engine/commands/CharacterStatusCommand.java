@@ -26,7 +26,8 @@ public class CharacterStatusCommand extends BaseCommand {
         UIManager.printMessage("Traits: " + activePlayer.getTraits());
         UIManager.printMessage("Money: $" + activePlayer.getMoney());
         if (activePlayer.canWork()) {
-            UIManager.printMessage("Current Job Status: " + activePlayer.getCareer().getTitle());
+            UIManager.printMessage("Job: " + activePlayer.getCareer().getTitle() + " (Tier " + activePlayer.getJobTier() + ")");
+            UIManager.printMessage("Salary: $" + activePlayer.getCareer().getSalaryAtTier(activePlayer.getJobTier()) + " per shift");
         }
         UIManager.printMessage("Health: " + activePlayer.getHealth() + "%");
         UIManager.printMessage("Hunger: " + activePlayer.getHunger().getValue() + " / " + simcli.needs.Need.MAX_VALUE);

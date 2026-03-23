@@ -64,6 +64,7 @@ public class CareerProfile {
     public Job getCareer() { return career; }
     public void setCareer(Job career) { this.career = career; }
     public int getJobTier() { return jobTier; }
+    public void setJobTier(int tier) { this.jobTier = tier; }
     public int getConsecutiveDaysMissed() { return consecutiveDaysMissed; }
     public void setConsecutiveDaysMissed(int days) { this.consecutiveDaysMissed = days; }
     public int getShiftsWorkedToday() { return shiftsWorkedToday; }

@@ -60,14 +60,51 @@ public class SaveManager {
                 writer.println("STATS_ITEMS:" + engine.getSessionTotalItems());
             }
 
+            // Save Building States
+            List<simcli.world.Building> map = engine.getWorldManager().getCityMap();
+            for (int i = 0; i < map.size(); i++) {
+                if (map.get(i) instanceof simcli.world.Residential) {
+                    simcli.world.Residential res = (simcli.world.Residential) map.get(i);
+                    StringBuilder sb = new StringBuilder("ResState:" + i + "," + res.isOwned());
+                    for (simcli.world.Room r : res.getRooms()) {
+                        sb.append(",").append(r.getMaxCapacity());
+                    }
+                    writer.println(sb.toString());
+                }
+            }
+
+            // Save Location
+            int locIndex = map.indexOf(engine.getWorldManager().getCurrentLocation());
+            int roomIndex = -1;
+            Sim activeSim = engine.getNeighborhood().get(0);
+            if (engine.getWorldManager().getCurrentLocation() instanceof simcli.world.Residential && activeSim.getCurrentRoom() != null) {
+                simcli.world.Residential res = (simcli.world.Residential) engine.getWorldManager().getCurrentLocation();
+                roomIndex = res.getRooms().indexOf(activeSim.getCurrentRoom());
+            }
+            writer.println("LOCATION:" + locIndex + "," + roomIndex);
+
             for (Sim sim : engine.getNeighborhood()) {
-                // Format: Sim:Name,Age,Gender,JobName,Money,InventoryCapacity,Hunger,Energy,Fun,Hygiene,Social
+                // Format: Sim:Name,Age,Gender,JobName,Money,InventoryCapacity,Hunger,Energy,Fun,Hygiene,Social,JobTier
                 writer.println("Sim:" + sim.getName() + "," + sim.getAge() + "," +
                         sim.getGender().name() + "," + sim.getCareer().name() + "," + 
                         sim.getMoney() + "," + sim.getInventoryCapacity() + "," +
                         sim.getHunger().getValue() + "," + sim.getEnergy().getValue() + ","
                         + sim.getFun().getValue() + "," + sim.getHygiene().getValue() + ","
-                        + sim.getSocial().getValue());
+                        + sim.getSocial().getValue() + "," + sim.getJobTier());
+                
+                // Save Inventory
+                for (simcli.entities.Item item : sim.getInventory()) {
+                    if (item instanceof simcli.entities.Furniture) {
+                        simcli.entities.Furniture f = (simcli.entities.Furniture) item;
+                        writer.println("Inventory:" + sim.getName() + ",Furniture," + f.getObjectName() + "," + f.getPrice() + "," + f.getSpaceScore());
+                    } else if (item instanceof simcli.entities.Food) {
+                        simcli.entities.Food f = (simcli.entities.Food) item;
+                        writer.println("Inventory:" + sim.getName() + ",Food," + f.getObjectName() + "," + f.getPrice() + "," + f.getSatiationValue() + "," + f.getEnergyValue());
+                    } else if (item instanceof simcli.entities.Consumable) {
+                        simcli.entities.Consumable c = (simcli.entities.Consumable) item;
+                        writer.println("Inventory:" + sim.getName() + ",Consumable," + c.getObjectName() + "," + c.getPrice() + "," + c.getSatiationValue() + "," + c.getEnergyValue() + "," + c.getFunValue());
+                    }
+                }
             }
         } catch (IOException e) {
             simcli.ui.UIManager.printWarning("Error saving game: " + e.getMessage());
@@ -83,7 +120,10 @@ public class SaveManager {
             boolean isGameOver = false;
             int statsMoney = 0;
             int statsItems = 0;
+            int loadedLocIndex = 0;
+            int loadedRoomIndex = -1;
             List<Sim> loadedNeighborhood = new ArrayList<>();
+            java.util.Map<Integer, String[]> parsedResStates = new java.util.HashMap<>();
 
             while ((line = reader.readLine()) != null) {
                 if (line.startsWith("WORLD:")) {
@@ -92,10 +132,42 @@ public class SaveManager {
                     loadedTick = Integer.parseInt(line.substring(5));
                 } else if (line.startsWith("GAME_OVER:")) {
                     isGameOver = Boolean.parseBoolean(line.substring(10));
+                } else if (line.startsWith("LOCATION:")) {
+                    String[] locData = line.substring(9).split(",");
+                    loadedLocIndex = Integer.parseInt(locData[0]);
+                    loadedRoomIndex = Integer.parseInt(locData[1]);
+                } else if (line.startsWith("ResState:")) {
+                    String[] resData = line.substring(9).split(",");
+                    parsedResStates.put(Integer.parseInt(resData[0]), resData);
                 } else if (line.startsWith("STATS_MONEY:")) {
                     statsMoney = Integer.parseInt(line.substring(12));
                 } else if (line.startsWith("STATS_ITEMS:")) {
                     statsItems = Integer.parseInt(line.substring(12));
+                } else if (line.startsWith("Inventory:")) {
+                    String[] invData = line.substring(10).split(",");
+                    String ownerName = invData[0];
+                    String type = invData[1];
+                    String itemName = invData[2];
+                    int price = Integer.parseInt(invData[3]);
+                    
+                    for (Sim s : loadedNeighborhood) {
+                        if (s.getName().equals(ownerName)) {
+                            if (type.equals("Furniture")) {
+                                int space = Integer.parseInt(invData[4]);
+                                s.addItem(new simcli.entities.Furniture(itemName, price, space));
+                            } else if (type.equals("Food")) {
+                                int sat = Integer.parseInt(invData[4]);
+                                int eng = Integer.parseInt(invData[5]);
+                                s.addItem(new simcli.entities.Food(itemName, price, sat, eng));
+                            } else if (type.equals("Consumable")) {
+                                int sat = Integer.parseInt(invData[4]);
+                                int eng = Integer.parseInt(invData[5]);
+                                int fun = Integer.parseInt(invData[6]);
+                                s.addItem(new simcli.entities.Consumable(itemName, price, sat, eng, fun));
+                            }
+                            break;
+                        }
+                    }
                 } else if (line.startsWith("Sim:")) {
                     String[] data = line.substring(4).split(",");
 
@@ -119,6 +191,9 @@ public class SaveManager {
                     if (data.length > 10) {
                         sim.getSocial().setValue(Integer.parseInt(data[10]));
                     }
+                    if (data.length > 11) {
+                        sim.setJobTier(Integer.parseInt(data[11]));
+                    }
                     sim.updateState();
 
                     loadedNeighborhood.add(sim);
@@ -131,7 +206,37 @@ public class SaveManager {
                 return null;
             }
 
-            return new GameEngine(loadedWorldName, loadedTick, loadedNeighborhood, isGameOver);
+            GameEngine engine = new GameEngine(loadedWorldName, loadedTick, loadedNeighborhood, isGameOver);
+            
+            // Post-Load: Inject World States
+            List<simcli.world.Building> map = engine.getWorldManager().getCityMap();
+            for (java.util.Map.Entry<Integer, String[]> entry : parsedResStates.entrySet()) {
+                int bIndex = entry.getKey();
+                String[] bData = entry.getValue();
+                if (bIndex >= 0 && bIndex < map.size() && map.get(bIndex) instanceof simcli.world.Residential) {
+                    simcli.world.Residential res = (simcli.world.Residential) map.get(bIndex);
+                    res.setOwned(Boolean.parseBoolean(bData[1]));
+                    for (int i = 0; i < res.getRooms().size() && (i + 2) < bData.length; i++) {
+                        res.getRooms().get(i).setMaxCapacity(Integer.parseInt(bData[i + 2]));
+                    }
+                }
+            }
+            
+            // Post-Load: Inject Location
+            if (loadedLocIndex >= 0 && loadedLocIndex < map.size()) {
+                simcli.world.Building curLoc = map.get(loadedLocIndex);
+                engine.getWorldManager().setCurrentLocation(curLoc);
+                
+                Sim active = loadedNeighborhood.get(0);
+                if (curLoc instanceof simcli.world.Residential && loadedRoomIndex >= 0) {
+                    simcli.world.Residential res = (simcli.world.Residential) curLoc;
+                    if (loadedRoomIndex < res.getRooms().size()) {
+                        active.setCurrentRoom(res.getRooms().get(loadedRoomIndex));
+                    }
+                }
+            }
+
+            return engine;
 
         } catch (Exception e) {
             simcli.ui.UIManager.printWarning("Error loading game: " + e.getMessage());

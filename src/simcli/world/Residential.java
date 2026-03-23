@@ -34,6 +34,7 @@ public class Residential extends Building {
 
     public int getPurchasePrice() { return purchasePrice; }
     public boolean isOwned() { return isOwned; }
+    public void setOwned(boolean owned) { this.isOwned = owned; }
 
     public boolean purchase(Sim sim) {
         if (sim.getMoney() >= purchasePrice) {
