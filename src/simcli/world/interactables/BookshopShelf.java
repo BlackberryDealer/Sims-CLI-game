@@ -7,6 +7,7 @@ import simcli.entities.Sim;
 import simcli.entities.Item;
 import simcli.entities.Consumable;
 import simcli.entities.Furniture;
+import simcli.utils.GameConstants;
 
 /**
  * A bookshop selling knowledge-related items and entertainment.
@@ -31,7 +32,7 @@ public class BookshopShelf extends AbstractShop {
         // Furniture available at the bookshop
         catalog.add(new Furniture("Computer", 500, 20));
 
-        if (sim.getAge() >= 18) {
+        if (sim.getAge() >= GameConstants.ADULT_AGE) {
             catalog.add(new Consumable("Energy Drink", 25, 5, 30, 0));
         }
 

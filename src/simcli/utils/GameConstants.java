@@ -6,6 +6,9 @@ public final class GameConstants {
     // Sim
     public static final int STARTING_MONEY = 500;
     public static final int STARTING_INVENTORY_CAPACITY = 10;
+    public static final int TEEN_AGE = 13;
+    public static final int ADULT_AGE = 18;
+    public static final int ELDER_AGE = 65;
     public static final double AGE_ENERGY_PENALTY_MULTIPLIER = 0.05;
     public static final int DAYS_PER_AGE_TICK = 3;
     

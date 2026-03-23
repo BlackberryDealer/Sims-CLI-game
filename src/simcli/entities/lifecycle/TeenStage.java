@@ -1,7 +1,8 @@
 package simcli.entities.lifecycle;
 
+import simcli.utils.GameConstants;
+
 public class TeenStage implements LifeStage {
-    private static final int ADULTHOOD_AGE = 18;
 
     @Override
     public boolean canWork() {
@@ -20,7 +21,7 @@ public class TeenStage implements LifeStage {
 
     @Override
     public LifeStage getNextStage(int currentAge) {
-        if (currentAge >= ADULTHOOD_AGE) {
+        if (currentAge >= GameConstants.ADULT_AGE) {
             return new AdultStage();
         }
         return this;

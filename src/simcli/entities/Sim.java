@@ -63,11 +63,11 @@ public class Sim implements ISimBehaviour {
         this.totalMoneyEarned = money;
         this.totalItemsBought = 0;
 
-        if (this.age < 13) {
+        if (this.age < GameConstants.TEEN_AGE) {
             this.setLifeStage(new ChildStage());
-        } else if (this.age < 18) {
+        } else if (this.age < GameConstants.ADULT_AGE) {
             this.setLifeStage(new TeenStage());
-        } else if (this.age < 65) {
+        } else if (this.age < GameConstants.ELDER_AGE) {
             this.setLifeStage(new AdultStage());
         } else {
             this.setLifeStage(new ElderStage());
@@ -196,7 +196,7 @@ public class Sim implements ISimBehaviour {
             if (this.age >= 81) {
                 needsTracker.setState(SimState.DEAD);
                 SimulationLogger.log("\n*** TRAGEDY! " + this.name + " has passed away of old age at " + this.age + ". ***");
-            } else if (this.age >= 65 && this.getCareer() != Job.UNEMPLOYED) {
+            } else if (this.age >= GameConstants.ELDER_AGE && this.getCareer() != Job.UNEMPLOYED) {
                 SimulationLogger.log("\n*** RETIREMENT! " + this.name + " has reached the retirement age of 65 and is officially retired. ***");
                 this.changeJob(Job.UNEMPLOYED);
                 this.setMoney(this.getMoney() + 1000);
