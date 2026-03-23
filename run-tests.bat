@@ -13,7 +13,7 @@ if %errorlevel% neq 0 (
 
 echo [2/2] Compiling tests...
 if not exist bin\test mkdir bin\test
-javac -cp "lib\junit-platform-console-standalone.jar;bin" -d bin\test -sourcepath test test\simcli\ReproduceTest.java test\simcli\LifecycleTest.java test\simcli\TimeManagerTest.java test\simcli\NeedTest.java test\simcli\engine\WorkCommandTest.java
+javac -cp "lib\junit-platform-console-standalone.jar;bin" -d bin\test -sourcepath test test\simcli\*.java test\simcli\engine\*.java
 if %errorlevel% neq 0 (
     echo [ERROR] Test compilation failed.
     exit /b 1
