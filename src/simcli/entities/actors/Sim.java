@@ -59,7 +59,7 @@ public class Sim implements ISimBehaviour {
 
         this.needsTracker = new NeedsTracker();
         this.careerProfile = new CareerProfile();
-        this.inventoryManager = new InventoryManager(10);
+        this.inventoryManager = new InventoryManager(GameConstants.STARTING_INVENTORY_CAPACITY);
         this.skillManager = new SkillManager();
         this.traits = new ArrayList<>();
         Trait[] allTraits = Trait.values();
