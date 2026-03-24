@@ -61,9 +61,10 @@ public enum Job {
     }
 
     public int getSalaryAtTier(int tier) {
-        if (this == UNEMPLOYED)
-            return 0;
-        int t = Math.min(tier, maxTier);
-        return (int) (baseSalary * Math.pow(promotionMultiplier, t - 1));
+    if (this == UNEMPLOYED) return 0;
+    
+    int safeTier = Math.max(1, Math.min(tier, this.maxTier));
+    
+    return (int) (baseSalary * Math.pow(promotionMultiplier, safeTier - 1));
     }
 }

@@ -1,8 +1,12 @@
 package simcli.needs;
 
+<<<<<<< HEAD:src/simcli/entities/NeedsTracker.java
+=======
 import simcli.entities.actors.Sim;
 import simcli.entities.actors.SimState;
+>>>>>>> 7364b3c9f398451005ac0cc0adef6bde0a5b590c:src/simcli/needs/NeedsTracker.java
 import simcli.engine.SimulationLogger;
+import simcli.needs.*;
 
 /**
  * Encapsulates management of Sim Needs properties and translates boundaries into SimState evaluations.
@@ -28,6 +32,38 @@ public class NeedsTracker {
         this.starvingTicks = 0;
     }
 
+<<<<<<< HEAD:src/simcli/entities/NeedsTracker.java
+    public void tick(double ageMultiplier, double stageEnergyModifier, String simName) {
+    if (this.state == SimState.DEAD) return;
+
+    this.hunger.decay(ageMultiplier);
+    this.energy.decay(ageMultiplier * stageEnergyModifier);
+    this.hygiene.decay(ageMultiplier);
+    this.fun.decay(ageMultiplier);
+    this.social.decay(ageMultiplier);
+    this.applyCrossPenalties();
+    this.updateState();
+
+    SimulationLogger.log(String.format("[%s] H:%d | E:%d | S:%d | Status: %s", 
+        simName, 
+        hunger.getValue(), 
+        energy.getValue(), 
+        social.getValue(), 
+        this.state));
+    }
+
+    private void applyCrossPenalties() {
+        if (this.hygiene.getValue() <= 10) {
+            this.social.decrease(5);
+        }
+        if (this.fun.getValue() <= 15) {
+            this.energy.decrease(3);
+        }
+        if (this.social.getValue() <= 10) {
+            this.fun.decrease(3);
+            this.energy.decrease(2);
+        }
+=======
     /**
      * Ticks the needs by triggering dynamic calculation and pushing states.
      * @param sim The specific Sim experiencing the tick.
@@ -54,6 +90,7 @@ public class NeedsTracker {
                 " | Hygiene: " + this.hygiene.getValue() +
                 " | Fun: " + this.fun.getValue() +
                 " | Cash: $" + money + " | Status: " + this.state);
+>>>>>>> 7364b3c9f398451005ac0cc0adef6bde0a5b590c:src/simcli/needs/NeedsTracker.java
     }
 
     /**
