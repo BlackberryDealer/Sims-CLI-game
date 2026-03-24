@@ -135,13 +135,13 @@ public class Sim implements ISimBehaviour {
     public void interactSocially(Sim otherSim) {
         if (otherSim == this) return;
         relationships.putIfAbsent(otherSim, 0);
-        int relBonus = 10;
-        int socialBonus = 25;
-        int funBonus = 10;
+        int relBonus = GameConstants.relBonus;
+        int socialBonus = GameConstants.socialBonus;
+        int funBonus = GameConstants.funBonus;
         if (this.hasTrait(Trait.SOCIALITE)) {
-            relBonus = 15;   // 50% more relationship
-            socialBonus = 38; // 50% more social recovery
-            funBonus = 15;
+            relBonus = (int)(relBonus * GameConstants.bonusTimes);   // 50% more relationship
+            socialBonus = (int)(socialBonus * GameConstants.bonusTimes); // 50% more social recovery
+            funBonus = (int)(funBonus * GameConstants.bonusTimes);
         }
         relationships.put(otherSim, relationships.get(otherSim) + relBonus);
         this.currentAction = ActionState.SOCIALIZING;
