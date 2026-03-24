@@ -96,9 +96,9 @@ public class SimsNeedsTracker {
     public void updateState() {
         if (this.health <= 0) {
             this.state = SimState.DEAD;
-        } else if (this.energy.getValue() <= 20) {
+        } else if (this.energy.getValue() <= GameConstants.ENERGY_WARNING_LEVEL) {
             this.state = SimState.TIRED;
-        } else if (this.hunger.getValue() <= simcli.utils.GameConstants.HUNGER_WARNING_LEVEL) {
+        } else if (this.hunger.getValue() <= GameConstants.HUNGER_WARNING_LEVEL) {
             this.state = SimState.HUNGRY;
         } else {
             this.state = SimState.HEALTHY;

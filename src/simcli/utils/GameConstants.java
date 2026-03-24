@@ -25,6 +25,7 @@ public final class GameConstants {
     // Needs Tracker
     public static final int STARVING_DEATH_THRESHOLD = 3;
     public static final int HUNGER_WARNING_LEVEL = 20;
+    public static final int ENERGY_WARNING_LEVEL = 20;
 
     // Cross Penalty
     public static final int HYGIENE_PENALTY_THRESHOLD = 10;
