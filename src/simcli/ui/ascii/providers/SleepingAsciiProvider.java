@@ -15,12 +15,18 @@ public class SleepingAsciiProvider implements IAsciiProvider {
 
     @Override
     public String getAsciiArt(Sim player, Building location) {
-        return "  z Z z Z z             \n" +
-                "  ___________________   \n" +
-                " |  (o)  [==pillow==]|  \n" +
-                " | --o-- ~~~~~~~~~~~  |  \n" +
-                " |____________________|  \n" +
-                " |__[   BED FRAME   ]_|  \n" +
+        return """
+                    .-"''-.  _
+                  .'       `( \\
+                 /            ')   ,--,__,-"
+                /        /      \\ /     /   _/
+              __|           ,   |/         /
+            .~  `\\   / \\ ,  |   /
+          .~      `\\    `  /  _/   _/
+        .~          `\\  ~~`__/    /
+        ~             `--'/
+                     /   /    /
+                    /  /'    /""" +
                 "   \" " + player.getName() + " is sleeping... \"";
     }
 }

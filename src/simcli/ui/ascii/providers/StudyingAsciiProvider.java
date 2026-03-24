@@ -15,12 +15,16 @@ public class StudyingAsciiProvider implements IAsciiProvider {
 
     @Override
     public String getAsciiArt(Sim player, Building location) {
-        return "          |            \n" +
-                "         /|\\  o        \n" +
-                "         / \\ /|\\       \n" +
-                "   ______|__/ \\______  \n" +
-                "  | BOOK | BOOK | :) | \n" +
-                "  |______|______|____| \n" +
+        return "          __    __\n" +
+            "         /  \\ /| |'-.\n" +
+            "        .\\__/ || |   |\n" +
+            "     _ /  `._ \\|_|_.-'\n" +
+            "    | /  \\__.`=._) (_\n" +
+            "    |/ ._/  |\"\"\"\"\"\"\"\"\"|\n" +
+            "    |'.  `\\ |         |\n" +
+            "    ;\"\"\"/ / |         |\n" +
+            "     ) /_/| |.-------.|\n" +
+            "    '  `-`' \"         \"" +
                 "   \" " + player.getName() + " is studying! \"";
     }
 }

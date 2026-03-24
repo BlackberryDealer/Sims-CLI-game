@@ -14,11 +14,15 @@ public class SocializingAsciiProvider implements IAsciiProvider {
 
     @Override
     public String getAsciiArt(Sim player, Building location) {
-        return "  o         o          \n" +
-                " /|\\  \" :D \"  /|\\     \n" +
-                " / \\  ~~~~~~  / \\     \n" +
-                "  |  speech!  |        \n" +
-                "  |  bubbles  |        \n" +
+        return """
+               .-------.                 .-------.
+              /  Hello  \\               /   Hi!   \\
+              '----.----'               '----.----'
+                    \\                       /
+                     \\                     /
+                       O                   O
+                      /|\\                 /|\\
+                      / \\                 / \\""" +
                 " " + player.getName() + "        Friend  \n" +
                 "   \" " + player.getName() + " is socializing! \"";
     }

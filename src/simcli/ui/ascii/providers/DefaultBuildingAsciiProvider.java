@@ -16,12 +16,22 @@ public class DefaultBuildingAsciiProvider implements IAsciiProvider {
     @Override
     public String getAsciiArt(Sim player, Building location) {
         String locName = (location != null) ? location.getName().toUpperCase() : "UNKNOWN";
-        return "   __________________  \n" +
-                "  |                  | \n" +
-                "  |  [ " + padOrTrim(locName, 10) + " ]  | \n" +
-                "  |                  | \n" +
-                "  |  [door]  [win]   | \n" +
-                "  |__________________|";
+        return "^             ^               ^!^\n" +
+            "   ^ _______________________________\n" +
+            "    [=U=U=U=U=U=U=U=U=U=U=U=U=U=U=U=]\n" +
+            "    |.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.|\n" +
+            "    |        +-+-+-+-+-+-+-+        |\n" + 
+            "    |        | " + locName + " |        |\n" +
+            "    |        +-+-+-+-+-+-+-+        |\n" +
+            "    |.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.|\n" +
+            "    |  _________  __ __  _________  |\n" +
+            "  _ | |___   _  ||[]|[]||  _      | | _\n" +
+            " (!)||OPEN|_(!)_|| ,| ,||_(!)_____| |(!)\n" +
+            ".T~T|:.....:T~T.:|__|__|:.T~T.:....:|T~T.\n" +
+            "||_||||||||||_|||||||||||||_||||||||||_||\n" +
+            "~\\=/~~~~~~~~\\=/~~~~~~~~~~~\\=/~~~~~~~~\\=/~\n" +
+            "  | -------- | ----------- | -------- |\n" +
+            "~ |~^ ^~~^ ~~| ~^  ~~ ^~^~ |~ ^~^ ~~^ |^~";
     }
 
     /** Pads or trims a string to a fixed display width. */

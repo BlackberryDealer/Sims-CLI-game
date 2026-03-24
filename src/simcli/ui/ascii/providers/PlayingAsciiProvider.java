@@ -14,11 +14,16 @@ public class PlayingAsciiProvider implements IAsciiProvider {
 
     @Override
     public String getAsciiArt(Sim player, Building location) {
-        return "     \\o/  wheee!       \n" +
-                "      |     ->         \n" +
-                "     / \\              \n" +
-                "   ~  ~  ~  ~  ~  ~   \n" +
-                "   (running outside)   \n" +
+        return "          __    __\n" +
+            "         /  \\ /| |'-.\n" +
+            "        .\\__/ || |   |\n" +
+            "     _ /  `._ \\|_|_.-'\n" +
+            "    | /  \\__.`=._) (_\n" +
+            "    |/ ._/  |\"\"\"\"\"\"\"\"\"|\n" +
+            "    |'.  `\\ |         |\n" +
+            "    ;\"\"\"/ / |         |\n" +
+            "     ) /_/| |.-------.|\n" +
+            "    '  `-`' \"         \"" +
                 "   \" " + player.getName() + " is playing! \"";
     }
 }

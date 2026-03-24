@@ -14,12 +14,15 @@ public class EatingAsciiProvider implements IAsciiProvider {
 
     @Override
     public String getAsciiArt(Sim player, Building location) {
-        return "        o           \n" +
-                "       /|\\  nom!    \n" +
-                "       / \\          \n" +
-                "  ____(_____)____   \n" +
-                " |   [~BOWL~] f  |  \n" +
-                " |_______________|  \n" +
+        return "              ,-------------------.\n" +
+            "             ( Yummy!! )\n" +
+            "        munch `-v-----------------'\n" +
+            " ,---'. --------'\n" +
+            " C.^o^|   munch\n" +
+            " (_,-_)\n" +
+            ",--`|-.\n" +
+            "|\\    ]\\__n_\n" +
+            "||`   '---E/   " +
                 "   \" " + player.getName() + " is eating \"";
     }
 }
