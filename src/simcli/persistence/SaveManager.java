@@ -89,7 +89,7 @@ public class SaveManager {
                         sim.getGender().name() + "," + sim.getCareer().name() + "," + 
                         sim.getMoney() + "," + sim.getInventoryCapacity() + "," +
                         sim.getHunger().getValue() + "," + sim.getEnergy().getValue() + ","
-                        + sim.getFun().getValue() + "," + sim.getHygiene().getValue() + ","
+                        + sim.getHappiness().getValue() + "," + sim.getHygiene().getValue() + ","
                         + sim.getSocial().getValue() + "," + sim.getJobTier());
                 
                 // Save Inventory
@@ -102,7 +102,7 @@ public class SaveManager {
                         writer.println("Inventory:" + sim.getName() + ",Food," + f.getObjectName() + "," + f.getPrice() + "," + f.getSatiationValue() + "," + f.getEnergyValue());
                     } else if (item instanceof simcli.entities.items.Consumable) {
                         simcli.entities.items.Consumable c = (simcli.entities.items.Consumable) item;
-                        writer.println("Inventory:" + sim.getName() + ",Consumable," + c.getObjectName() + "," + c.getPrice() + "," + c.getSatiationValue() + "," + c.getEnergyValue() + "," + c.getFunValue());
+                        writer.println("Inventory:" + sim.getName() + ",Consumable," + c.getObjectName() + "," + c.getPrice() + "," + c.getSatiationValue() + "," + c.getEnergyValue() + "," + c.getHappinessValue());
                     }
                 }
             }
@@ -162,8 +162,8 @@ public class SaveManager {
                             } else if (type.equals("Consumable")) {
                                 int sat = Integer.parseInt(invData[4]);
                                 int eng = Integer.parseInt(invData[5]);
-                                int fun = Integer.parseInt(invData[6]);
-                                s.addItem(new simcli.entities.items.Consumable(itemName, price, sat, eng, fun));
+                                int happiness = Integer.parseInt(invData[6]);
+                                s.addItem(new simcli.entities.items.Consumable(itemName, price, sat, eng, happiness));
                             }
                             break;
                         }
@@ -183,7 +183,7 @@ public class SaveManager {
                     sim.getHunger().setValue(Integer.parseInt(data[6]));
                     sim.getEnergy().setValue(Integer.parseInt(data[7]));
                     if (data.length > 8) {
-                        sim.getFun().setValue(Integer.parseInt(data[8]));
+                        sim.getHappiness().setValue(Integer.parseInt(data[8]));
                     }
                     if (data.length > 9) {
                         sim.getHygiene().setValue(Integer.parseInt(data[9]));

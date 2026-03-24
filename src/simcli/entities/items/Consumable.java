@@ -7,18 +7,18 @@ import simcli.engine.SimulationException;
 public class Consumable extends Item {
     private int satiationValue;
     private int energyValue;
-    private int funValue;
+    private int happinessValue;
 
-    public Consumable(String name, int price, int satiationValue, int energyValue, int funValue) {
+    public Consumable(String name, int price, int satiationValue, int energyValue, int happinessValue) {
         super(name, price);
         this.satiationValue = satiationValue;
         this.energyValue = energyValue;
-        this.funValue = funValue;
+        this.happinessValue = happinessValue;
     }
 
     public int getSatiationValue() { return satiationValue; }
     public int getEnergyValue() { return energyValue; }
-    public int getFunValue() { return funValue; }
+    public int getHappinessValue() { return happinessValue; }
 
     @Override
     public void interact(Sim sim, java.util.Scanner scanner, simcli.engine.TimeManager timeManager) throws SimulationException {
@@ -27,12 +27,12 @@ public class Consumable extends Item {
         simcli.ui.UIManager.printMessage(sim.getName() + " consumes the " + getObjectName() + ".");
         sim.getHunger().increase(this.satiationValue);
         sim.getEnergy().increase(this.energyValue);
-        sim.getFun().increase(this.funValue);
+        sim.getHappiness().increase(this.happinessValue);
         sim.getInventory().remove(this);
     }
     
     @Override
     public Item copyItem() {
-        return new Consumable(getObjectName(), getPrice(), this.satiationValue, this.energyValue, this.funValue);
+        return new Consumable(getObjectName(), getPrice(), this.satiationValue, this.energyValue, this.happinessValue);
     }
 }

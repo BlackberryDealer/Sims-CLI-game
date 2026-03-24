@@ -31,7 +31,7 @@ public class NeedTest {
         assertEquals(Need.MAX_VALUE, new Hunger().getValue());
         assertEquals(Need.MAX_VALUE, new Energy().getValue());
         assertEquals(Need.MAX_VALUE, new Hygiene().getValue());
-        assertEquals(Need.MAX_VALUE, new Fun().getValue());
+        assertEquals(Need.MAX_VALUE, new Happiness().getValue());
         assertEquals(Need.MAX_VALUE, new Social().getValue());
     }
 
@@ -67,12 +67,12 @@ public class NeedTest {
     }
 
     @Test
-    @DisplayName("Fun.decay(1.0) decreases by its base decay rate (2)")
+    @DisplayName("Happiness.decay(1.0) decreases by its base decay rate (2)")
     void testFunDecayRate() {
-        Fun f = new Fun();
+        Happiness f = new Happiness();
         f.decay(1.0);
         assertEquals(Need.MAX_VALUE - 2, f.getValue(),
-                "Fun base decay rate is 2");
+                "Happiness base decay rate is 2");
     }
 
     @Test

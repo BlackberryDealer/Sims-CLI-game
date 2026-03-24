@@ -98,7 +98,7 @@ public class Sim implements ISimBehaviour {
     public Need getHunger() { return needsTracker.getHunger(); }
     public Need getEnergy() { return needsTracker.getEnergy(); }
     public Need getHygiene() { return needsTracker.getHygiene(); }
-    public Need getFun() { return needsTracker.getFun(); }
+    public Need getHappiness() { return needsTracker.getHappiness(); }
     public Need getSocial() { return needsTracker.getSocial(); }
     public SimState getState() { return needsTracker.getState(); }
     public void updateState() { needsTracker.updateState(); }

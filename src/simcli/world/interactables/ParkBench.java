@@ -43,7 +43,7 @@ public class ParkBench implements Interactable {
                     int relGain = isSocialite ? 8 : 5;
                     SimulationLogger.log(sim.getName() + " chats politely with " + target.getName() + ".");
                     sim.getRelationshipManager().increaseRelationship(target, relGain);
-                    sim.getFun().increase(10);
+                    sim.getHappiness().increase(10);
                     sim.getEnergy().decrease(5);
                     sim.getSocial().increase(30);
                     sim.getSkillManager().addSkillExperience(SkillType.CHARISMA, isSocialite ? 8 : 5, sim.getName(), false);
@@ -51,14 +51,14 @@ public class ParkBench implements Interactable {
                     int relGain = isSocialite ? 15 : 10;
                     SimulationLogger.log(sim.getName() + " tells a funny joke to " + target.getName() + "!");
                     sim.getRelationshipManager().increaseRelationship(target, relGain);
-                    sim.getFun().increase(15);
+                    sim.getHappiness().increase(15);
                     sim.getEnergy().decrease(10);
                     sim.getSocial().increase(70);
                     sim.getSkillManager().addSkillExperience(SkillType.CHARISMA, isSocialite ? 15 : 10, sim.getName(), false);
                 } else if (actionChoice == 3) {
                     SimulationLogger.log(sim.getName() + " argues bitterly with " + target.getName() + ".");
                     sim.getRelationshipManager().increaseRelationship(target, -15);
-                    sim.getFun().decrease(10);
+                    sim.getHappiness().decrease(10);
                     sim.getEnergy().decrease(15);
                     sim.getSocial().increase(20);
                 } else {

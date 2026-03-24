@@ -15,8 +15,8 @@ public class RandomEventManager {
                 activePlayer.setMoney(activePlayer.getMoney() + 50);
                 activePlayer.addTotalMoneyEarned(50);
             } else if (eventRoll < 0.35) {
-                SimulationLogger.log("\n*** RANDOM EVENT! Oh no, you stubbed your toe! Fun decreased. ***");
-                activePlayer.getFun().decrease(15);
+                SimulationLogger.log("\n*** RANDOM EVENT! Oh no, you stubbed your toe! Happiness decreased. ***");
+                activePlayer.getHappiness().decrease(15);
             } else if (eventRoll < 0.50) {
                 SimulationLogger.log("\n*** RANDOM EVENT! A sudden stroke of inspiration! Energy restored. ***");
                 activePlayer.getEnergy().increase(20);
@@ -25,7 +25,7 @@ public class RandomEventManager {
                 activePlayer.getHunger().decrease(10);
                 activePlayer.getEnergy().decrease(10);
                 activePlayer.getHygiene().decrease(10);
-                activePlayer.getFun().decrease(10);
+                activePlayer.getHappiness().decrease(10);
                 activePlayer.getSocial().decrease(10);
             } else if (eventRoll < 0.80) {
                 // Stove catches fire (from proposal slide 24)
@@ -40,7 +40,7 @@ public class RandomEventManager {
                 SimulationLogger.log("\n*** RANDOM EVENT! LOTTERY WIN! You won $" + winnings + "! ***");
                 activePlayer.setMoney(activePlayer.getMoney() + winnings);
                 activePlayer.addTotalMoneyEarned(winnings);
-                activePlayer.getFun().increase(30);
+                activePlayer.getHappiness().increase(30);
             }
         }
     }

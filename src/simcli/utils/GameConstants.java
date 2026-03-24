@@ -17,7 +17,7 @@ public final class GameConstants {
     // Bonus
     public static final int relBonus = 10;
     public static final int socialBonus = 25;
-    public static final int funBonus = 10;
+    public static final int happinessBonus = 10;
     public static final double bonusTimes = 1.5;
 
     // Needs Tracker

@@ -33,7 +33,7 @@ public class CharacterStatusCommand extends BaseCommand {
         UIManager.printMessage("Hunger: " + activePlayer.getHunger().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
         UIManager.printMessage("Energy: " + activePlayer.getEnergy().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
         UIManager.printMessage("Hygiene: " + activePlayer.getHygiene().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
-        UIManager.printMessage("Fun: " + activePlayer.getFun().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
+        UIManager.printMessage("Happiness: " + activePlayer.getHappiness().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
         UIManager.printMessage("Social: " + activePlayer.getSocial().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
         UIManager.printMessage(
                 "Inventory Items: " + activePlayer.getInventory().size() + " / " + activePlayer.getInventoryCapacity());

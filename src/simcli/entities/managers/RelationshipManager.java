@@ -93,12 +93,12 @@ public class RelationshipManager {
         
         int relBonus = GameConstants.relBonus;
         int socialBonus = GameConstants.socialBonus;
-        int funBonus = GameConstants.funBonus;
+        int happinessBonus = GameConstants.happinessBonus;
         
         if (owner.hasTrait(Trait.SOCIALITE)) {
             relBonus = (int)(relBonus * GameConstants.bonusTimes);
             socialBonus = (int)(socialBonus * GameConstants.bonusTimes);
-            funBonus = (int)(funBonus * GameConstants.bonusTimes);
+            happinessBonus = (int)(happinessBonus * GameConstants.bonusTimes);
         }
         relationships.put(otherSim, relationships.get(otherSim) + relBonus);
         owner.setCurrentAction(ActionState.SOCIALIZING);
@@ -106,7 +106,7 @@ public class RelationshipManager {
         SimulationLogger.log(owner.getName() + " socializes with " + otherSim.getName() + ".");
         owner.getSocial().increase(socialBonus);
         owner.getEnergy().decrease(10);
-        owner.getFun().increase(funBonus);
+        owner.getHappiness().increase(happinessBonus);
         
         // Push legacy integration through new mechanic
         interactWith(otherSim, "chat");

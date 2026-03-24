@@ -113,7 +113,7 @@ public class GameEngine {
                                 " | Hunger: " + activePlayer.getHunger().getValue() +
                                 " | Energy: " + activePlayer.getEnergy().getValue() +
                                 " | Hygiene: " + activePlayer.getHygiene().getValue() +
-                                " | Fun: " + activePlayer.getFun().getValue() +
+                                " | Happiness: " + activePlayer.getHappiness().getValue() +
                                 " | Social: " + activePlayer.getSocial().getValue() +
                                 " | Cash: $" + activePlayer.getMoney() + " | Status: " + activePlayer.getState());
             }

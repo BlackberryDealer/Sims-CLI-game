@@ -11,7 +11,7 @@ public class NeedsTracker {
     private Need hunger;
     private Need energy;
     private Need hygiene;
-    private Need fun;
+    private Need happiness;
     private Need social;
     private SimState state;
     private int health;
@@ -21,7 +21,7 @@ public class NeedsTracker {
         this.hunger = new Hunger();
         this.energy = new Energy();
         this.hygiene = new Hygiene();
-        this.fun = new Fun();
+        this.happiness = new Happiness();
         this.social = new Social();
         this.state = SimState.HEALTHY;
         this.health = 100;
@@ -34,7 +34,7 @@ public class NeedsTracker {
         this.hunger.decay(ageMultiplier);
         this.energy.decay(ageMultiplier * stageEnergyModifier);
         this.hygiene.decay(ageMultiplier);
-        this.fun.decay(ageMultiplier);
+        this.happiness.decay(ageMultiplier);
         this.social.decay(ageMultiplier);
         this.applyCrossPenalties();
         this.updateState();
@@ -51,11 +51,11 @@ public class NeedsTracker {
         if (this.hygiene.getValue() <= 10) {
             this.social.decrease(5);
         }
-        if (this.fun.getValue() <= 15) {
+        if (this.happiness.getValue() <= 15) {
             this.energy.decrease(3);
         }
         if (this.social.getValue() <= 10) {
-            this.fun.decrease(3);
+            this.happiness.decrease(3);
             this.energy.decrease(2);
         }
     }
@@ -78,7 +78,7 @@ public class NeedsTracker {
     public Need getHunger() { return hunger; }
     public Need getEnergy() { return energy; }
     public Need getHygiene() { return hygiene; }
-    public Need getFun() { return fun; }
+    public Need getHappiness() { return happiness; }
     public Need getSocial() { return social; }
     public SimState getState() { return state; }
     public void setState(SimState state) { this.state = state; }

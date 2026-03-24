@@ -31,11 +31,11 @@ public class ConsumableTest {
         // Decrease stats so there's room to restore
         testSim.getHunger().decrease(50);
         testSim.getEnergy().decrease(50);
-        testSim.getFun().decrease(50);
+        testSim.getHappiness().decrease(50);
 
         int initialHunger = testSim.getHunger().getValue();
         int initialEnergy = testSim.getEnergy().getValue();
-        int initialFun = testSim.getFun().getValue();
+        int initialHappiness = testSim.getHappiness().getValue();
 
         Consumable coffee = new Consumable("Coffee", 5, 10, 30, 5);
         testSim.addItem(coffee);
@@ -45,7 +45,7 @@ public class ConsumableTest {
 
         assertEquals(initialHunger + 10, testSim.getHunger().getValue());
         assertEquals(initialEnergy + 30, testSim.getEnergy().getValue());
-        assertEquals(initialFun + 5, testSim.getFun().getValue());
+        assertEquals(initialHappiness + 5, testSim.getHappiness().getValue());
         
         assertEquals(0, testSim.getInventory().size(), "Coffee should be removed after consumption");
     }
@@ -55,11 +55,11 @@ public class ConsumableTest {
     void testFoodInteraction() throws SimulationException {
         testSim.getHunger().decrease(40);
         testSim.getEnergy().decrease(40);
-        testSim.getFun().decrease(40);
+        testSim.getHappiness().decrease(40);
 
         int initialHunger = testSim.getHunger().getValue();
         int initialEnergy = testSim.getEnergy().getValue();
-        int initialFun = testSim.getFun().getValue();
+        int initialHappiness = testSim.getHappiness().getValue();
 
         Food apple = new Food("Apple", 2, 20, 5);
         testSim.addItem(apple);
@@ -68,6 +68,6 @@ public class ConsumableTest {
 
         assertEquals(initialHunger + 20, testSim.getHunger().getValue());
         assertEquals(initialEnergy + 5, testSim.getEnergy().getValue());
-        assertEquals(initialFun, testSim.getFun().getValue(), "Food should not increase fun");
+        assertEquals(initialFun, testSim.getHappiness().getValue(), "Food should not increase fun");
     }
 }

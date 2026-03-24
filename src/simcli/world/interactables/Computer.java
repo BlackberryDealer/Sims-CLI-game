@@ -10,7 +10,7 @@ import simcli.entities.models.Trait;
 public class Computer implements Interactable {
     private static final int ENERGY_COST = 15;
     private static final int HUNGER_COST = 10;
-    private static final int FUN_GAIN = 5;
+    private static final int HAPPINESS_GAIN = 5;
     private static final int LOGIC_GAIN = 15;
 
     @Override
@@ -26,7 +26,7 @@ public class Computer implements Interactable {
         
         sim.getEnergy().decrease(ENERGY_COST);
         sim.getHunger().decrease(HUNGER_COST);
-        sim.getFun().increase(FUN_GAIN);
+        sim.getHappiness().increase(HAPPINESS_GAIN);
         
         sim.getSkillManager().addSkillExperience(SkillType.LOGIC, LOGIC_GAIN, sim.getName(), sim.hasTrait(Trait.FAST_LEARNER));
     }
