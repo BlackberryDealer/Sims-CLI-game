@@ -93,7 +93,7 @@ public class RelationshipManager {
         
         int relBonus = GameConstants.RELATIONSHIP_BONUS;
         int socialBonus = GameConstants.SOCIAL_BONUS;
-        int happinessBonus = GameConstants.FUN_BONUS;
+        int happinessBonus = GameConstants.HAPPINESS_BONUS;
         
         if (owner.hasTrait(Trait.SOCIALITE)) {
             relBonus = (int)(relBonus * GameConstants.BONUS_TIMES);
