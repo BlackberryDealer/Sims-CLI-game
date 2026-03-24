@@ -1,6 +1,7 @@
 package simcli.needs;
 
 import simcli.entities.actors.Sim;
+import simcli.utils.GameConstants;
 
 /**
  * Represents the overarching Happiness metric for a Sim.
@@ -8,7 +9,7 @@ import simcli.entities.actors.Sim;
 public class Happiness extends Need {
     /** Constructor */
     public Happiness() {
-        super("Happiness", 2);
+        super("Happiness", GameConstants.HAPPINESS_BASE_DECAY_RATE);
     }
 
     /**

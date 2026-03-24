@@ -2,6 +2,7 @@ package simcli.needs;
 
 import simcli.entities.actors.Sim;
 import simcli.entities.models.ActionState;
+import simcli.utils.GameConstants;
 
 /**
  * Represents the Social isolation need of a Sim.
@@ -11,7 +12,7 @@ public class Social extends Need {
      * Constructor setting base Decay.
      */
     public Social() {
-        super("Social", 5);
+        super("Social", GameConstants.SOCIAL_BASE_DECAY_RATE);
     }
 
     /**

@@ -2,6 +2,7 @@ package simcli.needs;
 
 import simcli.entities.actors.Sim;
 import simcli.entities.models.ActionState;
+import simcli.utils.GameConstants;
 
 /**
  * Represents the Hygiene component for the Sim.
@@ -11,7 +12,7 @@ public class Hygiene extends Need {
      * Core hygiene constructor.
      */
     public Hygiene() {
-        super("Hygiene", 5);
+        super("Hygiene", GameConstants.HYGIENE_BASE_DECAY_RATE);
     }
 
     /**

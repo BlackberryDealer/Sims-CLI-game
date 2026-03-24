@@ -2,6 +2,7 @@ package simcli.needs;
 
 import simcli.entities.actors.Sim;
 import simcli.entities.models.ActionState;
+import simcli.utils.GameConstants;
 
 /**
  * Represents the immediate dietary requirements of a Sim.
@@ -12,7 +13,7 @@ public class Hunger extends Need {
      * Constructs a Hunger need instance with a base decay of 5.
      */
     public Hunger() {
-        super("Hunger", 5);
+        super("Hunger", GameConstants.HUNGER_BASE_DECAY_RATE);
     }
 
     /**

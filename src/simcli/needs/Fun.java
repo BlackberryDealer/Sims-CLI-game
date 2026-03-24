@@ -2,6 +2,7 @@ package simcli.needs;
 
 import simcli.entities.actors.Sim;
 import simcli.entities.models.ActionState;
+import simcli.utils.GameConstants;
 
 /**
  * Represents the Fun entertainment metric for the Sim.
@@ -9,7 +10,7 @@ import simcli.entities.models.ActionState;
 public class Fun extends Need {
     /** Constructor */
     public Fun() {
-        super("Fun", 2);
+        super("Fun", GameConstants.FUN_BASE_DECAY_RATE);
     }
 
     /**

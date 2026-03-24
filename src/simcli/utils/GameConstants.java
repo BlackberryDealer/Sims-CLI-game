@@ -24,6 +24,25 @@ public final class GameConstants {
     public static final int STARVING_DEATH_THRESHOLD = 3;
     public static final int HUNGER_WARNING_LEVEL = 20;
 
+    // Needs
+    // Energy
+    public static final int ENERGY_BASE_DECAY_RATE = 2;
+
+    // Fun
+    public static final int FUN_BASE_DECAY_RATE = 2;
+
+    // Happiness
+    public static final int HAPPINESS_BASE_DECAY_RATE = 2;
+
+    // Hunger
+    public static final int HUNGER_BASE_DECAY_RATE = 5;
+
+    // Hygiene
+    public static final int HYGIENE_BASE_DECAY_RATE = 5;
+
+    // Social
+    public static final int SOCIAL_BASE_DECAY_RATE = 5;
+
     // GameEngine
     public static final int TICKS_PER_DAY = 24;
     public static final int AUTOSAVE_INTERVAL_TICKS = 10;
