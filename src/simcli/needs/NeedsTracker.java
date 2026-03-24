@@ -39,11 +39,13 @@ public class NeedsTracker {
         this.applyCrossPenalties();
         this.updateState();
 
-        SimulationLogger.log(String.format("[%s] H:%d | E:%d | S:%d | Status: %s", 
+        SimulationLogger.log(String.format("[%s] Hunger: %d | Energy: %d | Social: %d | Hygiene: %d | Happiness: %d | Status: %s", 
             simName, 
             hunger.getValue(), 
             energy.getValue(), 
             social.getValue(), 
+            hygiene.getValue(),
+            happiness.getValue(),
             this.state));
     }
 
