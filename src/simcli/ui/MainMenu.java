@@ -61,6 +61,7 @@ public class MainMenu {
     }
 
     private void createNewWorld() {
+        simcli.engine.SimulationLogger.reset();
         String newName = "";
         while (true) {
             UIManager.prompt("\nEnter a name for your new world: ");
@@ -127,6 +128,7 @@ public class MainMenu {
     }
 
     private void loadWorld() {
+        simcli.engine.SimulationLogger.reset();
         List<String> saves = SaveManager.getExistingSaves();
 
         if (saves.isEmpty()) {

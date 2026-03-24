@@ -38,4 +38,13 @@ public class SimulationLogger {
         }
     }
 
+    /**
+     * Clears all buffered logs without printing them.
+     * Must be called when transitioning between game sessions.
+     */
+    public static void reset() {
+        logs.clear();
+        simToAnimate = null;
+    }
+
 }
