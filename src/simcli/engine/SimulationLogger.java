@@ -8,7 +8,7 @@ import java.util.List;
  */
 public class SimulationLogger {
     private static final List<String> logs = new ArrayList<>();
-    private static simcli.entities.Sim simToAnimate = null;
+    private static simcli.entities.actors.Sim simToAnimate = null;
 
     public static void log(String message) {
         logs.add(message);
@@ -18,7 +18,7 @@ public class SimulationLogger {
         logs.add("[WARNING] " + message);
     }
 
-    public static void logAnimation(simcli.entities.Sim player) {
+    public static void logAnimation(simcli.entities.actors.Sim player) {
         simToAnimate = player;
     }
     

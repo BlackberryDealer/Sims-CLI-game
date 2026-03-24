@@ -1,6 +1,6 @@
 package simcli.ui.ascii;
 
-import simcli.entities.Sim;
+import simcli.entities.actors.Sim;
 import simcli.world.Building;
 
 public interface IAsciiProvider {

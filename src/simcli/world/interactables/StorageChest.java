@@ -1,7 +1,7 @@
 package simcli.world.interactables;
 import simcli.engine.SimulationException;
-import simcli.entities.Sim;
-import simcli.entities.Item;
+import simcli.entities.actors.Sim;
+import simcli.entities.items.Item;
 import simcli.ui.MenuPagination;
 import java.util.ArrayList;
 import java.util.List;

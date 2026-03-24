@@ -48,7 +48,7 @@ public class UIManager {
         }
     }
 
-    public static void displayActionAnimation(simcli.entities.Sim player) {
+    public static void displayActionAnimation(simcli.entities.actors.Sim player) {
         clearScreen();
         System.out.println(new simcli.ui.ascii.AsciiEngine().render(player, null));
         System.out.println();

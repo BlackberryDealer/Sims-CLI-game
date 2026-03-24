@@ -2,7 +2,7 @@ package simcli.engine.commands;
 
 import simcli.engine.CommandResult;
 import simcli.engine.IWorldManager;
-import simcli.entities.Sim;
+import simcli.entities.actors.Sim;
 import simcli.ui.AsciiArt;
 import simcli.ui.UIManager;
 import simcli.world.Building;

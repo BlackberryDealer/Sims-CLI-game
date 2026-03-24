@@ -2,7 +2,7 @@ package simcli.world;
 import java.util.ArrayList;
 import java.util.List;
 
-import simcli.entities.Sim;
+import simcli.entities.actors.Sim;
 import simcli.world.interactables.Interactable;
 
 public abstract class Building {

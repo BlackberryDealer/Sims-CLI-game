@@ -1,6 +1,6 @@
 package simcli.ui;
 
-import simcli.entities.Sim;
+import simcli.entities.actors.Sim;
 import simcli.world.Building;
 import simcli.world.interactables.Interactable;
 import simcli.ui.ascii.AsciiEngine;
@@ -47,7 +47,7 @@ public class TerminalRenderer implements IRenderer {
         }
         
         // Reset action to IDLE after rendering so art doesn't persist next frame
-        player.setCurrentAction(simcli.entities.ActionState.IDLE);
+        player.setCurrentAction(simcli.entities.actors.ActionState.IDLE);
     }
 
     @Override

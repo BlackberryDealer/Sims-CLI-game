@@ -4,9 +4,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import simcli.entities.Gender;
-import simcli.entities.Job;
-import simcli.entities.Sim;
+import simcli.entities.actors.Gender;
+import simcli.entities.actors.Job;
+import simcli.entities.actors.Sim;
 import simcli.entities.lifecycle.LifeStage;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -107,8 +107,8 @@ public class LifecycleTest {
         assertEquals("Teen", sim.getCurrentStageName(), "Should start as Teen");
 
         // Add items to inventory BEFORE transition
-        sim.addItem(new simcli.entities.Food("Apple", 10, 15, 5));
-        sim.addItem(new simcli.entities.Food("Steak", 40, 50, 20));
+        sim.addItem(new simcli.entities.items.Food("Apple", 10, 15, 5));
+        sim.addItem(new simcli.entities.items.Food("Steak", 40, 50, 20));
         assertEquals(2, sim.getInventory().size(), "Should have 2 items before transition");
 
         // Trigger the transition

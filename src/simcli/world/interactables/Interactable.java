@@ -1,7 +1,7 @@
 package simcli.world.interactables;
 import simcli.engine.SimulationException;
 import simcli.engine.TimeManager;
-import simcli.entities.Sim;
+import simcli.entities.actors.Sim;
 
 /**
  * Interface defining objects that Sims can use.

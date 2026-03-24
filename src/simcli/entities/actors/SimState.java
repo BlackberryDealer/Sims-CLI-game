@@ -1,0 +1,7 @@
+package simcli.entities.actors;
+/**
+ * Represents the health and lifecycle states of a Sim.
+ */
+public enum SimState {
+    HEALTHY, HUNGRY, TIRED, STARVING, CRITICAL, DEAD
+}

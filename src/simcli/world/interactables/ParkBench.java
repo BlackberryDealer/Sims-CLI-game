@@ -2,11 +2,11 @@ package simcli.world.interactables;
 
 import simcli.engine.SimulationException;
 import simcli.engine.SimulationLogger;
-import simcli.entities.ActionState;
-import simcli.entities.NPCSim;
-import simcli.entities.Sim;
-import simcli.entities.SkillType;
-import simcli.entities.Trait;
+import simcli.entities.actors.ActionState;
+import simcli.entities.actors.NPCSim;
+import simcli.entities.actors.Sim;
+import simcli.entities.components.SkillType;
+import simcli.entities.actors.Trait;
 
 import java.util.List;
 import java.util.Scanner;
