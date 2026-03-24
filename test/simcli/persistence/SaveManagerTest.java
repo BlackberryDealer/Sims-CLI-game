@@ -5,8 +5,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import simcli.engine.GameEngine;
-import simcli.entities.actors.Gender;
-import simcli.entities.actors.Job;
+import simcli.entities.models.Gender;
+import simcli.entities.models.Job;
 import simcli.entities.actors.Sim;
 
 import java.io.FileWriter;

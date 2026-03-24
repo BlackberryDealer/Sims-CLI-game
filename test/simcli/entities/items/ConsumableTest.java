@@ -4,7 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import simcli.entities.actors.Sim;
-import simcli.entities.actors.Gender;
+import simcli.entities.models.Gender;
 import simcli.engine.TimeManager;
 import simcli.engine.SimulationException;
 import java.util.Scanner;
@@ -68,6 +68,6 @@ public class ConsumableTest {
 
         assertEquals(initialHunger + 20, testSim.getHunger().getValue());
         assertEquals(initialEnergy + 5, testSim.getEnergy().getValue());
-        assertEquals(initialFun, testSim.getHappiness().getValue(), "Food should not increase fun");
+        assertEquals(initialHappiness, testSim.getHappiness().getValue(), "Food should not increase fun");
     }
 }

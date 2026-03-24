@@ -3,7 +3,7 @@ package simcli.world;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import simcli.entities.items.Furniture;
-import simcli.entities.actors.Gender;
+import simcli.entities.models.Gender;
 import simcli.entities.actors.Sim;
 
 import static org.junit.jupiter.api.Assertions.*;
