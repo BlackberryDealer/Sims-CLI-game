@@ -3,6 +3,7 @@ package simcli.persistence;
 import simcli.engine.GameEngine;
 import simcli.entities.models.Job;
 import simcli.entities.actors.Sim;
+import simcli.entities.actors.NPCSim;
 import simcli.entities.models.Gender;
 
 import java.io.*;
@@ -50,6 +51,7 @@ public class SaveManager {
         try (PrintWriter writer = new PrintWriter(new FileWriter(SAVE_DIR + worldName + ".txt"))) {
             writer.println("WORLD:" + engine.getWorldName());
             writer.println("TICK:" + engine.getCurrentTick());
+            writer.println("ACTIVE_PLAYER_NAME:" + engine.getActivePlayer().getName());
             writer.println("GAME_OVER:" + engine.isGameOver());
             if (engine.isGameOver()) {
                 writer.println("STATS_MONEY:" + engine.getSessionTotalMoney());
@@ -72,14 +74,14 @@ public class SaveManager {
             // Save Location
             int locIndex = map.indexOf(engine.getWorldManager().getCurrentLocation());
             int roomIndex = -1;
-            Sim activeSim = engine.getNeighborhood().get(0);
+            Sim activeSim = engine.getActivePlayer();
             if (engine.getWorldManager().getCurrentLocation() instanceof simcli.world.Residential && activeSim.getCurrentRoom() != null) {
                 simcli.world.Residential res = (simcli.world.Residential) engine.getWorldManager().getCurrentLocation();
                 roomIndex = res.getRooms().indexOf(activeSim.getCurrentRoom());
             }
             writer.println("LOCATION:" + locIndex + "," + roomIndex);
 
-            // Save all sims
+            // Save all household sims
             for (Sim sim : engine.getNeighborhood()) {
                 writer.println("Sim:" + sim.getName() + "," + sim.getAge() + "," +
                         sim.getGender().name() + "," + sim.getCareer().name() + "," + 
@@ -104,8 +106,20 @@ public class SaveManager {
                 }
             }
 
-            // Save Relationships (legacy map)
-            for (Sim sim : engine.getNeighborhood()) {
+            // Save Global NPCs
+            for (NPCSim npc : engine.getNpcManager().getActiveNPCs()) {
+                writer.println("NPC:" + npc.getName() + "," + npc.getAge() + "," +
+                        npc.getGender().name() + "," + npc.getCareer().name() + "," +
+                        npc.getHunger().getValue() + "," + npc.getEnergy().getValue() + "," +
+                        npc.getHappiness().getValue() + "," + npc.getHygiene().getValue() + "," +
+                        npc.getSocial().getValue());
+            }
+
+            // Save Relationships
+            List<Sim> allTrackedSims = new ArrayList<>(engine.getNeighborhood());
+            allTrackedSims.addAll(engine.getNpcManager().getActiveNPCs());
+
+            for (Sim sim : allTrackedSims) {
                 Map<Sim, Integer> rels = sim.getRelationshipManager().getRelationships();
                 for (Map.Entry<Sim, Integer> entry : rels.entrySet()) {
                     writer.println("Rel:" + sim.getName() + "," + entry.getKey().getName() + "," + entry.getValue());
@@ -113,7 +127,7 @@ public class SaveManager {
             }
 
             // Save Spouse data
-            for (Sim sim : engine.getNeighborhood()) {
+            for (Sim sim : allTrackedSims) {
                 if (sim.getRelationshipManager().getSpouse() != null) {
                     writer.println("Spouse:" + sim.getName() + "," + sim.getRelationshipManager().getSpouse().getName());
                 }
@@ -122,13 +136,6 @@ public class SaveManager {
         } catch (IOException e) {
             simcli.ui.UIManager.printWarning("Error saving game: " + e.getMessage());
         }
-        
-        simcli.ui.UIManager.printMessage("\n=== Successfully saved World: " + worldName + " ===");
-        simcli.ui.UIManager.printMessage("Household Saved:");
-        for(Sim s : engine.getNeighborhood()) {
-            simcli.ui.UIManager.printMessage(" - " + s.getName() + " (Age: " + s.getAge() + " | Job: " + s.getCareer().getTitle() + ")");
-        }
-        simcli.ui.UIManager.printMessage("=============================================");
     }
 
     public static GameEngine loadGame(String worldName) {
@@ -142,15 +149,21 @@ public class SaveManager {
             int loadedLocIndex = 0;
             int loadedRoomIndex = -1;
             List<Sim> loadedNeighborhood = new ArrayList<>();
+            List<NPCSim> loadedNPCs = new ArrayList<>();
             java.util.Map<Integer, String[]> parsedResStates = new java.util.HashMap<>();
             List<String[]> relLines = new ArrayList<>();
             List<String[]> spouseLines = new ArrayList<>();
+            List<String[]> inventoryLines = new ArrayList<>();
+
+            String activePlayerName = null;
 
             while ((line = reader.readLine()) != null) {
                 if (line.startsWith("WORLD:")) {
                     loadedWorldName = line.substring(6);
                 } else if (line.startsWith("TICK:")) {
                     loadedTick = Integer.parseInt(line.substring(5));
+                } else if (line.startsWith("ACTIVE_PLAYER_NAME:")) {
+                    activePlayerName = line.substring(19);
                 } else if (line.startsWith("GAME_OVER:")) {
                     isGameOver = Boolean.parseBoolean(line.substring(10));
                 } else if (line.startsWith("LOCATION:")) {
@@ -169,108 +182,89 @@ public class SaveManager {
                 } else if (line.startsWith("Spouse:")) {
                     spouseLines.add(line.substring(7).split(","));
                 } else if (line.startsWith("Inventory:")) {
-                    String[] invData = line.substring(10).split(",");
-                    String ownerName = invData[0];
-                    String type = invData[1];
-                    String itemName = invData[2];
-                    int price = Integer.parseInt(invData[3]);
-                    
-                    for (Sim s : loadedNeighborhood) {
-                        if (s.getName().equals(ownerName)) {
-                            if (type.equals("Furniture")) {
-                                int space = Integer.parseInt(invData[4]);
-                                s.addItem(new simcli.entities.items.Furniture(itemName, price, space));
-                            } else if (type.equals("Food")) {
-                                int sat = Integer.parseInt(invData[4]);
-                                int eng = Integer.parseInt(invData[5]);
-                                s.addItem(new simcli.entities.items.Food(itemName, price, sat, eng));
-                            } else if (type.equals("Consumable")) {
-                                int sat = Integer.parseInt(invData[4]);
-                                int eng = Integer.parseInt(invData[5]);
-                                int happiness = Integer.parseInt(invData[6]);
-                                s.addItem(new simcli.entities.items.Consumable(itemName, price, sat, eng, happiness));
-                            }
-                            break;
-                        }
-                    }
+                    inventoryLines.add(line.substring(10).split(","));
+                } else if (line.startsWith("NPC:")) {
+                    String[] data = line.substring(4).split(",");
+                    Gender gender = Gender.valueOf(data[2]);
+                    Job job = Job.valueOf(data[3]);
+                    NPCSim npc = new NPCSim(data[0], Integer.parseInt(data[1]), gender, job);
+                    npc.getHunger().setValue(Integer.parseInt(data[4]));
+                    npc.getEnergy().setValue(Integer.parseInt(data[5]));
+                    npc.getHappiness().setValue(Integer.parseInt(data[6]));
+                    npc.getHygiene().setValue(Integer.parseInt(data[7]));
+                    npc.getSocial().setValue(Integer.parseInt(data[8]));
+                    loadedNPCs.add(npc);
                 } else if (line.startsWith("Sim:")) {
                     String[] data = line.substring(4).split(",");
-
                     Gender loadedGender = Gender.valueOf(data[2]);
                     Job loadedJob = Job.valueOf(data[3]);
                     Sim sim = new Sim(data[0], Integer.parseInt(data[1]), loadedGender, loadedJob);
-
                     sim.setMoney(Integer.parseInt(data[4]));
                     sim.setInventoryCapacity(Integer.parseInt(data[5]));
-
                     sim.getHunger().setValue(Integer.parseInt(data[6]));
                     sim.getEnergy().setValue(Integer.parseInt(data[7]));
-                    if (data.length > 8) {
-                        sim.getHappiness().setValue(Integer.parseInt(data[8]));
-                    }
-                    if (data.length > 9) {
-                        sim.getHygiene().setValue(Integer.parseInt(data[9]));
-                    }
-                    if (data.length > 10) {
-                        sim.getSocial().setValue(Integer.parseInt(data[10]));
-                    }
-                    if (data.length > 11) {
-                        sim.setJobTier(Integer.parseInt(data[11]));
-                    }
+                    sim.getHappiness().setValue(Integer.parseInt(data[8]));
+                    sim.getHygiene().setValue(Integer.parseInt(data[9]));
+                    sim.getSocial().setValue(Integer.parseInt(data[10]));
+                    sim.setJobTier(Integer.parseInt(data[11]));
                     if (data.length > 12) {
                         sim.setChildSim(Boolean.parseBoolean(data[12]));
                     }
                     sim.updateState();
-
                     loadedNeighborhood.add(sim);
                 }
             }
 
             if (isGameOver) {
                 simcli.ui.UIManager.printGameOverStats(loadedTick, statsMoney, statsItems);
-                simcli.ui.UIManager.printMessage("This save state is complete. Returning to Main Menu.");
                 return null;
             }
 
-            // Post-Load: Rebuild relationships between loaded sims
+            List<Sim> allSims = new ArrayList<>(loadedNeighborhood);
+            allSims.addAll(loadedNPCs);
+
+            // Load Inventory
+            for (String[] invData : inventoryLines) {
+                String ownerName = invData[0];
+                Sim owner = findSimByName(allSims, ownerName);
+                if (owner != null) {
+                    String type = invData[1];
+                    String itemName = invData[2];
+                    int price = Integer.parseInt(invData[3]);
+                    if (type.equals("Furniture")) {
+                        owner.addItem(new simcli.entities.items.Furniture(itemName, price, Integer.parseInt(invData[4])));
+                    } else if (type.equals("Food")) {
+                        owner.addItem(new simcli.entities.items.Food(itemName, price, Integer.parseInt(invData[4]), Integer.parseInt(invData[5])));
+                    } else if (type.equals("Consumable")) {
+                        owner.addItem(new simcli.entities.items.Consumable(itemName, price, Integer.parseInt(invData[4]), Integer.parseInt(invData[5]), Integer.parseInt(invData[6])));
+                    }
+                }
+            }
+
+            // Load Relationships
             for (String[] relData : relLines) {
-                String ownerName = relData[0];
-                String targetName = relData[1];
-                int score = Integer.parseInt(relData[2]);
-                Sim ownerSim = findSimByName(loadedNeighborhood, ownerName);
-                Sim targetSim = findSimByName(loadedNeighborhood, targetName);
-                if (ownerSim != null && targetSim != null) {
-                    ownerSim.getRelationshipManager().increaseRelationship(targetSim, score);
+                Sim s1 = findSimByName(allSims, relData[0]);
+                Sim s2 = findSimByName(allSims, relData[1]);
+                if (s1 != null && s2 != null) {
+                    s1.getRelationshipManager().increaseRelationship(s2, Integer.parseInt(relData[2]));
                 }
             }
 
-            // Post-Load: Rebuild spouse links
+            // Load Spouses
             for (String[] spouseData : spouseLines) {
-                String ownerName = spouseData[0];
-                String spouseName = spouseData[1];
-                Sim ownerSim = findSimByName(loadedNeighborhood, ownerName);
-                Sim spouseSim = findSimByName(loadedNeighborhood, spouseName);
-                if (ownerSim != null && spouseSim != null) {
-                    ownerSim.getRelationshipManager().setSpouse(spouseSim);
+                Sim s1 = findSimByName(allSims, spouseData[0]);
+                Sim s2 = findSimByName(allSims, spouseData[1]);
+                if (s1 != null && s2 != null) {
+                    s1.getRelationshipManager().setSpouse(s2);
                 }
             }
 
-            // Post-Load: Rebuild parent-child links (children are child sims whose parents are in neighborhood)
-            for (Sim sim : loadedNeighborhood) {
+            // Load Children parentage
+            for (Sim sim : allSims) {
                 if (sim.isChildSim()) {
-                    // Find married parents and add this child to their children list
                     for (Sim parent : loadedNeighborhood) {
-                        if (!parent.isChildSim() && parent.getRelationshipManager().getSpouse() != null) {
-                            boolean alreadyHasChild = false;
-                            for (Sim c : parent.getRelationshipManager().getChildren()) {
-                                if (c.getName().equals(sim.getName())) {
-                                    alreadyHasChild = true;
-                                    break;
-                                }
-                            }
-                            if (!alreadyHasChild) {
-                                parent.getRelationshipManager().addChild(sim);
-                            }
+                        if (parent.getRelationshipManager().getSpouse() != null && !parent.isChildSim()) {
+                            parent.getRelationshipManager().addChild(sim);
                         }
                     }
                 }
@@ -278,50 +272,41 @@ public class SaveManager {
 
             GameEngine engine = new GameEngine(loadedWorldName, loadedTick, loadedNeighborhood, isGameOver);
             
-            // Post-Load: Inject World States
-            List<simcli.world.Building> map = engine.getWorldManager().getCityMap();
-            for (java.util.Map.Entry<Integer, String[]> entry : parsedResStates.entrySet()) {
-                int bIndex = entry.getKey();
-                String[] bData = entry.getValue();
-                if (bIndex >= 0 && bIndex < map.size() && map.get(bIndex) instanceof simcli.world.Residential) {
-                    simcli.world.Residential res = (simcli.world.Residential) map.get(bIndex);
-                    res.setOwned(Boolean.parseBoolean(bData[1]));
-                    for (int i = 0; i < res.getRooms().size() && (i + 2) < bData.length; i++) {
-                        res.getRooms().get(i).setMaxCapacity(Integer.parseInt(bData[i + 2]));
-                    }
+            // Restore active player if saved
+            if (activePlayerName != null) {
+                Sim savedActive = findSimByName(loadedNeighborhood, activePlayerName);
+                if (savedActive != null && savedActive.getState() != simcli.entities.models.SimState.DEAD) {
+                    engine.setActivePlayer(savedActive);
                 }
             }
             
-            // Post-Load: Inject Location
+            for (NPCSim npc : loadedNPCs) {
+                engine.getNpcManager().addNPC(npc);
+            }
+
+            // Post-Load injection
+            List<simcli.world.Building> map = engine.getWorldManager().getCityMap();
+            for (Map.Entry<Integer, String[]> entry : parsedResStates.entrySet()) {
+                simcli.world.Residential res = (simcli.world.Residential) map.get(entry.getKey());
+                res.setOwned(Boolean.parseBoolean(entry.getValue()[1]));
+            }
             if (loadedLocIndex >= 0 && loadedLocIndex < map.size()) {
-                simcli.world.Building curLoc = map.get(loadedLocIndex);
-                engine.getWorldManager().setCurrentLocation(curLoc);
-                
-                Sim active = loadedNeighborhood.get(0);
-                if (curLoc instanceof simcli.world.Residential && loadedRoomIndex >= 0) {
-                    simcli.world.Residential res = (simcli.world.Residential) curLoc;
-                    if (loadedRoomIndex < res.getRooms().size()) {
-                        active.setCurrentRoom(res.getRooms().get(loadedRoomIndex));
-                    }
+                engine.getWorldManager().setCurrentLocation(map.get(loadedLocIndex));
+                if (engine.getWorldManager().getCurrentLocation() instanceof simcli.world.Residential && loadedRoomIndex >= 0) {
+                    simcli.world.Residential res = (simcli.world.Residential) engine.getWorldManager().getCurrentLocation();
+                    loadedNeighborhood.get(0).setCurrentRoom(res.getRooms().get(loadedRoomIndex));
                 }
             }
 
             return engine;
-
         } catch (Exception e) {
-            simcli.ui.UIManager.printWarning("Error loading game: " + e.getMessage());
             return null;
         }
     }
 
-    /**
-     * Helper to find a Sim by name in the loaded neighborhood.
-     */
-    private static Sim findSimByName(List<Sim> neighborhood, String name) {
-        for (Sim s : neighborhood) {
-            if (s.getName().equals(name)) {
-                return s;
-            }
+    private static Sim findSimByName(List<Sim> list, String name) {
+        for (Sim s : list) {
+            if (s.getName().equals(name)) return s;
         }
         return null;
     }

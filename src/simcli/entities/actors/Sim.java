@@ -146,7 +146,13 @@ public class Sim implements ISimBehaviour {
             traitEnergyMod *= t.getEnergyDecayModifier(); 
         }
 
-        needsTracker.tick(this, ageMultiplier, stageEnergyModifier * traitEnergyMod, this.name);
+        if (this.isChildSim && !this.isPlayable()) {
+            // Babys/Infants only have hunger decay
+            this.getHunger().calculateDecay(this, ageMultiplier);
+            this.updateState();
+        } else {
+            needsTracker.tick(this, ageMultiplier, stageEnergyModifier * traitEnergyMod, this.name);
+        }
     }
 
     public void growOlderDaily() {

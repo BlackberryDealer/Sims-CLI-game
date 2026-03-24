@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import simcli.engine.SimulationException;
 import simcli.entities.models.Gender;
 import simcli.entities.models.Job;
-import simcli.entities.actors.Sim;
+
 import simcli.utils.GameConstants;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -114,7 +114,7 @@ public class ReproduceTest {
         // Act: try multiple times to account for 50% success rate
         Sim child = null;
         for (int attempt = 0; attempt < 20; attempt++) {
-            child = male.getRelationshipManager().reproduce();
+            child = male.getRelationshipManager().reproduce("TestBaby");
             if (child != null) break;
         }
 
@@ -136,7 +136,7 @@ public class ReproduceTest {
         // Try many times — at least one should return null
         boolean hadNull = false;
         for (int attempt = 0; attempt < 50; attempt++) {
-            Sim child = male.getRelationshipManager().reproduce();
+            Sim child = male.getRelationshipManager().reproduce("TestBaby");
             if (child == null) {
                 hadNull = true;
                 break;
@@ -148,7 +148,7 @@ public class ReproduceTest {
     @Test
     @DisplayName("reproduce() throws SimulationException when Sim is not married")
     void testReproduceFailsWhenNotMarried() {
-        assertThrows(SimulationException.class, () -> male.getRelationshipManager().reproduce(),
+        assertThrows(SimulationException.class, () -> male.getRelationshipManager().reproduce("TestBaby"),
                 "reproduce() must throw when the Sim has no spouse");
     }
 
@@ -161,7 +161,7 @@ public class ReproduceTest {
         boolean married = male.getRelationshipManager().marry(male2);
         assertTrue(married, "Two males can still get 'married' — the biological check is in reproduce()");
 
-        assertThrows(SimulationException.class, () -> male.getRelationshipManager().reproduce(),
+        assertThrows(SimulationException.class, () -> male.getRelationshipManager().reproduce("TestBaby"),
                 "reproduce() must throw for same-gender couple");
     }
 
@@ -173,7 +173,7 @@ public class ReproduceTest {
 
         Sim child = null;
         for (int attempt = 0; attempt < 20; attempt++) {
-            child = male.getRelationshipManager().reproduce();
+            child = male.getRelationshipManager().reproduce("TestBaby");
             if (child != null) break;
         }
 
@@ -190,7 +190,7 @@ public class ReproduceTest {
 
         Sim child = null;
         for (int attempt = 0; attempt < 20; attempt++) {
-            child = male.getRelationshipManager().reproduce();
+            child = male.getRelationshipManager().reproduce("TestBaby");
             if (child != null) break;
         }
 

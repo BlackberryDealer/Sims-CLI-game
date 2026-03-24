@@ -1,13 +1,13 @@
 package simcli.engine;
 
 import simcli.entities.actors.Sim;
+import simcli.entities.managers.NPCManager;
 import simcli.entities.models.SimState;
 import simcli.ui.IRenderer;
 import simcli.ui.TerminalRenderer;
 import simcli.persistence.SaveManager;
 import simcli.utils.GameConstants;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -22,6 +22,7 @@ public class GameEngine {
     private RandomEventManager randomEventManager;
 
     // World Stats tracking (aggregated upon save/game over)
+    private final NPCManager npcManager;
     private int sessionTotalMoney;
     private int sessionTotalItems;
     private Sim activePlayer;
@@ -36,6 +37,8 @@ public class GameEngine {
         ((WorldManager)this.worldManager).setEngine(this);
         this.worldManager.setupWorld();
         this.activePlayer = startingNeighborhood.get(0);
+        this.npcManager = new NPCManager();
+        this.npcManager.replenishNPCs(3);
         this.inputHandler = new InputHandler(this.worldManager, this.timeManager, this);
         this.renderer = new TerminalRenderer();
         this.randomEventManager = new RandomEventManager();
@@ -60,6 +63,8 @@ public class GameEngine {
             }
         }
         this.activePlayer = firstAlive;
+        this.npcManager = new NPCManager();
+        this.npcManager.replenishNPCs(3);
         
         this.inputHandler = new InputHandler(this.worldManager, this.timeManager, this);
         this.renderer = new TerminalRenderer();
@@ -73,6 +78,10 @@ public class GameEngine {
 
     public IWorldManager getWorldManager() {
         return worldManager;
+    }
+
+    public NPCManager getNpcManager() {
+        return npcManager;
     }
 
     public void run(Scanner scanner) {
@@ -137,7 +146,7 @@ public class GameEngine {
 
             tickForward = true;
 
-            renderer.renderActiveSimStats(activePlayer);
+            renderer.renderActiveSimStats(activePlayer, this.neighborhood);
 
             simcli.ui.UIManager.printMessage("Inventory Logs: " + activePlayer.getInventory().size() + " items");
 
@@ -148,7 +157,7 @@ public class GameEngine {
                 items = this.worldManager.getCurrentLocation().getInteractables();
             }
 
-            renderer.renderActions(items, this.worldManager.getCurrentLocation() instanceof simcli.world.Residential);
+            renderer.renderActions(activePlayer, items, this.worldManager.getCurrentLocation() instanceof simcli.world.Residential);
             simcli.engine.SimulationLogger.flushAndPrint();
             simcli.ui.UIManager.prompt("\nCOMMAND> ");
 

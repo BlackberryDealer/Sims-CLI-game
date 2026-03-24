@@ -136,7 +136,7 @@ public class RelationshipManager {
         relationships.putIfAbsent(otherSim, 0);
         if (relationships.get(otherSim) >= GameConstants.MARRIAGE_THRESHOLD && this.spouse == null && otherSim.getRelationshipManager().getSpouse() == null) {
             this.spouse = otherSim;
-            otherSim.getRelationshipManager().setSpouseExternally(owner);
+            otherSim.getRelationshipManager().setSpouse(owner);
             SimulationLogger.log("\n*** WEDDING BELLS! " + owner.getName() + " and " + otherSim.getName() + " are now married! ***");
             return true;
         }
@@ -144,18 +144,11 @@ public class RelationshipManager {
     }
 
     /**
-     * Package-private mutator allowing cross-assignment during marriage.
-     */
-    protected void setSpouseExternally(Sim spouse) {
-        this.spouse = spouse;
-    }
-
-    /**
      * Produces a child if correctly married and passes the 50% success check.
      * @return The child Sim, or null if the attempt fails (50% chance).
      * @throws SimulationException if unmarried or same gender.
      */
-    public Sim reproduce() throws SimulationException {
+    public Sim reproduce(String childName) throws SimulationException {
         if (this.spouse == null) {
             throw new SimulationException(owner.getName() + " is not married and cannot reproduce.");
         }
@@ -164,19 +157,17 @@ public class RelationshipManager {
         }
 
         // 50% success rate
-        if (GameRandom.RANDOM.nextInt(100) >= GameConstants.REPRODUCE_SUCCESS_CHANCE) {
+        if (GameRandom.RANDOM.nextInt(100) < GameConstants.REPRODUCE_SUCCESS_CHANCE) {
+            Gender childGender = GameRandom.RANDOM.nextBoolean() ? Gender.MALE : Gender.FEMALE;
+            Sim child = new Sim(childName, 0, childGender);
+            child.setChildSim(true);
+            this.addChild(child);
+            spouse.getRelationshipManager().addChild(child);
+            SimulationLogger.log("\n*** NEW LIFE! " + owner.getName() + " and " + this.spouse.getName() + " have had a baby named " + childName + "! ***");
+            return child;
+        } else {
             SimulationLogger.log("\n" + owner.getName() + " and " + this.spouse.getName() + " tried to have a baby, but it didn't work out this time.");
             return null;
         }
-
-        Gender childGender = GameRandom.RANDOM.nextBoolean() ? Gender.MALE : Gender.FEMALE;
-        Sim child = new Sim("Baby", 0, childGender);
-        child.setChildSim(true);
-
-        this.children.add(child);
-        this.spouse.getRelationshipManager().addChild(child);
-
-        SimulationLogger.log("\n*** NEW LIFE! " + owner.getName() + " and " + this.spouse.getName() + " have had a baby! ***");
-        return child;
     }
 }

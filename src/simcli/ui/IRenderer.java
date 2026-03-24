@@ -33,7 +33,7 @@ public interface IRenderer {
     /**
      * Renders detailed stats for the currently controlled Sim right above the action menu
      */
-    void renderActiveSimStats(Sim activePlayer);
+    void renderActiveSimStats(Sim activePlayer, List<Sim> neighborhood);
 
     /**
      * Renders the memorial statistics block when a Sim dies.
@@ -43,8 +43,9 @@ public interface IRenderer {
     /**
      * Renders the grid of available actions (interactables + system commands).
      *
+     * @param activePlayer  the currently controlled Sim
      * @param items         interactable objects at the current location
      * @param isResidential whether house-specific commands should be shown
      */
-    void renderActions(List<Interactable> items, boolean isResidential);
+    void renderActions(Sim activePlayer, List<Interactable> items, boolean isResidential);
 }

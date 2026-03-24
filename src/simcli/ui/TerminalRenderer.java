@@ -68,16 +68,25 @@ public class TerminalRenderer implements IRenderer {
     }
 
     @Override
-    public void renderActiveSimStats(Sim activePlayer) {
+    public void renderActiveSimStats(Sim activePlayer, List<Sim> neighborhood) {
         UIManager.printMessage("\n==========================================================================");
-        UIManager.printMessage("[" + activePlayer.getName().toUpperCase() + "] Health: " + activePlayer.getHealth() + "%" +
+        String stats = "[" + activePlayer.getName().toUpperCase() + "] Health: " + activePlayer.getHealth() + "%" +
                 " | Hunger: " + activePlayer.getHunger().getValue() +
                 " | Energy: " + activePlayer.getEnergy().getValue() +
                 " | Hygiene: " + activePlayer.getHygiene().getValue() +
                 " | Happiness: " + activePlayer.getHappiness().getValue() +
                 " | Social: " + activePlayer.getSocial().getValue() +
                 " | Cash: $" + activePlayer.getMoney() + " | Job: " + activePlayer.getCareer().getTitle() + 
-                " | State: " + activePlayer.getState());
+                " | State: " + activePlayer.getState();
+        UIManager.printMessage(stats);
+
+        // Add Baby Hunger if applicable (any non-playable child Sim in household)
+        for (Sim sim : neighborhood) {
+            if (sim.isChildSim() && !sim.isPlayable()) {
+                UIManager.printMessage("[BABY] " + sim.getName() + " Hunger: " + sim.getHunger().getValue() + "/100");
+            }
+        }
+        
         UIManager.printMessage("==========================================================================");
     }
 
@@ -101,7 +110,7 @@ public class TerminalRenderer implements IRenderer {
     }
 
     @Override
-    public void renderActions(List<Interactable> items, boolean isResidential) {
-        UIManager.printActionGrid(items, isResidential);
+    public void renderActions(Sim activePlayer, List<Interactable> items, boolean isResidential) {
+        UIManager.printActionGrid(activePlayer, items, isResidential);
     }
 }

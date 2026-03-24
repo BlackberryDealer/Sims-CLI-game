@@ -66,6 +66,9 @@ public class InputHandler implements IInputHandler {
                 case "K":
                     command = new SwitchSimCommand(engine, scanner);
                     break;
+                case "L":
+                    command = new SpouseInteractionCommand(engine, scanner);
+                    break;
                 default:
                     int choice = Integer.parseInt(input) - 1;
                     command = new InteractCommand(activePlayer, scanner, timeManager, items, choice);

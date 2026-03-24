@@ -58,7 +58,7 @@ public class UIManager {
         }
     }
 
-    public static void printActionGrid(List<Interactable> items, boolean isResidential) {
+    public static void printActionGrid(simcli.entities.actors.Sim player, List<Interactable> items, boolean isResidential) {
         System.out.println("\nAvailable Actions:");
         for (int i = 0; i < items.size(); i++) {
             System.out.printf("[%2d] Use %-15s", (i + 1), items.get(i).getObjectName());
@@ -72,7 +72,13 @@ public class UIManager {
         if (isResidential) {
             System.out.println("[House]    [M] Move Room    [H] House Info   [U] Upgrade Room");
         }
-        System.out.println("[Personal] [I] Character Status   [V] Inventory   [K] Switch Sim");
+        
+        String personalLine = "[Personal] [I] Character Status   [V] Inventory   [K] Switch Sim";
+        if (player.getRelationshipManager().getSpouse() != null) {
+            personalLine += "   [L] Interact with Spouse";
+        }
+        System.out.println(personalLine);
+        
         System.out.println("[General]  [S] Save & Exit");
     }
 

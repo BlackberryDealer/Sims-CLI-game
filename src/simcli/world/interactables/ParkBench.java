@@ -14,11 +14,9 @@ import java.util.List;
 import java.util.Scanner;
 
 public class ParkBench implements Interactable {
-    private final List<NPCSim> visitors;
     private final GameEngine engine;
 
-    public ParkBench(List<NPCSim> visitors, GameEngine engine) {
-        this.visitors = visitors;
+    public ParkBench(GameEngine engine) {
         this.engine = engine;
     }
 
@@ -27,12 +25,15 @@ public class ParkBench implements Interactable {
         sim.setCurrentAction(ActionState.SOCIALIZING);
         SimulationLogger.logAnimation(sim);
 
+        List<NPCSim> visitors = engine.getNpcManager().getActiveNPCs();
+
         SimulationLogger.prompt("\n=== Socialize at the Park ===\n");
         for (int i = 0; i < visitors.size(); i++) {
             NPCSim npc = visitors.get(i);
             int relScore = sim.getRelationshipManager().getRelationship(npc);
             String spouseTag = (sim.getRelationshipManager().getSpouse() == npc) ? " [SPOUSE]" : "";
-            SimulationLogger.prompt("[" + (i + 1) + "] Talk to " + npc.getName()
+            SimulationLogger.prompt("[" + (i + 1) + "] " + npc.getName() 
+                    + ", " + npc.getAge() + ", " + npc.getCareer().getTitle()
                     + " (Relationship: " + relScore + "/100)" + spouseTag + "\n");
         }
         SimulationLogger.prompt("[0] Go back\nSelect person> ");
@@ -88,7 +89,7 @@ public class ParkBench implements Interactable {
                 } else if (actionChoice == 4 && canPropose) {
                     handleProposal(sim, target);
                 } else if (actionChoice == 5 && isSpouse) {
-                    handleBaby(sim);
+                    handleBaby(sim, scanner);
                 } else {
                     SimulationLogger.logWarning("Invalid action selection.");
                     return;
@@ -107,6 +108,10 @@ public class ParkBench implements Interactable {
     private void handleProposal(Sim sim, NPCSim target) {
         boolean married = sim.getRelationshipManager().marry(target);
         if (married) {
+            // Remove from park pool and replenish
+            engine.getNpcManager().removeNPC(target);
+            engine.getNpcManager().replenishNPCs(3);
+
             // Add the NPC to the neighborhood as a playable character
             if (!engine.getNeighborhood().contains(target)) {
                 engine.getNeighborhood().add(target);
@@ -120,12 +125,16 @@ public class ParkBench implements Interactable {
     /**
      * Handles the baby attempt. 50% success rate via RelationshipManager.reproduce().
      */
-    private void handleBaby(Sim sim) {
+    private void handleBaby(Sim sim, Scanner scanner) {
+        SimulationLogger.prompt("Enter a name for the baby: ");
+        String babyName = scanner.nextLine().trim();
+        if (babyName.isEmpty()) babyName = "Baby";
+
         try {
-            Sim child = sim.getRelationshipManager().reproduce();
+            Sim child = sim.getRelationshipManager().reproduce(babyName);
             if (child != null) {
                 engine.getNeighborhood().add(child);
-                SimulationLogger.log("The baby has been added to your household!");
+                SimulationLogger.log(child.getName() + " has been added to your household!");
                 SimulationLogger.log("Note: The child will become playable once they reach the teen stage (age 13).");
             }
         } catch (SimulationException e) {
