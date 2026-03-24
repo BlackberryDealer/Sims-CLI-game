@@ -120,9 +120,9 @@ public class RelationshipManager {
         owner.setCurrentAction(ActionState.SOCIALIZING);
         
         SimulationLogger.log(owner.getName() + " socializes with " + otherSim.getName() + ".");
-        owner.getSocial().increase(socialBonus);
-        owner.getEnergy().decrease(10);
-        owner.getHappiness().increase(happinessBonus);
+        owner.increaseSocial(socialBonus);
+        owner.decreaseEnergy(10);
+        owner.increaseHappiness(happinessBonus);
         
         interactWith(otherSim, "chat");
     }

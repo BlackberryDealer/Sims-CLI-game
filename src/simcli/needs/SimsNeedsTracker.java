@@ -95,6 +95,18 @@ public class SimsNeedsTracker {
         }
     }
 
+    public void increaseSocial(int amount) {
+        this.social.increase(amount);
+    }
+
+    public void decreaseEnergy(int amount) {
+        this.energy.increase(amount);
+    }
+
+    public void increaseHappiness(int amount) {
+        this.happiness.increase(amount);
+    }
+
     public Need getHunger() { return hunger; }
     public Need getEnergy() { return energy; }
     public Need getHygiene() { return hygiene; }

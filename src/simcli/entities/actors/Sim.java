@@ -130,6 +130,10 @@ public class Sim implements ISimBehaviour {
     public RelationshipManager getRelationshipManager() { return relationshipManager; }
     public CareerManager getCareerManager() { return careerManager; }
 
+    public void decreaseEnergy(int amount) { needsTracker.decreaseEnergy(amount); }
+    public void increaseHappiness(int amount) { this.needsTracker.increaseHappiness(amount); }
+    public void increaseSocial(int amount) { this.needsTracker.increaseSocial(amount); }
+
     public void tick() {
         if (this.getState() == SimState.DEAD) {
             return; 
