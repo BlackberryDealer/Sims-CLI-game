@@ -6,11 +6,15 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import simcli.engine.*;
 import simcli.entities.actors.*;
-import simcli.entities.components.*;
+import simcli.entities.models.*;
+import simcli.entities.managers.*;
+import simcli.entities.models.*;
 import simcli.entities.items.*;
 import simcli.needs.*;
 import simcli.entities.actors.*;
-import simcli.entities.components.*;
+import simcli.entities.models.*;
+import simcli.entities.managers.*;
+import simcli.entities.models.*;
 import simcli.entities.items.*;
 import simcli.needs.*;
 import simcli.world.Building;
@@ -125,7 +129,7 @@ public class IntegrationTest {
     @Test
     @DisplayName("Edge Case: Cancel an Overwork shift (State Validation)")
     void testCancelOverworkMaintainsState() {
-        activePlayer.changeJob(Job.SOFTWARE_ENGINEER);
+        activePlayer.getCareerManager().changeJob(Job.SOFTWARE_ENGINEER, activePlayer.getName());
         activePlayer.incrementShiftsWorkedToday(); // Sim has already worked once today
         int initialEnergy = activePlayer.getEnergy().getValue();
 

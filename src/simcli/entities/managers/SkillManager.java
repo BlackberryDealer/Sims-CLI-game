@@ -1,4 +1,6 @@
-package simcli.entities.components;
+package simcli.entities.managers;
+
+import simcli.entities.models.SkillType;
 
 import java.util.HashMap;
 import java.util.Map;

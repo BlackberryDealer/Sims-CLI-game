@@ -1,5 +1,7 @@
 package simcli.entities.actors;
 
+import simcli.entities.models.*;
+
 public class NPCSim extends Sim {
 
 

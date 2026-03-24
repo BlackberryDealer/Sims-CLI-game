@@ -1,4 +1,4 @@
-package simcli.entities.actors;
+package simcli.entities.models;
 
 /**
  * Encapsulates the overall physical constraints and emotional states of a Sim.

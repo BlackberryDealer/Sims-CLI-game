@@ -1,4 +1,4 @@
-package simcli.entities.actors;
+package simcli.entities.models;
 
 public enum ActionState {
     IDLE,

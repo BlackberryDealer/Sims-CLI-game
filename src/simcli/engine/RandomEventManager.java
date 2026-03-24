@@ -1,7 +1,7 @@
 package simcli.engine;
 
 import simcli.entities.actors.Sim;
-import simcli.entities.actors.SimState;
+import simcli.entities.models.SimState;
 
 public class RandomEventManager {
     public void trigger(Sim activePlayer, TimeManager timeManager) {

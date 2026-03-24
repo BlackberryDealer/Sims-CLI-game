@@ -1,4 +1,4 @@
-package simcli.entities.actors;
+package simcli.entities.models;
 
 /**
  * Enumerated thresholds detailing the severity and nature of an association between two Sims.

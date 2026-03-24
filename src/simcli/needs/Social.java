@@ -1,7 +1,7 @@
 package simcli.needs;
 
 import simcli.entities.actors.Sim;
-import simcli.entities.actors.ActionState;
+import simcli.entities.models.ActionState;
 
 /**
  * Represents the Social isolation need of a Sim.

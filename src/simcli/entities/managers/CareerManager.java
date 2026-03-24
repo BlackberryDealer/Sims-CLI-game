@@ -1,17 +1,17 @@
-package simcli.entities.components;
+package simcli.entities.managers;
 
-import simcli.entities.actors.Job;
+import simcli.entities.models.Job;
 
 import simcli.engine.SimulationLogger;
 
-public class CareerProfile {
+public class CareerManager {
     private Job career;
     private int jobTier;
     private int consecutiveDaysMissed;
     private int shiftsWorkedToday;
     private boolean hasWarnedAboutOverwork;
 
-    public CareerProfile() {
+    public CareerManager() {
         this.career = Job.UNEMPLOYED;
         this.jobTier = 1;
         this.consecutiveDaysMissed = 0;
@@ -19,7 +19,7 @@ public class CareerProfile {
         this.hasWarnedAboutOverwork = false;
     }
 
-    public CareerProfile(Job job) {
+    public CareerManager(Job job) {
         this();
         this.career = job;
     }

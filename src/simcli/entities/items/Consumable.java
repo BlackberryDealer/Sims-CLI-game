@@ -22,7 +22,7 @@ public class Consumable extends Item {
 
     @Override
     public void interact(Sim sim, java.util.Scanner scanner, simcli.engine.TimeManager timeManager) throws SimulationException {
-        sim.setCurrentAction(simcli.entities.actors.ActionState.EATING);
+        sim.setCurrentAction(simcli.entities.models.ActionState.EATING);
         simcli.ui.UIManager.displayActionAnimation(sim);
         simcli.ui.UIManager.printMessage(sim.getName() + " consumes the " + getObjectName() + ".");
         sim.getHunger().increase(this.satiationValue);

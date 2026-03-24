@@ -1,9 +1,9 @@
 package simcli.persistence;
 
 import simcli.engine.GameEngine;
-import simcli.entities.actors.Job;
+import simcli.entities.models.Job;
 import simcli.entities.actors.Sim;
-import simcli.entities.actors.Gender;
+import simcli.entities.models.Gender;
 
 import java.io.*;
 import java.util.ArrayList;

@@ -1,4 +1,4 @@
-package simcli.entities.actors;
+package simcli.entities.models;
 
 public enum Trait {
     ACTIVE(0.8),         // Uses less energy

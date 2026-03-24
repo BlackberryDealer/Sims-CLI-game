@@ -1,7 +1,7 @@
 package simcli.needs;
 
 import simcli.entities.actors.Sim;
-import simcli.entities.actors.SimState;
+import simcli.entities.models.SimState;
 import simcli.engine.SimulationLogger;
 
 /**

@@ -85,7 +85,7 @@ public class Fridge implements Interactable, Container {
                     int c = Integer.parseInt(choice);
                     if (c > 0 && c <= storedFood.size()) {
                         Item food = retrieveItem(c - 1);
-                        sim.setCurrentAction(simcli.entities.actors.ActionState.EATING);
+                        sim.setCurrentAction(simcli.entities.models.ActionState.EATING);
                         simcli.ui.UIManager.displayActionAnimation(sim);
                         simcli.ui.UIManager.printMessage(
                                 sim.getName() + " takes " + food.getObjectName() + " from the fridge and eats it.");

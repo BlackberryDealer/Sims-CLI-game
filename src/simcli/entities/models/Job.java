@@ -1,4 +1,4 @@
-package simcli.entities.actors;
+package simcli.entities.models;
 
 public enum Job {
     UNEMPLOYED("Unemployed", 0, 0, 0, 0, 100, 1.0, 1),

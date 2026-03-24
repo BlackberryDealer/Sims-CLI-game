@@ -1,7 +1,7 @@
 package simcli.engine;
 
 import simcli.entities.actors.Sim;
-import simcli.entities.actors.SimState;
+import simcli.entities.models.SimState;
 import simcli.ui.IRenderer;
 import simcli.ui.TerminalRenderer;
 import simcli.persistence.SaveManager;
@@ -182,7 +182,7 @@ public class GameEngine {
                             .printMessage("\n*** A new day has begun! (Day " + timeManager.getCurrentDay() + ") ***");
                     for (Sim s : neighborhood) {
                         s.growOlderDaily();
-                        s.checkTruancy();
+                        s.getCareerManager().checkTruancy(s.getName());
                     }
                 }
 

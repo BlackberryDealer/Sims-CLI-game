@@ -1,4 +1,4 @@
-package simcli.entities.components;
+package simcli.entities.managers;
 
 import simcli.entities.items.Item;
 

@@ -1,6 +1,6 @@
 package simcli.ui.ascii;
 
-import simcli.entities.actors.ActionState;
+import simcli.entities.models.ActionState;
 import simcli.entities.actors.Sim;
 import simcli.world.Building;
 

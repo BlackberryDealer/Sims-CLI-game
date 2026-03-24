@@ -2,8 +2,8 @@ package simcli.ui;
 
 import simcli.engine.GameEngine;
 import simcli.persistence.SaveManager;
-import simcli.entities.actors.Gender;
-import simcli.entities.actors.Job;
+import simcli.entities.models.Gender;
+import simcli.entities.models.Job;
 import simcli.entities.actors.Sim;
 
 import java.util.List;

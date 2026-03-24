@@ -2,11 +2,11 @@ package simcli.world.interactables;
 
 import simcli.engine.SimulationException;
 import simcli.engine.SimulationLogger;
-import simcli.entities.actors.ActionState;
+import simcli.entities.models.ActionState;
 import simcli.entities.actors.NPCSim;
 import simcli.entities.actors.Sim;
-import simcli.entities.components.SkillType;
-import simcli.entities.actors.Trait;
+import simcli.entities.models.SkillType;
+import simcli.entities.models.Trait;
 
 import java.util.List;
 import java.util.Scanner;
@@ -27,7 +27,7 @@ public class ParkBench implements Interactable {
         for (int i = 0; i < visitors.size(); i++) {
             NPCSim npc = visitors.get(i);
             SimulationLogger.prompt("[" + (i + 1) + "] Talk to " + npc.getName()
-                    + " (Relationship: " + sim.getRelationship(npc) + ")\n");
+                    + " (Relationship: " + sim.getRelationshipManager().getRelationship(npc) + ")\n");
         }
         SimulationLogger.prompt("[0] Go back\nSelect person> ");
         try {
@@ -42,7 +42,7 @@ public class ParkBench implements Interactable {
                 if (actionChoice == 1) {
                     int relGain = isSocialite ? 8 : 5;
                     SimulationLogger.log(sim.getName() + " chats politely with " + target.getName() + ".");
-                    sim.increaseRelationship(target, relGain);
+                    sim.getRelationshipManager().increaseRelationship(target, relGain);
                     sim.getFun().increase(10);
                     sim.getEnergy().decrease(5);
                     sim.getSocial().increase(30);
@@ -50,14 +50,14 @@ public class ParkBench implements Interactable {
                 } else if (actionChoice == 2) {
                     int relGain = isSocialite ? 15 : 10;
                     SimulationLogger.log(sim.getName() + " tells a funny joke to " + target.getName() + "!");
-                    sim.increaseRelationship(target, relGain);
+                    sim.getRelationshipManager().increaseRelationship(target, relGain);
                     sim.getFun().increase(15);
                     sim.getEnergy().decrease(10);
                     sim.getSocial().increase(70);
                     sim.getSkillManager().addSkillExperience(SkillType.CHARISMA, isSocialite ? 15 : 10, sim.getName(), false);
                 } else if (actionChoice == 3) {
                     SimulationLogger.log(sim.getName() + " argues bitterly with " + target.getName() + ".");
-                    sim.increaseRelationship(target, -15);
+                    sim.getRelationshipManager().increaseRelationship(target, -15);
                     sim.getFun().decrease(10);
                     sim.getEnergy().decrease(15);
                     sim.getSocial().increase(20);
@@ -66,7 +66,7 @@ public class ParkBench implements Interactable {
                     return;
                 }
                 
-                SimulationLogger.log("Relationship with " + target.getName() + " is now " + sim.getRelationship(target) + ".");
+                SimulationLogger.log("Relationship with " + target.getName() + " is now " + sim.getRelationshipManager().getRelationship(target) + ".");
             }
         } catch (NumberFormatException e) {
             SimulationLogger.logWarning("Invalid selection.");

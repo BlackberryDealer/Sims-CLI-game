@@ -1,4 +1,6 @@
-package simcli.entities.actors;
+package simcli.entities.models;
+
+import simcli.entities.actors.Sim;
 
 /**
  * Encapsulates the social connection a Sim holds with an opposing Sim entity.

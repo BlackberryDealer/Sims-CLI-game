@@ -3,9 +3,9 @@ package simcli.world.interactables;
 import simcli.engine.SimulationException;
 import simcli.engine.SimulationLogger;
 import simcli.entities.actors.Sim;
-import simcli.entities.actors.ActionState;
-import simcli.entities.components.SkillType;
-import simcli.entities.actors.Trait;
+import simcli.entities.models.ActionState;
+import simcli.entities.models.SkillType;
+import simcli.entities.models.Trait;
 
 public class Computer implements Interactable {
     private static final int ENERGY_COST = 15;
@@ -16,7 +16,7 @@ public class Computer implements Interactable {
     @Override
     public void interact(Sim sim, java.util.Scanner scanner, simcli.engine.TimeManager timeManager) throws SimulationException {
         // Slide 5: TIRED state blocks studying (Aligned with Proposal Slides)
-        if (sim.getState() == simcli.entities.actors.SimState.TIRED) {
+        if (sim.getState() == simcli.entities.models.SimState.TIRED) {
             throw new SimulationException(sim.getName() + " is too tired to study! Get some sleep first.");
         }
         

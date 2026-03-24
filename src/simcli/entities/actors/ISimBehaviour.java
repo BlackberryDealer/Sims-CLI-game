@@ -1,5 +1,7 @@
 package simcli.entities.actors;
 
+import simcli.entities.models.*;
+
 /**
  * Contract that every controllable/playable Sim type must fulfil.
  * Decouples GameEngine from concrete Sim subclasses — the engine works

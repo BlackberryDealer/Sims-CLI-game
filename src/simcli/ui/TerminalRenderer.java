@@ -47,7 +47,7 @@ public class TerminalRenderer implements IRenderer {
         }
         
         // Reset action to IDLE after rendering so art doesn't persist next frame
-        player.setCurrentAction(simcli.entities.actors.ActionState.IDLE);
+        player.setCurrentAction(simcli.entities.models.ActionState.IDLE);
     }
 
     @Override

@@ -5,8 +5,8 @@ import simcli.engine.SimulationException;
 import simcli.engine.SimulationLogger;
 import simcli.engine.TimeManager;
 import simcli.entities.actors.Sim;
-import simcli.entities.actors.Job;
-import simcli.entities.actors.ActionState;
+import simcli.entities.models.Job;
+import simcli.entities.models.ActionState;
 
 import java.util.Scanner;
 
@@ -33,9 +33,7 @@ public class WorkCommand implements ICommand {
         }
 
         // Slide 5: HUNGRY or STARVING states restrict work (Aligned with Proposal Slides)
-        if (activePlayer.getState() == simcli.entities.actors.SimState.HUNGRY
-                || activePlayer.getState() == simcli.entities.actors.SimState.STARVING
-                || activePlayer.getState() == simcli.entities.actors.SimState.CRITICAL) {
+        if (activePlayer.getState() == simcli.entities.models.SimState.HUNGRY) {
             simcli.ui.UIManager.printWarning(activePlayer.getName() + " is too hungry to focus on work! Eat something first.");
             simcli.ui.UIManager.prompt("\nPress ENTER to return...");
             scanner.nextLine();
@@ -89,7 +87,7 @@ public class WorkCommand implements ICommand {
         // Promotion chance after completing a shift
         if (activePlayer.getJobTier() < activePlayer.getCareer().getMaxTier()) {
             if (simcli.utils.GameRandom.RANDOM.nextDouble() < 0.25) {
-                activePlayer.promote();
+                activePlayer.getCareerManager().promote(activePlayer.getName());
             }
         }
 

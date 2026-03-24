@@ -1,7 +1,7 @@
 package simcli.engine.commands;
 
 import simcli.engine.CommandResult;
-import simcli.entities.actors.Job;
+import simcli.entities.models.Job;
 import simcli.entities.actors.Sim;
 import simcli.ui.UIManager;
 
@@ -41,7 +41,7 @@ public class JobMarketCommand extends BaseCommand {
                         UIManager.printMessage("You are already unemployed.");
                         pause(scanner);
                     } else {
-                        activePlayer.changeJob(Job.UNEMPLOYED);
+                        activePlayer.getCareerManager().changeJob(Job.UNEMPLOYED, activePlayer.getName());
                     }
                 } else if (jChoice > 0 && jChoice < allJobs.length) {
                     Job targetJob = allJobs[jChoice];
@@ -52,7 +52,7 @@ public class JobMarketCommand extends BaseCommand {
                         pause(scanner);
                     } else if (activePlayer.getAge() >= targetJob.getMinAge()
                             && activePlayer.getAge() <= targetJob.getMaxAge()) {
-                        activePlayer.changeJob(targetJob);
+                        activePlayer.getCareerManager().changeJob(targetJob, activePlayer.getName());
                     } else {
                         UIManager.printMessage("You don't meet the age requirements for this job.");
                         pause(scanner);

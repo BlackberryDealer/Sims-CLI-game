@@ -1,4 +1,4 @@
-package simcli.entities.components;
+package simcli.entities.models;
 
 public enum SkillType {
     LOGIC,

@@ -2,7 +2,7 @@ package simcli.entities.lifecycle;
 
 import simcli.engine.LifecycleManager;
 import simcli.entities.actors.Sim;
-import simcli.entities.actors.Gender;
+import simcli.entities.models.Gender;
 
 /**
  * LifecycleDemo — a standalone CLI demonstration of the State Design Pattern

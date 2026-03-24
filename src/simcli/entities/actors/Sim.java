@@ -1,9 +1,12 @@
 package simcli.entities.actors;
 
+import simcli.entities.models.*;
+
 import simcli.needs.NeedsTracker;
-import simcli.entities.components.CareerProfile;
-import simcli.entities.components.InventoryManager;
-import simcli.entities.components.SkillManager;
+import simcli.entities.managers.CareerManager;
+import simcli.entities.managers.InventoryManager;
+import simcli.entities.managers.RelationshipManager;
+import simcli.entities.managers.SkillManager;
 import simcli.entities.items.Item;
 
 import simcli.engine.SimulationException;
@@ -35,15 +38,12 @@ public class Sim implements ISimBehaviour {
 
     // Component Managers
     private NeedsTracker needsTracker;
-    private CareerProfile careerProfile;
+    private CareerManager careerManager;
     private InventoryManager inventoryManager;
     private SkillManager skillManager;
     private List<Trait> traits;
 
-    // Social Mechanics
-    private Map<Sim, Integer> relationships;
-    private List<Relationship> relationshipRegistry;
-    private Sim spouse;
+    private RelationshipManager relationshipManager;
 
     // World Stats trackers
     private int totalMoneyEarned;
@@ -58,16 +58,14 @@ public class Sim implements ISimBehaviour {
         this.currentAction = ActionState.IDLE;
 
         this.needsTracker = new NeedsTracker();
-        this.careerProfile = new CareerProfile();
+        this.careerManager = new CareerManager();
         this.inventoryManager = new InventoryManager(10);
         this.skillManager = new SkillManager();
         this.traits = new ArrayList<>();
         Trait[] allTraits = Trait.values();
         this.traits.add(allTraits[simcli.utils.GameRandom.RANDOM.nextInt(allTraits.length)]);
 
-        this.relationships = new HashMap<>();
-        this.relationshipRegistry = new ArrayList<>();
-        this.spouse = null;
+        this.relationshipManager = new RelationshipManager(this);
         this.totalMoneyEarned = money;
         this.totalItemsBought = 0;
 
@@ -84,7 +82,7 @@ public class Sim implements ISimBehaviour {
 
     public Sim(String name, int age, Gender gender, Job career) {
         this(name, age, gender);
-        this.careerProfile.setCareer(career);
+        this.careerManager.setCareer(career);
     }
 
     // --- Property Getters ---
@@ -109,14 +107,14 @@ public class Sim implements ISimBehaviour {
     public int getStarvingTicks() { return needsTracker.getStarvingTicks(); }
     public void setHealth(int health) { needsTracker.setHealth(health); }
     
-    public Job getCareer() { return careerProfile.getCareer(); }
-    public int getJobTier() { return careerProfile.getJobTier(); }
-    public void setJobTier(int tier) { careerProfile.setJobTier(tier); }
-    public int getShiftsWorkedToday() { return careerProfile.getShiftsWorkedToday(); }
-    public void incrementShiftsWorkedToday() { careerProfile.incrementShiftsWorkedToday(); }
-    public void resetConsecutiveDaysMissed() { careerProfile.setConsecutiveDaysMissed(0); }
-    public boolean hasWarnedAboutOverwork() { return careerProfile.hasWarnedAboutOverwork(); }
-    public void setWarnedAboutOverwork(boolean warned) { careerProfile.setWarnedAboutOverwork(warned); }
+    public Job getCareer() { return careerManager.getCareer(); }
+    public int getJobTier() { return careerManager.getJobTier(); }
+    public void setJobTier(int tier) { careerManager.setJobTier(tier); }
+    public int getShiftsWorkedToday() { return careerManager.getShiftsWorkedToday(); }
+    public void incrementShiftsWorkedToday() { careerManager.incrementShiftsWorkedToday(); }
+    public void resetConsecutiveDaysMissed() { careerManager.setConsecutiveDaysMissed(0); }
+    public boolean hasWarnedAboutOverwork() { return careerManager.hasWarnedAboutOverwork(); }
+    public void setWarnedAboutOverwork(boolean warned) { careerManager.setWarnedAboutOverwork(warned); }
 
     public int getInventoryCapacity() { return inventoryManager.getCapacity(); }
     public void setInventoryCapacity(int capacity) { inventoryManager.setCapacity(capacity); }
@@ -128,101 +126,8 @@ public class Sim implements ISimBehaviour {
     public ActionState getCurrentAction() { return currentAction; }
     public void setCurrentAction(ActionState action) { this.currentAction = action; }
 
-    public Map<Sim, Integer> getRelationships() { return relationships; }
-    public Sim getSpouse() { return spouse; }
-
-    public int getRelationship(Sim otherSim) {
-        return relationships.getOrDefault(otherSim, 0);
-    }
-
-    public void increaseRelationship(Sim otherSim, int amount) {
-        relationships.put(otherSim, getRelationship(otherSim) + amount);
-    }
-
-    // --- Social Logic ---
-    public List<Relationship> getRelationshipRegistry() { return relationshipRegistry; }
-
-    /**
-     * Interacts with another Sim, modifying relationship scores.
-     * @param otherSim The other Sim being interacted with.
-     * @param action The string verb describing the action (e.g., "chat", "flirt", "argue").
-     */
-    public void interactWith(Sim otherSim, String action) {
-        if (otherSim == this) return;
-        
-        Relationship rel = null;
-        for (Relationship r : relationshipRegistry) {
-            if (r.getTargetSim() == otherSim) {
-                rel = r;
-                break;
-            }
-        }
-        if (rel == null) {
-            rel = new Relationship(otherSim);
-            relationshipRegistry.add(rel);
-        }
-
-        if (action.equalsIgnoreCase("chat")) {
-            rel.setFriendshipScore(rel.getFriendshipScore() + 10);
-        } else if (action.equalsIgnoreCase("flirt")) {
-            rel.setFriendshipScore(rel.getFriendshipScore() + 25);
-        } else if (action.equalsIgnoreCase("argue")) {
-            rel.setFriendshipScore(rel.getFriendshipScore() - 15);
-        }
-        
-        rel.updateStatus();
-    }
-
-    public void interactSocially(Sim otherSim) {
-        if (otherSim == this) return;
-        relationships.putIfAbsent(otherSim, 0);
-        int relBonus = GameConstants.relBonus;
-        int socialBonus = GameConstants.socialBonus;
-        int funBonus = GameConstants.funBonus;
-        if (this.hasTrait(Trait.SOCIALITE)) {
-            relBonus = (int)(relBonus * GameConstants.bonusTimes);   // 50% more relationship
-            socialBonus = (int)(socialBonus * GameConstants.bonusTimes); // 50% more social recovery
-            funBonus = (int)(funBonus * GameConstants.bonusTimes);
-        }
-        relationships.put(otherSim, relationships.get(otherSim) + relBonus);
-        this.currentAction = ActionState.SOCIALIZING;
-        
-        SimulationLogger.log(this.name + " socializes with " + otherSim.getName() + ".");
-        this.getSocial().increase(socialBonus);
-        this.getEnergy().decrease(10);
-        this.getFun().increase(funBonus);
-        
-        // Push legacy integration through new mechanic
-        interactWith(otherSim, "chat");
-    }
-
-    public boolean marry(Sim otherSim) {
-        if (otherSim == this) return false;
-        relationships.putIfAbsent(otherSim, 0);
-        if (relationships.get(otherSim) >= 50 && this.spouse == null && otherSim.getSpouse() == null) {
-            this.spouse = otherSim;
-            otherSim.spouse = this;
-            SimulationLogger.log("\n*** WEDDING BELLS! " + this.name + " and " + otherSim.getName() + " are now married! ***");
-            return true;
-        }
-        return false;
-    }
-
-    public Sim reproduce() throws SimulationException {
-        if (this.spouse == null) {
-            throw new SimulationException(this.name + " is not married and cannot reproduce.");
-        }
-        if (this.gender == this.spouse.getGender()) {
-            throw new SimulationException(this.name + " and " + this.spouse.getName() + " are of the same gender and cannot reproduce biologically.");
-        }
-        SimulationLogger.log("\n*** NEW LIFE! " + this.name + " and " + this.spouse.getName() + " have had a baby! ***");
-        return new Sim("Baby", 0, simcli.utils.GameRandom.RANDOM.nextBoolean() ? Gender.MALE : Gender.FEMALE);
-    }
-
-    // --- Activity Logic ---
-    public void checkTruancy() { careerProfile.checkTruancy(this.name); }
-    public void promote() { careerProfile.promote(this.name); }
-    public void changeJob(Job newJob) { careerProfile.changeJob(newJob, this.name); }
+    public RelationshipManager getRelationshipManager() { return relationshipManager; }
+    public CareerManager getCareerManager() { return careerManager; }
 
     public void tick() {
         double ageMultiplier = 1.0 + (Math.max(0, this.age - 18) * 0.05);
@@ -234,7 +139,7 @@ public class Sim implements ISimBehaviour {
 
     public void growOlderDaily() {
         this.daysAlive++;
-        careerProfile.resetDaily(true);
+        careerManager.resetDaily(true);
 
         if (this.daysAlive % 3 == 0) {
             this.ageUp();
@@ -243,7 +148,7 @@ public class Sim implements ISimBehaviour {
                 SimulationLogger.log("\n*** TRAGEDY! " + this.name + " has passed away of old age at " + this.age + ". ***");
             } else if (this.age >= GameConstants.ELDER_AGE && this.getCareer() != Job.UNEMPLOYED) {
                 SimulationLogger.log("\n*** RETIREMENT! " + this.name + " has reached the retirement age of 65 and is officially retired. ***");
-                this.changeJob(Job.UNEMPLOYED);
+                this.careerManager.changeJob(Job.UNEMPLOYED, this.name);
                 this.setMoney(this.getMoney() + 1000);
             }
         }

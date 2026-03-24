@@ -8,7 +8,7 @@ import simcli.entities.items.Item;
 import simcli.entities.items.Food;
 import simcli.entities.items.Consumable;
 import simcli.entities.items.Furniture;
-import simcli.entities.actors.Job;
+import simcli.entities.models.Job;
 
 public class GroceryShelf extends AbstractShop {
 
