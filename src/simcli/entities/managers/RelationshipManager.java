@@ -120,7 +120,7 @@ public class RelationshipManager {
     public boolean marry(Sim otherSim) {
         if (otherSim == owner) return false;
         relationships.putIfAbsent(otherSim, 0);
-        if (relationships.get(otherSim) >= 50 && this.spouse == null && otherSim.getRelationshipManager().getSpouse() == null) {
+        if (relationships.get(otherSim) >= GameConstants.MARRIAGE_THRESHOLD && this.spouse == null && otherSim.getRelationshipManager().getSpouse() == null) {
             this.spouse = otherSim;
             // Cross-update spouse manager
             otherSim.getRelationshipManager().setSpouseExternally(owner);

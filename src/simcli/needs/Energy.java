@@ -2,6 +2,7 @@ package simcli.needs;
 
 import simcli.entities.actors.Sim;
 import simcli.entities.models.ActionState;
+import simcli.utils.GameConstants;
 
 /**
  * Represents the Energy need of a Sim.
@@ -11,7 +12,7 @@ public class Energy extends Need {
      * Constructor setting base Decay to 2.
      */
     public Energy() {
-        super("Energy", 2);
+        super("Energy", GameConstants.ENERGY_BASE_DECAY_RATE);
     }
 
     /**

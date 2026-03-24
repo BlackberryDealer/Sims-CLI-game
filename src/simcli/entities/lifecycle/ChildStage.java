@@ -13,7 +13,7 @@ public class ChildStage implements LifeStage {
  
     @Override
     public double getEnergyDecayModifier() {
-        return simcli.utils.GameConstants.bonusTimes;
+        return simcli.utils.GameConstants.BONUS_TIMES;
     }
 
     @Override

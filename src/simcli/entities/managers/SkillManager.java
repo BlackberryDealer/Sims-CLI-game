@@ -22,7 +22,7 @@ public class SkillManager {
 
     public void addSkillExperience(SkillType type, int amount, String simName, boolean isFastLearner) {
         if (isFastLearner) {
-            amount = (int)(amount * simcli.utils.GameConstants.bonusTimes); // 50% extra xp
+            amount = (int)(amount * simcli.utils.GameConstants.BONUS_TIMES); // 50% extra xp
         }
         int current = skills.get(type);
         int newExp = current + amount;
