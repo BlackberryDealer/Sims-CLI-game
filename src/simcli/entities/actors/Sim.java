@@ -42,6 +42,7 @@ public class Sim implements ISimBehaviour {
 
     // Social Mechanics
     private Map<Sim, Integer> relationships;
+    private List<Relationship> relationshipRegistry;
     private Sim spouse;
 
     // World Stats trackers
@@ -65,6 +66,7 @@ public class Sim implements ISimBehaviour {
         this.traits.add(allTraits[simcli.utils.GameRandom.RANDOM.nextInt(allTraits.length)]);
 
         this.relationships = new HashMap<>();
+        this.relationshipRegistry = new ArrayList<>();
         this.spouse = null;
         this.totalMoneyEarned = money;
         this.totalItemsBought = 0;
@@ -138,6 +140,39 @@ public class Sim implements ISimBehaviour {
     }
 
     // --- Social Logic ---
+    public List<Relationship> getRelationshipRegistry() { return relationshipRegistry; }
+
+    /**
+     * Interacts with another Sim, modifying relationship scores.
+     * @param otherSim The other Sim being interacted with.
+     * @param action The string verb describing the action (e.g., "chat", "flirt", "argue").
+     */
+    public void interactWith(Sim otherSim, String action) {
+        if (otherSim == this) return;
+        
+        Relationship rel = null;
+        for (Relationship r : relationshipRegistry) {
+            if (r.getTargetSim() == otherSim) {
+                rel = r;
+                break;
+            }
+        }
+        if (rel == null) {
+            rel = new Relationship(otherSim);
+            relationshipRegistry.add(rel);
+        }
+
+        if (action.equalsIgnoreCase("chat")) {
+            rel.setFriendshipScore(rel.getFriendshipScore() + 10);
+        } else if (action.equalsIgnoreCase("flirt")) {
+            rel.setFriendshipScore(rel.getFriendshipScore() + 25);
+        } else if (action.equalsIgnoreCase("argue")) {
+            rel.setFriendshipScore(rel.getFriendshipScore() - 15);
+        }
+        
+        rel.updateStatus();
+    }
+
     public void interactSocially(Sim otherSim) {
         if (otherSim == this) return;
         relationships.putIfAbsent(otherSim, 0);
@@ -156,6 +191,9 @@ public class Sim implements ISimBehaviour {
         this.getSocial().increase(socialBonus);
         this.getEnergy().decrease(10);
         this.getFun().increase(funBonus);
+        
+        // Push legacy integration through new mechanic
+        interactWith(otherSim, "chat");
     }
 
     public boolean marry(Sim otherSim) {
@@ -191,7 +229,7 @@ public class Sim implements ISimBehaviour {
         double stageEnergyModifier = (this.currentStage != null) ? this.currentStage.getEnergyDecayModifier() : 1.0;
         double traitEnergyMod = 1.0;
         for(Trait t : traits) { traitEnergyMod *= t.getEnergyDecayModifier(); }
-        needsTracker.tick(ageMultiplier, stageEnergyModifier * traitEnergyMod, this.name, this.money);
+        needsTracker.tick(this, ageMultiplier, stageEnergyModifier * traitEnergyMod, this.name, this.money);
     }
 
     public void growOlderDaily() {

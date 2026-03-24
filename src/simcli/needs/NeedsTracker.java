@@ -1,10 +1,12 @@
 package simcli.needs;
 
+import simcli.entities.actors.Sim;
 import simcli.entities.actors.SimState;
-
-import simcli.needs.*;
 import simcli.engine.SimulationLogger;
 
+/**
+ * Encapsulates management of Sim Needs properties and translates boundaries into SimState evaluations.
+ */
 public class NeedsTracker {
     private Need hunger;
     private Need energy;
@@ -26,29 +28,23 @@ public class NeedsTracker {
         this.starvingTicks = 0;
     }
 
-    public void tick(double ageMultiplier, double stageEnergyModifier, String simName, int money) {
+    /**
+     * Ticks the needs by triggering dynamic calculation and pushing states.
+     * @param sim The specific Sim experiencing the tick.
+     * @param ageMultiplier Historical age decay impact.
+     * @param stageEnergyModifier Unique limits per lifestage.
+     * @param simName The display name of the owner.
+     * @param money The total cash of owner.
+     */
+    public void tick(Sim sim, double ageMultiplier, double stageEnergyModifier, String simName, int money) {
         if (this.state == SimState.DEAD) return;
 
-        this.hunger.decay(ageMultiplier);
-        this.energy.decay(ageMultiplier * stageEnergyModifier);
-        this.hygiene.decay(ageMultiplier);
-        this.fun.decay(ageMultiplier);
-        this.social.decay(ageMultiplier);
-
-        // Slide 6: Need cross-penalties
-        if (this.hygiene.getValue() <= 10) {
-            // Hygiene ≤ 10 → Social penalty (people avoid the Sim)
-            this.social.decrease(5);
-        }
-        if (this.fun.getValue() <= 15) {
-            // Fun ≤ 15 → Mood decreases (drains energy faster)
-            this.energy.decrease(3);
-        }
-        if (this.social.getValue() <= 10) {
-            // Social ≤ 10 → Isolation penalty (loneliness drains fun and energy)
-            this.fun.decrease(3);
-            this.energy.decrease(2);
-        }
+        // Uses Polymorphism calculateDecay required by constraints
+        this.hunger.calculateDecay(sim);
+        this.energy.calculateDecay(sim);
+        this.hygiene.calculateDecay(sim);
+        this.fun.calculateDecay(sim);
+        this.social.calculateDecay(sim);
 
         this.updateState();
 
@@ -60,26 +56,18 @@ public class NeedsTracker {
                 " | Cash: $" + money + " | Status: " + this.state);
     }
 
+    /**
+     * Resolves value thresholds into strict Enum definitions sequentially.
+     */
     public void updateState() {
         if (this.hunger.getValue() <= 0) {
-            this.state = SimState.CRITICAL;
-            this.health -= 5;
-            this.starvingTicks = 0;
-            if (this.health <= 0)
-                this.state = SimState.DEAD;
+            this.state = SimState.DEAD;
+        } else if (this.energy.getValue() <= 20) {
+            this.state = SimState.TIRED;
+        } else if (this.hunger.getValue() <= 30) {
+            this.state = SimState.HUNGRY;
         } else {
-            if (this.hunger.getValue() <= 10) {
-                this.state = SimState.STARVING;
-                this.starvingTicks++;
-            } else {
-                this.starvingTicks = 0;
-                if (this.hunger.getValue() <= 20)
-                    this.state = SimState.HUNGRY;
-                else if (this.energy.getValue() <= 20)
-                    this.state = SimState.TIRED;
-                else
-                    this.state = SimState.HEALTHY;
-            }
+            this.state = SimState.HEALTHY;
         }
     }
 

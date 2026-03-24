@@ -103,11 +103,9 @@ public class GameEngine {
                         scanner.nextLine();
                         continue;
                     }
-                } else if (activePlayer.getState() == SimState.STARVING) {
-                    int ticksLeft = 4 - activePlayer.getStarvingTicks();
+                } else if (activePlayer.getState() == SimState.HUNGRY) {
                     simcli.ui.UIManager
-                            .printMessage("\n[WARNING] " + activePlayer.getName() + " is STARVING! Feed them within "
-                                    + ticksLeft + " ticks or they will DIE!");
+                            .printMessage("\n[WARNING] " + activePlayer.getName() + " is HUNGRY! Feed them!");
                 }
             } else {
                 simcli.ui.UIManager.printMessage(
