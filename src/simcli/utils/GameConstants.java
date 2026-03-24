@@ -13,7 +13,7 @@ public final class GameConstants {
     public static final int DEATH_AGE = 90;
     public static final double AGE_ENERGY_PENALTY_MULTIPLIER = 0.05;
     public static final int DAYS_PER_AGE_TICK = 3;
-
+    public static final int RETIREMENT_PENSION_INCOME_AMOUNT = 100;
     // Manager
     // Relationship Manager
     public static final int RELATIONSHIP_BONUS = 10;

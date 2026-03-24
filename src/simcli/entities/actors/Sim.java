@@ -158,9 +158,9 @@ public class Sim implements ISimBehaviour {
             } 
             
             if (this.age >= GameConstants.ELDER_AGE && this.getCareer() == Job.UNEMPLOYED) {
-                int pension = 100; 
-                this.money += pension;
-                SimulationLogger.log(this.name + " collected a retirement pension of $" + pension);
+                int pensionIncome = GameConstants.RETIREMENT_PENSION_INCOME_AMOUNT;
+                this.money += pensionIncome;
+                SimulationLogger.log(this.name + " collected a retirement pension of $" + pensionIncome);
             }
 
             Job currentJob = this.getCareer();
