@@ -25,9 +25,9 @@ public class Hunger extends Need {
     public void calculateDecay(Sim sim) {
         int decayAmt = this.getBaseDecayRate();
         if (sim.getCurrentAction() == ActionState.WORKING || sim.getCurrentAction() == ActionState.PLAYING) {
-            decayAmt += 3; // Accelerated decay
+            decayAmt += GameConstants.HUNGER_ACCELERATED_DECAY_RATE; // Accelerated decay
         } else if (sim.getCurrentAction() == ActionState.SLEEPING) {
-            decayAmt -= 3; // Muted decay
+            decayAmt -= GameConstants.HUNGER_DECELERATED_DECAY_RATE; // Muted decay
         }
         this.decrease(decayAmt);
     }

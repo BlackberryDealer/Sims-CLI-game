@@ -22,7 +22,7 @@ public class Social extends Need {
     @Override
     public void calculateDecay(Sim sim) {
         if (sim.getCurrentAction() == ActionState.SOCIALIZING) {
-            this.increase(15);
+            this.increase(GameConstants.SOCIAL_ADDED_AMOUNT);
         } else {
             this.decrease(this.getBaseDecayRate());
         }

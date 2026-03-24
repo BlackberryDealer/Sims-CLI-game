@@ -38,6 +38,8 @@ public final class GameConstants {
     // Needs
     // Energy
     public static final int ENERGY_BASE_DECAY_RATE = 2;
+    public static final int ENERGY_SLEEP_ADDED_AMOUNT = 10;
+    public static final int ENERGY_WORK_DECAY_AMOUNT = 2;
 
     // Fun
     public static final int FUN_BASE_DECAY_RATE = 2;
@@ -47,12 +49,16 @@ public final class GameConstants {
 
     // Hunger
     public static final int HUNGER_BASE_DECAY_RATE = 5;
+    public static final int HUNGER_ACCELERATED_DECAY_RATE = 3;
+    public static final int HUNGER_DECELERATED_DECAY_RATE = 3;
 
     // Hygiene
     public static final int HYGIENE_BASE_DECAY_RATE = 5;
+    public static final int HYGIENE_ACCELERATED_DECAY_RATE = 4;
 
     // Social
     public static final int SOCIAL_BASE_DECAY_RATE = 5;
+    public static final int SOCIAL_ADDED_AMOUNT = 15;
 
     // GameEngine
     public static final int TICKS_PER_DAY = 24;
