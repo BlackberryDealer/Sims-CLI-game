@@ -1,6 +1,6 @@
 package simcli.ui;
 
-import simcli.entities.Item;
+import simcli.entities.items.Item;
 
 import java.util.List;
 import java.util.Scanner;

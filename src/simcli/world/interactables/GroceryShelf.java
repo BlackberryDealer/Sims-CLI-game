@@ -3,12 +3,12 @@ package simcli.world.interactables;
 import java.util.ArrayList;
 import java.util.List;
 
-import simcli.entities.Sim;
-import simcli.entities.Item;
-import simcli.entities.Food;
-import simcli.entities.Consumable;
-import simcli.entities.Furniture;
-import simcli.entities.Job;
+import simcli.entities.actors.Sim;
+import simcli.entities.items.Item;
+import simcli.entities.items.Food;
+import simcli.entities.items.Consumable;
+import simcli.entities.items.Furniture;
+import simcli.entities.actors.Job;
 
 public class GroceryShelf extends AbstractShop {
 

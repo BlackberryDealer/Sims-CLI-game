@@ -2,8 +2,8 @@ package simcli.engine.commands;
 
 import java.util.Scanner;
 import simcli.engine.CommandResult;
-import simcli.entities.Job;
-import simcli.entities.Sim;
+import simcli.entities.actors.Job;
+import simcli.entities.actors.Sim;
 import simcli.ui.UIManager;
 
 public class JobMarketCommand extends BaseCommand {

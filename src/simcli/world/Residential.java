@@ -1,6 +1,6 @@
 package simcli.world;
 
-import simcli.entities.Sim;
+import simcli.entities.actors.Sim;
 import simcli.world.interactables.Interactable;
 import java.util.ArrayList;
 import java.util.List;

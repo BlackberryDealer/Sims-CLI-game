@@ -1,6 +1,6 @@
 package simcli.ui.ascii.providers;
 
-import simcli.entities.Sim;
+import simcli.entities.actors.Sim;
 import simcli.world.Building;
 import simcli.ui.ascii.IAsciiProvider;
 

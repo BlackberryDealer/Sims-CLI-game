@@ -1,8 +1,8 @@
 package simcli.world.interactables;
 
-import simcli.entities.Sim;
-import simcli.entities.Item;
-import simcli.entities.Food;
+import simcli.entities.actors.Sim;
+import simcli.entities.items.Item;
+import simcli.entities.items.Food;
 import simcli.engine.SimulationException;
 import java.util.ArrayList;
 import java.util.List;
@@ -85,7 +85,7 @@ public class Fridge implements Interactable, Container {
                     int c = Integer.parseInt(choice);
                     if (c > 0 && c <= storedFood.size()) {
                         Item food = retrieveItem(c - 1);
-                        sim.setCurrentAction(simcli.entities.ActionState.EATING);
+                        sim.setCurrentAction(simcli.entities.actors.ActionState.EATING);
                         simcli.ui.UIManager.displayActionAnimation(sim);
                         simcli.ui.UIManager.printMessage(
                                 sim.getName() + " takes " + food.getObjectName() + " from the fridge and eats it.");

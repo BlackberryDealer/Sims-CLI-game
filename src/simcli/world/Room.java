@@ -2,8 +2,8 @@ package simcli.world;
 
 import java.util.ArrayList;
 import java.util.List;
-import simcli.entities.Furniture;
-import simcli.entities.Sim;
+import simcli.entities.items.Furniture;
+import simcli.entities.actors.Sim;
 import simcli.world.interactables.Interactable;
 
 public class Room {

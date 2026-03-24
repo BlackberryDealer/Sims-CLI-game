@@ -3,10 +3,10 @@ package simcli.world.interactables;
 import java.util.ArrayList;
 import java.util.List;
 
-import simcli.entities.Sim;
-import simcli.entities.Item;
-import simcli.entities.Consumable;
-import simcli.entities.Furniture;
+import simcli.entities.actors.Sim;
+import simcli.entities.items.Item;
+import simcli.entities.items.Consumable;
+import simcli.entities.items.Furniture;
 import simcli.utils.GameConstants;
 
 /**

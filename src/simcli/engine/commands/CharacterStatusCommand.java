@@ -1,7 +1,7 @@
 package simcli.engine.commands;
 
 import simcli.engine.CommandResult;
-import simcli.entities.Sim;
+import simcli.entities.actors.Sim;
 import simcli.ui.UIManager;
 import simcli.world.Building;
 

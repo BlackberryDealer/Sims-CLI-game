@@ -1,6 +1,6 @@
 package simcli.engine;
 
-import simcli.entities.Sim;
+import simcli.entities.actors.Sim;
 
 /**
  * LifecycleManager — drives simulation time and fires age transitions.

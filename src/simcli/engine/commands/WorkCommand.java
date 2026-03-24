@@ -4,9 +4,9 @@ import simcli.engine.CommandResult;
 import simcli.engine.SimulationException;
 import simcli.engine.SimulationLogger;
 import simcli.engine.TimeManager;
-import simcli.entities.Sim;
-import simcli.entities.Job;
-import simcli.entities.ActionState;
+import simcli.entities.actors.Sim;
+import simcli.entities.actors.Job;
+import simcli.entities.actors.ActionState;
 
 import java.util.Scanner;
 
@@ -33,9 +33,7 @@ public class WorkCommand implements ICommand {
         }
 
         // Slide 5: HUNGRY or STARVING states restrict work (Aligned with Proposal Slides)
-        if (activePlayer.getState() == simcli.entities.SimState.HUNGRY
-                || activePlayer.getState() == simcli.entities.SimState.STARVING
-                || activePlayer.getState() == simcli.entities.SimState.CRITICAL) {
+        if (activePlayer.getState() == simcli.entities.actors.SimState.HUNGRY) {
             simcli.ui.UIManager.printWarning(activePlayer.getName() + " is too hungry to focus on work! Eat something first.");
             simcli.ui.UIManager.prompt("\nPress ENTER to return...");
             scanner.nextLine();

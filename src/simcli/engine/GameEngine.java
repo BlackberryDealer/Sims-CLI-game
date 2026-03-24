@@ -1,10 +1,10 @@
 package simcli.engine;
 
-import simcli.entities.Sim;
-import simcli.entities.SimState;
+import simcli.entities.actors.Sim;
+import simcli.entities.actors.SimState;
 import simcli.ui.IRenderer;
 import simcli.ui.TerminalRenderer;
-import simcli.utils.SaveManager;
+import simcli.persistence.SaveManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -103,11 +103,9 @@ public class GameEngine {
                         scanner.nextLine();
                         continue;
                     }
-                } else if (activePlayer.getState() == SimState.STARVING) {
-                    int ticksLeft = 4 - activePlayer.getStarvingTicks();
+                } else if (activePlayer.getState() == SimState.HUNGRY) {
                     simcli.ui.UIManager
-                            .printMessage("\n[WARNING] " + activePlayer.getName() + " is STARVING! Feed them within "
-                                    + ticksLeft + " ticks or they will DIE!");
+                            .printMessage("\n[WARNING] " + activePlayer.getName() + " is HUNGRY! Feed them!");
                 }
             } else {
                 simcli.ui.UIManager.printMessage(

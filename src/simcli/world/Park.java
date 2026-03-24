@@ -1,7 +1,7 @@
 package simcli.world;
 
-import simcli.entities.Sim;
-import simcli.entities.NPCSim;
+import simcli.entities.actors.Sim;
+import simcli.entities.actors.NPCSim;
 import simcli.world.interactables.ParkBench;
 
 import java.util.ArrayList;

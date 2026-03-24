@@ -1,6 +1,6 @@
 package simcli.world.interactables;
 
-import simcli.entities.Item;
+import simcli.entities.items.Item;
 import java.util.List;
 
 public interface Container {
