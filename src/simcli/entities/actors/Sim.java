@@ -225,7 +225,7 @@ public class Sim implements ISimBehaviour {
     public void changeJob(Job newJob) { careerProfile.changeJob(newJob, this.name); }
 
     public void tick() {
-        double ageMultiplier = 1.0 + (Math.max(0, this.age - 18) * 0.05);
+        double ageMultiplier = 1.0 + (Math.max(0, this.age - GameConstants.ADULT_AGE) * GameConstants.AGE_ENERGY_PENALTY_MULTIPLIER);
         double stageEnergyModifier = (this.currentStage != null) ? this.currentStage.getEnergyDecayModifier() : 1.0;
         double traitEnergyMod = 1.0;
         for(Trait t : traits) { traitEnergyMod *= t.getEnergyDecayModifier(); }
@@ -242,7 +242,7 @@ public class Sim implements ISimBehaviour {
                 needsTracker.setState(SimState.DEAD);
                 SimulationLogger.log("\n*** TRAGEDY! " + this.name + " has passed away of old age at " + this.age + ". ***");
             } else if (this.age >= GameConstants.ELDER_AGE && this.getCareer() != Job.UNEMPLOYED) {
-                SimulationLogger.log("\n*** RETIREMENT! " + this.name + " has reached the retirement age of 65 and is officially retired. ***");
+                SimulationLogger.log("\n*** RETIREMENT! " + this.name + " has reached the retirement age of " + GameConstants.ELDER_AGE + " and is officially retired. ***");
                 this.changeJob(Job.UNEMPLOYED);
                 this.setMoney(this.getMoney() + 1000);
             }

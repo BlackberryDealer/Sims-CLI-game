@@ -85,7 +85,7 @@ public class MainMenu {
 
         int age = 21;
         while (true) {
-            UIManager.prompt("Enter your Sim's Age (18-80): ");
+            UIManager.prompt("Enter your Sim's Age (" + simcli.utils.GameConstants.ADULT_AGE + "-" + (simcli.utils.GameConstants.DEATH_AGE - 1) + "): ");
             try {
                 String inputAge = scanner.nextLine().trim();
                 if (inputAge.isEmpty()) {
@@ -93,11 +93,11 @@ public class MainMenu {
                     break;
                 }
                 int parsedAge = Integer.parseInt(inputAge);
-                if (parsedAge >= 18 && parsedAge <= 80) {
+                if (parsedAge >= simcli.utils.GameConstants.ADULT_AGE && parsedAge < simcli.utils.GameConstants.DEATH_AGE) {
                     age = parsedAge;
                     break;
                 } else {
-                    UIManager.printMessage("Age must be between 18 and 80. Please try again.");
+                    UIManager.printMessage("Age must be between " + simcli.utils.GameConstants.ADULT_AGE + " and " + (simcli.utils.GameConstants.DEATH_AGE - 1) + ". Please try again.");
                 }
             } catch (NumberFormatException e) {
                 UIManager.printMessage("Invalid age format. Please enter a valid number.");

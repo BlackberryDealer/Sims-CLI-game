@@ -22,9 +22,9 @@ public class NeedsTrackerTest {
     @DisplayName("SimState becomes HUNGRY if hunger drops to warning limits")
     void testHungryState() {
         NeedsTracker tracker = new NeedsTracker();
-        tracker.getHunger().setValue(25);
+        tracker.getHunger().setValue(simcli.utils.GameConstants.HUNGER_WARNING_LEVEL - 5);
         tracker.updateState();
-        assertEquals(SimState.HUNGRY, tracker.getState(), "If hunger <= 30, Sim enters hunger state.");
+        assertEquals(SimState.HUNGRY, tracker.getState(), "If hunger <= HUNGER_WARNING_LEVEL, Sim enters hunger state.");
     }
     
     @Test

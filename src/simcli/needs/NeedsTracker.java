@@ -64,7 +64,7 @@ public class NeedsTracker {
             this.state = SimState.DEAD;
         } else if (this.energy.getValue() <= 20) {
             this.state = SimState.TIRED;
-        } else if (this.hunger.getValue() <= 30) {
+        } else if (this.hunger.getValue() <= simcli.utils.GameConstants.HUNGER_WARNING_LEVEL) {
             this.state = SimState.HUNGRY;
         } else {
             this.state = SimState.HEALTHY;

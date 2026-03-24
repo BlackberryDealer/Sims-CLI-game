@@ -2,10 +2,10 @@ package simcli.entities.actors;
 
 public enum Job {
     UNEMPLOYED("Unemployed", 0, 0, 0, 0, 100, 1.0, 1),
-    SOFTWARE_ENGINEER("Software Engineer", 150, 4, 30, 18, 65, 1.2, 5),
-    HARDWARE_TECHNICIAN("Hardware Technician", 120, 5, 45, 18, 55, 1.1, 4),
-    FREELANCE_PHOTOGRAPHER("Freelance Photographer", 80, 2, 15, 18, 80, 1.5, 3),
-    PERSONAL_TRAINER("Personal Trainer", 90, 3, 60, 18, 40, 1.3, 3);
+    SOFTWARE_ENGINEER("Software Engineer", 150, 4, 30, simcli.utils.GameConstants.ADULT_AGE, simcli.utils.GameConstants.ELDER_AGE, 1.2, 5),
+    HARDWARE_TECHNICIAN("Hardware Technician", 120, 5, 45, simcli.utils.GameConstants.ADULT_AGE, 55, 1.1, 4),
+    FREELANCE_PHOTOGRAPHER("Freelance Photographer", 80, 2, 15, simcli.utils.GameConstants.ADULT_AGE, 80, simcli.utils.GameConstants.bonusTimes, 3),
+    PERSONAL_TRAINER("Personal Trainer", 90, 3, 60, simcli.utils.GameConstants.ADULT_AGE, 40, 1.3, 3);
 
     private final String title;
     private final int baseSalary;
