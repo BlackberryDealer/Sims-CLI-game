@@ -53,7 +53,7 @@ public class IntegrationTest {
         worldManager = new WorldManager();
         worldManager.setupWorld();
         timeManager = new TimeManager(1, 24); // Monday, Tick 1
-        inputHandler = new InputHandler(worldManager, timeManager);
+        inputHandler = new InputHandler(worldManager, timeManager, null);
     }
 
     @AfterEach

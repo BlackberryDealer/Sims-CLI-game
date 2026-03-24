@@ -76,54 +76,71 @@ public class MainMenu {
             }
         }
 
-        UIManager.printMessage("\n=== Character Creation ===");
-        UIManager.prompt("Enter your Sim's Name: ");
-        String name = scanner.nextLine().trim();
-        if (name.isEmpty()) {
-            name = "Dylan";
-            UIManager.printMessage("Sim's name set to Dylan.");
-        }
-
-        int age = 21;
+        UIManager.printMessage("\n=== Household Creation ===");
+        int simCount = 1;
         while (true) {
-            UIManager.prompt("Enter your Sim's Age (" + simcli.utils.GameConstants.ADULT_AGE + "-" + (simcli.utils.GameConstants.DEATH_AGE - 1) + "): ");
+            UIManager.prompt("How many Sims in this household? (1-4): ");
             try {
-                String inputAge = scanner.nextLine().trim();
-                if (inputAge.isEmpty()) {
-                    UIManager.printMessage("Sim's age set to 21 years old.");
-                    break;
-                }
-                int parsedAge = Integer.parseInt(inputAge);
-                if (parsedAge >= simcli.utils.GameConstants.ADULT_AGE && parsedAge < simcli.utils.GameConstants.DEATH_AGE) {
-                    age = parsedAge;
-                    break;
-                } else {
-                    UIManager.printMessage("Age must be between " + simcli.utils.GameConstants.ADULT_AGE + " and " + (simcli.utils.GameConstants.DEATH_AGE - 1) + ". Please try again.");
-                }
+                String inputStr = scanner.nextLine().trim();
+                simCount = Integer.parseInt(inputStr);
+                if (simCount >= 1 && simCount <= 4) break;
+                UIManager.printMessage("Please enter a number between 1 and 4.");
             } catch (NumberFormatException e) {
-                UIManager.printMessage("Invalid age format. Please enter a valid number.");
+                UIManager.printMessage("Please enter a valid number.");
             }
         }
 
-        Gender gender = Gender.MALE;
-        while (true) {
-            UIManager.prompt("Enter your Sim's Gender (M/F): ");
-            String gInput = scanner.nextLine().trim().toUpperCase();
-            if (gInput.equals("M")) {
-                gender = Gender.MALE;
-                break;
+        List<Sim> startingNeighborhood = new java.util.ArrayList<>();
+        for (int i = 0; i < simCount; i++) {
+            UIManager.printMessage("\n--- Creating Sim " + (i + 1) + " ---");
+            UIManager.prompt("Enter your Sim's Name: ");
+            String name = scanner.nextLine().trim();
+            if (name.isEmpty()) {
+                name = "Sim" + (i + 1);
+                UIManager.printMessage("Sim's name set to " + name + ".");
             }
-            if (gInput.equals("F")) {
-                gender = Gender.FEMALE;
-                break;
+
+            int age = 21;
+            while (true) {
+                UIManager.prompt("Enter your Sim's Age (" + simcli.utils.GameConstants.ADULT_AGE + "-" + (simcli.utils.GameConstants.DEATH_AGE - 1) + "): ");
+                try {
+                    String inputAge = scanner.nextLine().trim();
+                    if (inputAge.isEmpty()) {
+                        UIManager.printMessage("Sim's age set to 21 years old.");
+                        break;
+                    }
+                    int parsedAge = Integer.parseInt(inputAge);
+                    if (parsedAge >= simcli.utils.GameConstants.ADULT_AGE && parsedAge < simcli.utils.GameConstants.DEATH_AGE) {
+                        age = parsedAge;
+                        break;
+                    } else {
+                        UIManager.printMessage("Age must be between " + simcli.utils.GameConstants.ADULT_AGE + " and " + (simcli.utils.GameConstants.DEATH_AGE - 1) + ". Please try again.");
+                    }
+                } catch (NumberFormatException e) {
+                    UIManager.printMessage("Invalid age format. Please enter a valid number.");
+                }
             }
-            UIManager.printMessage("Please enter M or F.");
+
+            Gender gender = Gender.MALE;
+            while (true) {
+                UIManager.prompt("Enter your Sim's Gender (M/F): ");
+                String gInput = scanner.nextLine().trim().toUpperCase();
+                if (gInput.equals("M")) {
+                    gender = Gender.MALE;
+                    break;
+                }
+                if (gInput.equals("F")) {
+                    gender = Gender.FEMALE;
+                    break;
+                }
+                UIManager.printMessage("Please enter M or F.");
+            }
+            startingNeighborhood.add(new Sim(name, age, gender, Job.UNEMPLOYED));
         }
 
-        Sim player1 = new Sim(name, age, gender, Job.UNEMPLOYED);
         UIManager.printMessage("\n=== Booting World: " + newName + " ===");
 
-        GameEngine newGame = new GameEngine(newName, player1);
+        GameEngine newGame = new GameEngine(newName, startingNeighborhood);
         newGame.run(scanner);
     }
 
@@ -152,6 +169,12 @@ public class MainMenu {
             UIManager.printMessage("Loading '" + loadName + "'...");
             GameEngine loadedGame = SaveManager.loadGame(loadName);
             if (loadedGame != null) {
+                UIManager.printMessage("\n=== Loaded Household ===");
+                for (Sim s : loadedGame.getNeighborhood()) {
+                    UIManager.printMessage(" - " + s.getName() + " (Age: " + s.getAge() + " | Job: " + s.getCareer().getTitle() + ")");
+                }
+                UIManager.prompt("\nPress ENTER to resume game...");
+                scanner.nextLine();
                 loadedGame.run(scanner);
             }
         } else {

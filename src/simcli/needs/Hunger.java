@@ -22,13 +22,13 @@ public class Hunger extends Need {
      * @param sim The referencing Sim whose Hunger is decaying.
      */
     @Override
-    public void calculateDecay(Sim sim) {
+    public void calculateDecay(Sim sim, double multiplier) {
         int decayAmt = this.getBaseDecayRate();
         if (sim.getCurrentAction() == ActionState.WORKING || sim.getCurrentAction() == ActionState.PLAYING) {
             decayAmt += GameConstants.HUNGER_ACCELERATED_DECAY_RATE; // Accelerated decay
         } else if (sim.getCurrentAction() == ActionState.SLEEPING) {
             decayAmt -= GameConstants.HUNGER_DECELERATED_DECAY_RATE; // Muted decay
         }
-        this.decrease(decayAmt);
+        this.decrease((int) Math.round(decayAmt * multiplier));
     }
 }

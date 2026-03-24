@@ -109,6 +109,13 @@ public class SaveManager {
         } catch (IOException e) {
             simcli.ui.UIManager.printWarning("Error saving game: " + e.getMessage());
         }
+        
+        simcli.ui.UIManager.printMessage("\n=== Successfully saved World: " + worldName + " ===");
+        simcli.ui.UIManager.printMessage("Household Saved:");
+        for(Sim s : engine.getNeighborhood()) {
+            simcli.ui.UIManager.printMessage(" - " + s.getName() + " (Age: " + s.getAge() + " | Job: " + s.getCareer().getTitle() + ")");
+        }
+        simcli.ui.UIManager.printMessage("=============================================");
     }
 
     // Loads a game engine state from a text file

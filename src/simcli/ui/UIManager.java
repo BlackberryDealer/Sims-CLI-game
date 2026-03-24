@@ -72,7 +72,7 @@ public class UIManager {
         if (isResidential) {
             System.out.println("[House]    [M] Move Room    [H] House Info   [U] Upgrade Room");
         }
-        System.out.println("[Personal] [I] Character Status   [V] Inventory");
+        System.out.println("[Personal] [I] Character Status   [V] Inventory   [K] Switch Sim");
         System.out.println("[General]  [S] Save & Exit");
     }
 

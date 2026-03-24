@@ -23,17 +23,18 @@ public class GameEngine {
     // World Stats tracking (aggregated upon save/game over)
     private int sessionTotalMoney;
     private int sessionTotalItems;
+    private Sim activePlayer;
 
     // CONSTRUCTOR: For Creating a New World
-    public GameEngine(String worldName, Sim activePlayer) {
+    public GameEngine(String worldName, List<Sim> startingNeighborhood) {
         this.worldName = worldName;
         this.timeManager = new TimeManager(1, simcli.utils.GameConstants.TICKS_PER_DAY); // 24 ticks per day
         this.isGameOver = false;
-        this.neighborhood = new ArrayList<>();
-        this.neighborhood.add(activePlayer);
+        this.neighborhood = startingNeighborhood;
         this.worldManager = new WorldManager();
         this.worldManager.setupWorld();
-        this.inputHandler = new InputHandler(this.worldManager, this.timeManager);
+        this.activePlayer = startingNeighborhood.get(0);
+        this.inputHandler = new InputHandler(this.worldManager, this.timeManager, this);
         this.renderer = new TerminalRenderer();
         this.randomEventManager = new RandomEventManager();
     }
@@ -46,10 +47,24 @@ public class GameEngine {
         this.isGameOver = isGameOver;
         this.worldManager = new WorldManager();
         this.worldManager.setupWorld();
-        this.inputHandler = new InputHandler(this.worldManager, this.timeManager);
+        
+        // Find first alive sim, or default to 0 if all dead
+        Sim firstAlive = loadedNeighborhood.get(0);
+        for(Sim s : loadedNeighborhood) {
+            if(s.getState() != SimState.DEAD) {
+                firstAlive = s;
+                break;
+            }
+        }
+        this.activePlayer = firstAlive;
+        
+        this.inputHandler = new InputHandler(this.worldManager, this.timeManager, this);
         this.renderer = new TerminalRenderer();
         this.randomEventManager = new RandomEventManager();
     }
+
+    public Sim getActivePlayer() { return activePlayer; }
+    public void setActivePlayer(Sim sim) { this.activePlayer = sim; }
 
 
 
@@ -60,14 +75,15 @@ public class GameEngine {
     public void run(Scanner scanner) {
         boolean running = true;
         boolean tickForward = true;
-        Sim activePlayer = this.neighborhood.get(0);
         
-        // Only trigger entry sequence if they don't already have an assigned room from a loaded save
-        if (activePlayer.getCurrentRoom() == null) {
-            this.worldManager.getCurrentLocation().enter(activePlayer);
+        for (Sim sim : this.neighborhood) {
+            if (sim.getCurrentRoom() == null && sim.getState() != SimState.DEAD) {
+                this.worldManager.getCurrentLocation().enter(sim);
+            }
         }
 
         while (running) {
+            Sim activePlayer = this.activePlayer;
             renderer.clear();
             renderer.printHint();
 
@@ -80,7 +96,9 @@ public class GameEngine {
                     timeManager.getTimeOfDay(), inRoom, roomName);
 
             if (tickForward) {
-                activePlayer.tick();
+                for(Sim sim : this.neighborhood) {
+                    sim.tick();
+                }
 
                 if (activePlayer.getState() == SimState.DEAD) {
                     Sim deadSim = activePlayer;
@@ -100,8 +118,9 @@ public class GameEngine {
                     simcli.ui.UIManager.printMessage("  Total Earned: $" + deadSim.getTotalMoneyEarned());
                     simcli.ui.UIManager.printMessage("==========================================");
 
-                    activePlayer = getNextAliveSim();
-                    if (activePlayer == null) {
+                    this.activePlayer = getNextAliveSim();
+                    activePlayer = this.activePlayer;
+                    if (this.activePlayer == null) {
                         this.isGameOver = true;
                         aggregateStats();
                         simcli.ui.UIManager.printGameOverStats(this.timeManager.getCurrentTick(),

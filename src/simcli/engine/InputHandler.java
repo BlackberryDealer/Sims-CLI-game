@@ -14,9 +14,12 @@ public class InputHandler implements IInputHandler {
     private final IWorldManager worldManager;
     private final TimeManager timeManager;
 
-    public InputHandler(IWorldManager worldManager, TimeManager timeManager) {
+    private final GameEngine engine;
+
+    public InputHandler(IWorldManager worldManager, TimeManager timeManager, GameEngine engine) {
         this.worldManager = worldManager;
         this.timeManager = timeManager;
+        this.engine = engine;
     }
 
     @Override
@@ -60,6 +63,9 @@ public class InputHandler implements IInputHandler {
                     break;
                 case "S":
                     return CommandResult.SAVE_AND_EXIT;
+                case "K":
+                    command = new SwitchSimCommand(engine, scanner);
+                    break;
                 default:
                     int choice = Integer.parseInt(input) - 1;
                     command = new InteractCommand(activePlayer, scanner, timeManager, items, choice);

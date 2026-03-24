@@ -8,7 +8,7 @@ import simcli.utils.GameConstants;
 /**
  * Encapsulates management of Sim Needs properties and translates boundaries into SimState evaluations.
  */
-public class NeedsTracker {
+public class SimsNeedsTracker {
     private Need hunger;
     private Need energy;
     private Need hygiene;
@@ -18,7 +18,7 @@ public class NeedsTracker {
     private int health;
     private int starvingTicks;
 
-    public NeedsTracker() {
+    public SimsNeedsTracker() {
         this.hunger = new Hunger();
         this.energy = new Energy();
         this.hygiene = new Hygiene();
@@ -29,14 +29,14 @@ public class NeedsTracker {
         this.starvingTicks = 0;
     }
 
-    public void tick(double ageMultiplier, double stageEnergyModifier, String simName) {
+    public void tick(Sim sim, double ageMultiplier, double stageEnergyModifier, String simName) {
         if (this.state == SimState.DEAD) return;
 
-        this.hunger.decay(ageMultiplier);
-        this.energy.decay(ageMultiplier * stageEnergyModifier);
-        this.hygiene.decay(ageMultiplier);
-        this.happiness.decay(ageMultiplier);
-        this.social.decay(ageMultiplier);
+        this.hunger.calculateDecay(sim, ageMultiplier);
+        this.energy.calculateDecay(sim, ageMultiplier * stageEnergyModifier);
+        this.hygiene.calculateDecay(sim, ageMultiplier);
+        this.happiness.calculateDecay(sim, ageMultiplier);
+        this.social.calculateDecay(sim, ageMultiplier);
         this.applyCrossPenalties();
         this.applyHealthDrain(simName);
         this.updateState();

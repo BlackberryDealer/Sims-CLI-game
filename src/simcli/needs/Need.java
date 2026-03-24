@@ -25,19 +25,11 @@ public abstract class Need {
 
     /**
      * Calculates the dynamic decay of this need per game tick 
-     * based on the specific condition of the Sim instance.
+     * based on the specific condition of the Sim instance and age multiplier.
      * @param sim The Sim instance whose need needs to decay.
-     */
-    public abstract void calculateDecay(Sim sim);
-
-    /**
-     * Original decay method kept for compatibility.
      * @param multiplier Decay rate multiplier.
      */
-    public void decay(double multiplier) {
-        this.decrease((int) Math.round(baseDecayRate * multiplier));
-    }
-
+    public abstract void calculateDecay(Sim sim, double multiplier);
     /**
      * Increases the need value safely up to MAX_VALUE limit.
      * @param amount The integer amount to increase by.

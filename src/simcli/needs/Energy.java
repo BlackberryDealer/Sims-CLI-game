@@ -20,13 +20,13 @@ public class Energy extends Need {
      * @param sim The referencing Sim.
      */
     @Override
-    public void calculateDecay(Sim sim) {
+    public void calculateDecay(Sim sim, double multiplier) {
         if (sim.getCurrentAction() == ActionState.SLEEPING) {
             this.increase(GameConstants.ENERGY_SLEEP_ADDED_AMOUNT); // Refresh when sleeping
         } else if (sim.getCurrentAction() == ActionState.WORKING) {
-            this.decrease(this.getBaseDecayRate() + GameConstants.ENERGY_WORK_DECAY_AMOUNT);
+            this.decrease((int) Math.round((this.getBaseDecayRate() + GameConstants.ENERGY_WORK_DECAY_AMOUNT) * multiplier));
         } else {
-            this.decrease(this.getBaseDecayRate());
+            this.decrease((int) Math.round(this.getBaseDecayRate() * multiplier));
         }
     }
 }

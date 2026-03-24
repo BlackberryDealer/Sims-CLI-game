@@ -2,7 +2,7 @@ package simcli.entities.actors;
 
 import simcli.entities.models.*;
 
-import simcli.needs.NeedsTracker;
+import simcli.needs.SimsNeedsTracker;
 import simcli.entities.managers.CareerManager;
 import simcli.entities.managers.InventoryManager;
 import simcli.entities.managers.RelationshipManager;
@@ -36,7 +36,7 @@ public class Sim implements ISimBehaviour {
     private LifeStage currentStage;
 
     // Component Managers
-    private NeedsTracker needsTracker;
+    private SimsNeedsTracker needsTracker;
     private CareerManager careerManager;
     private InventoryManager inventoryManager;
     private SkillManager skillManager;
@@ -56,7 +56,7 @@ public class Sim implements ISimBehaviour {
         this.daysAlive = 0;
         this.currentAction = ActionState.IDLE;
 
-        this.needsTracker = new NeedsTracker();
+        this.needsTracker = new SimsNeedsTracker();
         this.careerManager = new CareerManager();
         this.inventoryManager = new InventoryManager(GameConstants.STARTING_INVENTORY_CAPACITY);
         this.skillManager = new SkillManager();
@@ -140,7 +140,7 @@ public class Sim implements ISimBehaviour {
             traitEnergyMod *= t.getEnergyDecayModifier(); 
         }
 
-        needsTracker.tick(ageMultiplier, stageEnergyModifier * traitEnergyMod, this.name);
+        needsTracker.tick(this, ageMultiplier, stageEnergyModifier * traitEnergyMod, this.name);
 
         SimulationLogger.log("[" + this.name + "] Cash: $" + this.money + " | Life Stage: " + this.getCurrentStageName());
     }

@@ -6,13 +6,13 @@ import simcli.entities.models.SimState;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@DisplayName("NeedsTracker — Sim State Conversion Tests")
-public class NeedsTrackerTest {
+@DisplayName("SimsNeedsTracker — Sim State Conversion Tests")
+public class SimsNeedsTrackerTest {
 
     @Test
     @DisplayName("SimState becomes DEAD if hunger hits 0")
     void testStarvingDeathState() {
-        NeedsTracker tracker = new NeedsTracker();
+        SimsNeedsTracker tracker = new SimsNeedsTracker();
         tracker.getHunger().setValue(0);
         tracker.updateState();
         assertEquals(SimState.DEAD, tracker.getState(), "If hunger drops to 0 or below, Sim dies.");
@@ -21,7 +21,7 @@ public class NeedsTrackerTest {
     @Test
     @DisplayName("SimState becomes HUNGRY if hunger drops to warning limits")
     void testHungryState() {
-        NeedsTracker tracker = new NeedsTracker();
+        SimsNeedsTracker tracker = new SimsNeedsTracker();
         tracker.getHunger().setValue(simcli.utils.GameConstants.HUNGER_WARNING_LEVEL - 5);
         tracker.updateState();
         assertEquals(SimState.HUNGRY, tracker.getState(), "If hunger <= HUNGER_WARNING_LEVEL, Sim enters hunger state.");
@@ -30,7 +30,7 @@ public class NeedsTrackerTest {
     @Test
     @DisplayName("SimState becomes TIRED if energy drops below limits")
     void testTiredState() {
-        NeedsTracker tracker = new NeedsTracker();
+        SimsNeedsTracker tracker = new SimsNeedsTracker();
         // Energy must be <= 20
         tracker.getEnergy().setValue(15);
         tracker.updateState();

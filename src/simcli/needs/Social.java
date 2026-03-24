@@ -20,11 +20,11 @@ public class Social extends Need {
      * @param sim The referencing Sim.
      */
     @Override
-    public void calculateDecay(Sim sim) {
+    public void calculateDecay(Sim sim, double multiplier) {
         if (sim.getCurrentAction() == ActionState.SOCIALIZING) {
             this.increase(GameConstants.SOCIAL_ADDED_AMOUNT);
         } else {
-            this.decrease(this.getBaseDecayRate());
+            this.decrease((int) Math.round(this.getBaseDecayRate() * multiplier));
         }
     }
 }

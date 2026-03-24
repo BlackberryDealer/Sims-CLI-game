@@ -20,11 +20,11 @@ public class Hygiene extends Need {
      * @param sim Sim owner.
      */
     @Override
-    public void calculateDecay(Sim sim) {
+    public void calculateDecay(Sim sim, double multiplier) {
         if (sim.getCurrentAction() == ActionState.WORKING) {
-            this.decrease(this.getBaseDecayRate() + GameConstants.HYGIENE_ACCELERATED_DECAY_RATE);
+            this.decrease((int) Math.round((this.getBaseDecayRate() + GameConstants.HYGIENE_ACCELERATED_DECAY_RATE) * multiplier));
         } else {
-            this.decrease(this.getBaseDecayRate());
+            this.decrease((int) Math.round(this.getBaseDecayRate() * multiplier));
         }
     }
 }

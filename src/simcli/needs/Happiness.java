@@ -17,7 +17,7 @@ public class Happiness extends Need {
      * @param sim The owner.
      */
     @Override
-    public void calculateDecay(Sim sim) {
-        this.decrease(this.getBaseDecayRate());
+    public void calculateDecay(Sim sim, double multiplier) {
+        this.decrease((int) Math.round(this.getBaseDecayRate() * multiplier));
     }
 }
