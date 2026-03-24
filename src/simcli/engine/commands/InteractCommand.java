@@ -4,7 +4,7 @@ import simcli.engine.CommandResult;
 import simcli.engine.SimulationException;
 import simcli.engine.SleepEventException;
 import simcli.engine.TimeManager;
-import simcli.entities.Sim;
+import simcli.entities.actors.Sim;
 import simcli.ui.UIManager;
 import simcli.world.interactables.Interactable;
 

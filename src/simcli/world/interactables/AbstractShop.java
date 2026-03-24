@@ -5,8 +5,8 @@ import java.util.Scanner;
 
 import simcli.engine.SimulationException;
 import simcli.engine.TimeManager;
-import simcli.entities.Item;
-import simcli.entities.Sim;
+import simcli.entities.items.Item;
+import simcli.entities.actors.Sim;
 import simcli.ui.MenuPagination;
 import simcli.ui.UIManager;
 

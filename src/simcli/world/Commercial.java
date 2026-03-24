@@ -1,6 +1,6 @@
 package simcli.world;
 
-import simcli.entities.Sim;
+import simcli.entities.actors.Sim;
 
 public class Commercial extends Building {
     public Commercial(String name) {

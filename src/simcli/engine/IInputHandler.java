@@ -1,6 +1,6 @@
 package simcli.engine;
 
-import simcli.entities.Sim;
+import simcli.entities.actors.Sim;
 
 import java.util.Scanner;
 

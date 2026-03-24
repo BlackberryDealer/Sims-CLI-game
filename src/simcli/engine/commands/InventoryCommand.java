@@ -4,7 +4,7 @@ import simcli.engine.CommandResult;
 import simcli.engine.SimulationException;
 import simcli.engine.SleepEventException;
 import simcli.engine.TimeManager;
-import simcli.entities.Sim;
+import simcli.entities.actors.Sim;
 import simcli.ui.UIManager;
 import simcli.world.Building;
 import simcli.world.Residential;
@@ -35,7 +35,7 @@ public class InventoryCommand extends BaseCommand {
         int currentPage = 0;
 
         while (managingInventory) {
-            List<simcli.entities.Item> inv = activePlayer.getInventory();
+            List<simcli.entities.items.Item> inv = activePlayer.getInventory();
             int totalPages = (int) Math.ceil((double) inv.size() / pageSize);
             if (totalPages == 0)
                 totalPages = 1;
@@ -77,11 +77,11 @@ public class InventoryCommand extends BaseCommand {
                     int invChoice = Integer.parseInt(invInput);
                     if (invChoice > 0 && invChoice <= (endIdx - startIdx)) {
                         int realIndex = startIdx + invChoice - 1;
-                        simcli.entities.Item selectedItem = inv.get(realIndex);
+                        simcli.entities.items.Item selectedItem = inv.get(realIndex);
 
-                        if (selectedItem instanceof simcli.entities.Furniture
+                        if (selectedItem instanceof simcli.entities.items.Furniture
                                 && currentLocation.isResidential()) {
-                            simcli.entities.Furniture furn = (simcli.entities.Furniture) selectedItem;
+                            simcli.entities.items.Furniture furn = (simcli.entities.items.Furniture) selectedItem;
                             Residential res = (Residential) currentLocation;
                             UIManager.printMessage("Select a room to place " + furn.getObjectName() + " (Requires "
                                     + furn.getSpaceScore() + " space):");

@@ -1,6 +1,6 @@
 package simcli.world.interactables;
 
-import simcli.entities.Sim;
+import simcli.entities.actors.Sim;
 
 public class Bed implements Interactable {
     @Override
@@ -19,7 +19,7 @@ public class Bed implements Interactable {
         sim.getEnergy().increase(energyGain);
         sim.getHunger().decrease(hungerLoss);
 
-        sim.setCurrentAction(simcli.entities.ActionState.SLEEPING);
+        sim.setCurrentAction(simcli.entities.actors.ActionState.SLEEPING);
 
         // Throw exception to let the game engine render the sleeping ASCII art
         // and pause for the sleep animation BEFORE advancing time.

@@ -1,7 +1,7 @@
 package simcli.ui.ascii;
 
-import simcli.entities.ActionState;
-import simcli.entities.Sim;
+import simcli.entities.actors.ActionState;
+import simcli.entities.actors.Sim;
 import simcli.world.Building;
 
 import simcli.ui.ascii.providers.*;

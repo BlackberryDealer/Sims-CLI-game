@@ -1,10 +1,10 @@
 package simcli.engine;
 
-import simcli.entities.Sim;
-import simcli.entities.SimState;
+import simcli.entities.actors.Sim;
+import simcli.entities.actors.SimState;
 import simcli.ui.IRenderer;
 import simcli.ui.TerminalRenderer;
-import simcli.utils.SaveManager;
+import simcli.persistence.SaveManager;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -4,9 +4,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import simcli.engine.commands.WorkCommand;
-import simcli.entities.Gender;
-import simcli.entities.Job;
-import simcli.entities.Sim;
+import simcli.entities.actors.Gender;
+import simcli.entities.actors.Job;
+import simcli.entities.actors.Sim;
 
 import java.io.ByteArrayInputStream;
 import java.util.Scanner;
