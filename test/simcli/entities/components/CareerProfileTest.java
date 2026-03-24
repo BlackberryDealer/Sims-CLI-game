@@ -3,17 +3,18 @@ package simcli.entities.components;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import simcli.entities.actors.Job;
+import simcli.entities.managers.CareerManager;
+import simcli.entities.models.Job;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Career Profile — Job Path Tests")
 public class CareerProfileTest {
-    private CareerProfile profile;
+    private CareerManager profile;
     
     @BeforeEach
     void setUp() { 
-        profile = new CareerProfile(Job.SOFTWARE_ENGINEER); 
+        profile = new CareerManager(Job.SOFTWARE_ENGINEER); 
     }
 
     @Test

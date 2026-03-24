@@ -1,5 +1,8 @@
 package simcli.entities.components;
 
+import simcli.entities.managers.SkillManager;
+import simcli.entities.models.SkillType;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -2,7 +2,7 @@ package simcli.needs;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import simcli.entities.actors.SimState;
+import simcli.entities.models.SimState;
 
 import static org.junit.jupiter.api.Assertions.*;
 
