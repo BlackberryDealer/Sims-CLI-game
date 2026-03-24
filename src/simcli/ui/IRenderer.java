@@ -26,6 +26,21 @@ public interface IRenderer {
             String timeOfDay, boolean inRoom, String roomName);
 
     /**
+     * Renders a compact dashboard of other alive Sims in the neighborhood
+     */
+    void renderHouseholdDashboard(List<Sim> neighborhood, Sim activePlayer);
+
+    /**
+     * Renders detailed stats for the currently controlled Sim right above the action menu
+     */
+    void renderActiveSimStats(Sim activePlayer);
+
+    /**
+     * Renders the memorial statistics block when a Sim dies.
+     */
+    void renderDeathStats(Sim deadSim);
+
+    /**
      * Renders the grid of available actions (interactables + system commands).
      *
      * @param items         interactable objects at the current location

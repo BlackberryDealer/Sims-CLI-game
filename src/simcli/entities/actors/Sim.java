@@ -141,8 +141,6 @@ public class Sim implements ISimBehaviour {
         }
 
         needsTracker.tick(this, ageMultiplier, stageEnergyModifier * traitEnergyMod, this.name);
-
-        SimulationLogger.log("[" + this.name + "] Cash: $" + this.money + " | Life Stage: " + this.getCurrentStageName());
     }
 
     public void growOlderDaily() {

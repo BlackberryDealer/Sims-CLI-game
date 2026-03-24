@@ -40,16 +40,6 @@ public class SimsNeedsTracker {
         this.applyCrossPenalties();
         this.applyHealthDrain(simName);
         this.updateState();
-
-        SimulationLogger.log(String.format("[%s] Hunger: %d | Energy: %d | Social: %d | Hygiene: %d | Happiness: %d | Health: %d%% | Status: %s", 
-            simName, 
-            hunger.getValue(), 
-            energy.getValue(), 
-            social.getValue(), 
-            hygiene.getValue(),
-            happiness.getValue(),
-            this.health,
-            this.state));
     }
 
     private void applyCrossPenalties() {
