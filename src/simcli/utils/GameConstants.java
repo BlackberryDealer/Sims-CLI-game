@@ -18,7 +18,7 @@ public final class GameConstants {
     // Relationship Manager
     public static final int RELATIONSHIP_BONUS = 10;
     public static final int SOCIAL_BONUS = 25;
-    public static final int FUN_BONUS = 10;
+    public static final int HAPPINESS_BONUS = 10;
     public static final double BONUS_TIMES = 1.5;
     public static final int MARRIAGE_THRESHOLD = 50;
 
