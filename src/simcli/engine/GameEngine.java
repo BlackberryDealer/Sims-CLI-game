@@ -83,7 +83,23 @@ public class GameEngine {
                 activePlayer.tick();
 
                 if (activePlayer.getState() == SimState.DEAD) {
-                    simcli.ui.UIManager.printMessage("Oh no! " + activePlayer.getName() + " has tragically died!");
+                    Sim deadSim = activePlayer;
+                    simcli.ui.UIManager.printMessage("\n==========================================");
+                    simcli.ui.UIManager.printMessage("  Oh no! " + deadSim.getName() + " has tragically died!");
+                    simcli.ui.UIManager.printMessage("==========================================");
+                    simcli.ui.UIManager.printMessage("  --- Final Stats ---");
+                    simcli.ui.UIManager.printMessage("  Name:      " + deadSim.getName());
+                    simcli.ui.UIManager.printMessage("  Age:       " + deadSim.getAge());
+                    simcli.ui.UIManager.printMessage("  Hunger:    " + deadSim.getHunger().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
+                    simcli.ui.UIManager.printMessage("  Energy:    " + deadSim.getEnergy().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
+                    simcli.ui.UIManager.printMessage("  Hygiene:   " + deadSim.getHygiene().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
+                    simcli.ui.UIManager.printMessage("  Happiness: " + deadSim.getHappiness().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
+                    simcli.ui.UIManager.printMessage("  Social:    " + deadSim.getSocial().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
+                    simcli.ui.UIManager.printMessage("  Health:    " + deadSim.getHealth() + "%");
+                    simcli.ui.UIManager.printMessage("  Cash:      $" + deadSim.getMoney());
+                    simcli.ui.UIManager.printMessage("  Total Earned: $" + deadSim.getTotalMoneyEarned());
+                    simcli.ui.UIManager.printMessage("==========================================");
+
                     activePlayer = getNextAliveSim();
                     if (activePlayer == null) {
                         this.isGameOver = true;
