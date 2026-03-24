@@ -20,6 +20,10 @@ public final class GameConstants {
     public static final int funBonus = 10;
     public static final double bonusTimes = 1.5;
 
+    // Manager
+    // Relationship Manager
+    public static final int MARRIAGE_THRESHOLD = 50;
+
     // Needs Tracker
     public static final int STARVING_DEATH_THRESHOLD = 3;
     public static final int HUNGER_WARNING_LEVEL = 20;
