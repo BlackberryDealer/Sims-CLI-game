@@ -1,4 +1,4 @@
-package simcli;
+package simcli.entities.lifecycle;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -201,7 +201,7 @@ public class LifecycleTest {
         Sim elderSim = new Sim("Grandpa", 70, Gender.MALE, Job.UNEMPLOYED);
         assertEquals("Elder", elderSim.getCurrentStageName(),
                 "A Sim created at age 70 should start in ElderStage");
-        assertFalse(elderSim.canWork(), "An elder should not be able to work");
+        assertTrue(elderSim.canWork(), "An elder can be able to work");
     }
 
     @Test
@@ -215,7 +215,7 @@ public class LifecycleTest {
         assertEquals(65, sim.getAge());
         assertEquals("Elder", sim.getCurrentStageName(),
                 "LifeStage should have transitioned to ElderStage at age 65");
-        assertFalse(sim.canWork(), "Elders cannot work");
+        assertTrue(sim.canWork(), "Elders can still work");
     }
 
     @Test

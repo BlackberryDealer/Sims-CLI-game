@@ -28,32 +28,36 @@ public class NeedsTracker {
         this.starvingTicks = 0;
     }
 
-    /**
-     * Ticks the needs by triggering dynamic calculation and pushing states.
-     * @param sim The specific Sim experiencing the tick.
-     * @param ageMultiplier Historical age decay impact.
-     * @param stageEnergyModifier Unique limits per lifestage.
-     * @param simName The display name of the owner.
-     * @param money The total cash of owner.
-     */
-    public void tick(Sim sim, double ageMultiplier, double stageEnergyModifier, String simName, int money) {
+    public void tick(double ageMultiplier, double stageEnergyModifier, String simName) {
         if (this.state == SimState.DEAD) return;
 
-        // Uses Polymorphism calculateDecay required by constraints
-        this.hunger.calculateDecay(sim);
-        this.energy.calculateDecay(sim);
-        this.hygiene.calculateDecay(sim);
-        this.fun.calculateDecay(sim);
-        this.social.calculateDecay(sim);
-
+        this.hunger.decay(ageMultiplier);
+        this.energy.decay(ageMultiplier * stageEnergyModifier);
+        this.hygiene.decay(ageMultiplier);
+        this.fun.decay(ageMultiplier);
+        this.social.decay(ageMultiplier);
+        this.applyCrossPenalties();
         this.updateState();
 
-        SimulationLogger.log("[" + simName + "] Hunger: " + this.hunger.getValue() +
-                " | Energy: " + this.energy.getValue() +
-                " | Social: " + this.social.getValue() +
-                " | Hygiene: " + this.hygiene.getValue() +
-                " | Fun: " + this.fun.getValue() +
-                " | Cash: $" + money + " | Status: " + this.state);
+        SimulationLogger.log(String.format("[%s] H:%d | E:%d | S:%d | Status: %s", 
+            simName, 
+            hunger.getValue(), 
+            energy.getValue(), 
+            social.getValue(), 
+            this.state));
+    }
+
+    private void applyCrossPenalties() {
+        if (this.hygiene.getValue() <= 10) {
+            this.social.decrease(5);
+        }
+        if (this.fun.getValue() <= 15) {
+            this.energy.decrease(3);
+        }
+        if (this.social.getValue() <= 10) {
+            this.fun.decrease(3);
+            this.energy.decrease(2);
+        }
     }
 
     /**
@@ -64,7 +68,7 @@ public class NeedsTracker {
             this.state = SimState.DEAD;
         } else if (this.energy.getValue() <= 20) {
             this.state = SimState.TIRED;
-        } else if (this.hunger.getValue() <= 30) {
+        } else if (this.hunger.getValue() <= simcli.utils.GameConstants.HUNGER_WARNING_LEVEL) {
             this.state = SimState.HUNGRY;
         } else {
             this.state = SimState.HEALTHY;

@@ -4,7 +4,7 @@ public class ElderStage implements LifeStage {
 
     @Override
     public boolean canWork() {
-        return false;
+        return true;
     }
 
     @Override

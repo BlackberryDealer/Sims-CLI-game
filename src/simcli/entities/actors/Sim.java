@@ -9,21 +9,20 @@ import simcli.entities.managers.RelationshipManager;
 import simcli.entities.managers.SkillManager;
 import simcli.entities.items.Item;
 
-import simcli.engine.SimulationException;
-import simcli.engine.SimulationLogger;
-import simcli.entities.lifecycle.LifeStage;
-import simcli.entities.lifecycle.AdultStage;
-import simcli.entities.lifecycle.TeenStage;
-import simcli.entities.lifecycle.ElderStage;
-import simcli.entities.lifecycle.ChildStage;
-import simcli.needs.Need;
-import simcli.world.Room;
-import simcli.utils.GameConstants;
-
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.ArrayList;
+import simcli.engine.SimulationException;
+import simcli.engine.SimulationLogger;
+import simcli.entities.lifecycle.AdultStage;
+import simcli.entities.lifecycle.ChildStage;
+import simcli.entities.lifecycle.ElderStage;
+import simcli.entities.lifecycle.LifeStage;
+import simcli.entities.lifecycle.TeenStage;
+import simcli.needs.Need;
+import simcli.utils.GameConstants;
+import simcli.world.Room;
 
 public class Sim implements ISimBehaviour {
 
@@ -59,7 +58,7 @@ public class Sim implements ISimBehaviour {
 
         this.needsTracker = new NeedsTracker();
         this.careerManager = new CareerManager();
-        this.inventoryManager = new InventoryManager(10);
+        this.inventoryManager = new InventoryManager(GameConstants.STARTING_INVENTORY_CAPACITY);
         this.skillManager = new SkillManager();
         this.traits = new ArrayList<>();
         Trait[] allTraits = Trait.values();
@@ -130,26 +129,44 @@ public class Sim implements ISimBehaviour {
     public CareerManager getCareerManager() { return careerManager; }
 
     public void tick() {
-        double ageMultiplier = 1.0 + (Math.max(0, this.age - 18) * 0.05);
+        if (this.getState() == SimState.DEAD) {
+            return; 
+        }
+
+        double ageMultiplier = 1.0 + (Math.max(0, this.age - GameConstants.ADULT_AGE) * GameConstants.AGE_ENERGY_PENALTY_MULTIPLIER);
         double stageEnergyModifier = (this.currentStage != null) ? this.currentStage.getEnergyDecayModifier() : 1.0;
         double traitEnergyMod = 1.0;
-        for(Trait t : traits) { traitEnergyMod *= t.getEnergyDecayModifier(); }
-        needsTracker.tick(this, ageMultiplier, stageEnergyModifier * traitEnergyMod, this.name, this.money);
+        for(Trait t : traits) { 
+            traitEnergyMod *= t.getEnergyDecayModifier(); 
+        }
+
+        needsTracker.tick(ageMultiplier, stageEnergyModifier * traitEnergyMod, this.name);
+
+        SimulationLogger.log("[" + this.name + "] Cash: $" + this.money + " | Life Stage: " + this.getCurrentStageName());
     }
 
     public void growOlderDaily() {
         this.daysAlive++;
         careerManager.resetDaily(true);
 
-        if (this.daysAlive % 3 == 0) {
+        if (this.daysAlive % GameConstants.DAYS_PER_AGE_TICK == 0) {
             this.ageUp();
+            
             if (this.age >= GameConstants.DEATH_AGE) {
-                needsTracker.setState(SimState.DEAD);
-                SimulationLogger.log("\n*** TRAGEDY! " + this.name + " has passed away of old age at " + this.age + ". ***");
-            } else if (this.age >= GameConstants.ELDER_AGE && this.getCareer() != Job.UNEMPLOYED) {
-                SimulationLogger.log("\n*** RETIREMENT! " + this.name + " has reached the retirement age of 65 and is officially retired. ***");
-                this.careerManager.changeJob(Job.UNEMPLOYED, this.name);
-                this.setMoney(this.getMoney() + 1000);
+                this.needsTracker.setState(SimState.DEAD); 
+                SimulationLogger.log("\n*** " + this.name + " has passed away of old age. ***");
+            } 
+            
+            if (this.age >= GameConstants.ELDER_AGE && this.getCareer() == Job.UNEMPLOYED) {
+                int pension = 100; 
+                this.money += pension;
+                SimulationLogger.log(this.name + " collected a retirement pension of $" + pension);
+            }
+
+            Job currentJob = this.getCareer();
+            if (currentJob != Job.UNEMPLOYED && this.age > currentJob.getMaxAge()) {
+                SimulationLogger.log("\n[RETIREMENT] " + this.name + " is too old for " + currentJob.getTitle() + " and must retire.");
+                this.getCareerManager().changeJob(Job.UNEMPLOYED, this.name);
             }
         }
     }
