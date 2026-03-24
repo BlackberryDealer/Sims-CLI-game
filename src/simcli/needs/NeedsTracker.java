@@ -3,6 +3,7 @@ package simcli.needs;
 import simcli.entities.actors.Sim;
 import simcli.entities.models.SimState;
 import simcli.engine.SimulationLogger;
+import simcli.utils.GameConstants;
 
 /**
  * Encapsulates management of Sim Needs properties and translates boundaries into SimState evaluations.
@@ -52,15 +53,15 @@ public class NeedsTracker {
     }
 
     private void applyCrossPenalties() {
-        if (this.hygiene.getValue() <= 10) {
-            this.social.decrease(5);
+        if (this.hygiene.getValue() <= GameConstants.HYGIENE_PENALTY_THRESHOLD) {
+            this.social.decrease(GameConstants.HYGIENE_SOCIAL_PENALTY_AMOUNT);
         }
-        if (this.happiness.getValue() <= 15) {
-            this.energy.decrease(3);
+        if (this.happiness.getValue() <= GameConstants.HAPPINESS_PENALTY_THRESHOLD) {
+            this.energy.decrease(GameConstants.HAPPINESS_ENERGY_PENALTY_AMOUNT);
         }
-        if (this.social.getValue() <= 10) {
-            this.happiness.decrease(3);
-            this.energy.decrease(2);
+        if (this.social.getValue() <= GameConstants.SOCIAL_PENALTY_THRESHOLD) {
+            this.happiness.decrease(GameConstants.SOCIAL_HAPPINESS_PENALTY_AMOUNT);
+            this.energy.decrease(GameConstants.SOCIAL_ENERGY_PENALTY_AMOUNT);
         }
     }
 

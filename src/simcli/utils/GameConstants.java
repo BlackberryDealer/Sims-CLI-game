@@ -26,6 +26,15 @@ public final class GameConstants {
     public static final int STARVING_DEATH_THRESHOLD = 3;
     public static final int HUNGER_WARNING_LEVEL = 20;
 
+    // Cross Penalty
+    public static final int HYGIENE_PENALTY_THRESHOLD = 10;
+    public static final int HYGIENE_SOCIAL_PENALTY_AMOUNT = 5;
+    public static final int HAPPINESS_PENALTY_THRESHOLD = 15;
+    public static final int HAPPINESS_ENERGY_PENALTY_AMOUNT = 3;
+    public static final int SOCIAL_PENALTY_THRESHOLD = 10;
+    public static final int SOCIAL_HAPPINESS_PENALTY_AMOUNT = 3;
+    public static final int SOCIAL_ENERGY_PENALTY_AMOUNT = 2;
+
     // Needs
     // Energy
     public static final int ENERGY_BASE_DECAY_RATE = 2;
