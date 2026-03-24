@@ -224,30 +224,21 @@ public class Sim implements ISimBehaviour {
     public void changeJob(Job newJob) { careerProfile.changeJob(newJob, this.name); }
 
     public void tick() {
-<<<<<<< HEAD:src/simcli/entities/Sim.java
-    if (this.getState() == SimState.DEAD) {
-        return; 
-=======
-        double ageMultiplier = 1.0 + (Math.max(0, this.age - 18) * 0.05);
+        if (this.getState() == SimState.DEAD) {
+            return; 
+        }
+
         double ageMultiplier = 1.0 + (Math.max(0, this.age - GameConstants.ADULT_AGE) * GameConstants.AGE_ENERGY_PENALTY_MULTIPLIER);
         double stageEnergyModifier = (this.currentStage != null) ? this.currentStage.getEnergyDecayModifier() : 1.0;
         double traitEnergyMod = 1.0;
-        for(Trait t : traits) { traitEnergyMod *= t.getEnergyDecayModifier(); }
-        needsTracker.tick(this, ageMultiplier, stageEnergyModifier * traitEnergyMod, this.name, this.money);
->>>>>>> 7364b3c9f398451005ac0cc0adef6bde0a5b590c:src/simcli/entities/actors/Sim.java
+        for(Trait t : traits) { 
+            traitEnergyMod *= t.getEnergyDecayModifier(); 
+        }
+
+        needsTracker.tick(ageMultiplier, stageEnergyModifier * traitEnergyMod, this.name);
+
+        SimulationLogger.log("[" + this.name + "] Cash: $" + this.money + " | Life Stage: " + this.getCurrentStageName());
     }
-
-    double ageMultiplier = 1.0 + (Math.max(0, this.age - 18) * GameConstants.AGE_ENERGY_PENALTY_MULTIPLIER);
-    double stageEnergyModifier = (this.currentStage != null) ? this.currentStage.getEnergyDecayModifier() : 1.0;
-    double traitEnergyMod = 1.0;
-    for(Trait t : traits) { 
-        traitEnergyMod *= t.getEnergyDecayModifier(); 
-    }
-
-    needsTracker.tick(ageMultiplier, stageEnergyModifier * traitEnergyMod, this.name);
-
-    SimulationLogger.log("[" + this.name + "] Cash: $" + this.money + " | Life Stage: " + this.getCurrentStageName());
-}
 
 public void growOlderDaily() {
     this.daysAlive++;

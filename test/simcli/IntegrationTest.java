@@ -150,7 +150,7 @@ public class IntegrationTest {
 
         assertEquals(CommandResult.NO_TICK, result);
         assertEquals(Job.UNEMPLOYED, teen.getCareer(), "Teen should remain unemployed.");
-        assertTrue(outputStreamCaptor.toString().contains("Only adults can access the job market."), 
+        assertTrue(outputStreamCaptor.toString().contains("Children and Teens cannot access the professional job market."), 
             "Should reject due to Age Boundary.");
     }
 

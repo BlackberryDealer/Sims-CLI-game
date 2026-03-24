@@ -1,12 +1,7 @@
 package simcli.needs;
 
-<<<<<<< HEAD:src/simcli/entities/NeedsTracker.java
-=======
-import simcli.entities.actors.Sim;
 import simcli.entities.actors.SimState;
->>>>>>> 7364b3c9f398451005ac0cc0adef6bde0a5b590c:src/simcli/needs/NeedsTracker.java
 import simcli.engine.SimulationLogger;
-import simcli.needs.*;
 
 /**
  * Encapsulates management of Sim Needs properties and translates boundaries into SimState evaluations.
@@ -32,24 +27,23 @@ public class NeedsTracker {
         this.starvingTicks = 0;
     }
 
-<<<<<<< HEAD:src/simcli/entities/NeedsTracker.java
     public void tick(double ageMultiplier, double stageEnergyModifier, String simName) {
-    if (this.state == SimState.DEAD) return;
+        if (this.state == SimState.DEAD) return;
 
-    this.hunger.decay(ageMultiplier);
-    this.energy.decay(ageMultiplier * stageEnergyModifier);
-    this.hygiene.decay(ageMultiplier);
-    this.fun.decay(ageMultiplier);
-    this.social.decay(ageMultiplier);
-    this.applyCrossPenalties();
-    this.updateState();
+        this.hunger.decay(ageMultiplier);
+        this.energy.decay(ageMultiplier * stageEnergyModifier);
+        this.hygiene.decay(ageMultiplier);
+        this.fun.decay(ageMultiplier);
+        this.social.decay(ageMultiplier);
+        this.applyCrossPenalties();
+        this.updateState();
 
-    SimulationLogger.log(String.format("[%s] H:%d | E:%d | S:%d | Status: %s", 
-        simName, 
-        hunger.getValue(), 
-        energy.getValue(), 
-        social.getValue(), 
-        this.state));
+        SimulationLogger.log(String.format("[%s] H:%d | E:%d | S:%d | Status: %s", 
+            simName, 
+            hunger.getValue(), 
+            energy.getValue(), 
+            social.getValue(), 
+            this.state));
     }
 
     private void applyCrossPenalties() {
@@ -63,34 +57,6 @@ public class NeedsTracker {
             this.fun.decrease(3);
             this.energy.decrease(2);
         }
-=======
-    /**
-     * Ticks the needs by triggering dynamic calculation and pushing states.
-     * @param sim The specific Sim experiencing the tick.
-     * @param ageMultiplier Historical age decay impact.
-     * @param stageEnergyModifier Unique limits per lifestage.
-     * @param simName The display name of the owner.
-     * @param money The total cash of owner.
-     */
-    public void tick(Sim sim, double ageMultiplier, double stageEnergyModifier, String simName, int money) {
-        if (this.state == SimState.DEAD) return;
-
-        // Uses Polymorphism calculateDecay required by constraints
-        this.hunger.calculateDecay(sim);
-        this.energy.calculateDecay(sim);
-        this.hygiene.calculateDecay(sim);
-        this.fun.calculateDecay(sim);
-        this.social.calculateDecay(sim);
-
-        this.updateState();
-
-        SimulationLogger.log("[" + simName + "] Hunger: " + this.hunger.getValue() +
-                " | Energy: " + this.energy.getValue() +
-                " | Social: " + this.social.getValue() +
-                " | Hygiene: " + this.hygiene.getValue() +
-                " | Fun: " + this.fun.getValue() +
-                " | Cash: $" + money + " | Status: " + this.state);
->>>>>>> 7364b3c9f398451005ac0cc0adef6bde0a5b590c:src/simcli/needs/NeedsTracker.java
     }
 
     /**
