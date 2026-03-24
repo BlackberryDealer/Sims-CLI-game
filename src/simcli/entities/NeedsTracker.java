@@ -1,7 +1,7 @@
 package simcli.entities;
 
-import simcli.needs.*;
 import simcli.engine.SimulationLogger;
+import simcli.needs.*;
 
 public class NeedsTracker {
     private Need hunger;
@@ -24,38 +24,36 @@ public class NeedsTracker {
         this.starvingTicks = 0;
     }
 
-    public void tick(double ageMultiplier, double stageEnergyModifier, String simName, int money) {
-        if (this.state == SimState.DEAD) return;
+    public void tick(double ageMultiplier, double stageEnergyModifier, String simName) {
+    if (this.state == SimState.DEAD) return;
 
-        this.hunger.decay(ageMultiplier);
-        this.energy.decay(ageMultiplier * stageEnergyModifier);
-        this.hygiene.decay(ageMultiplier);
-        this.fun.decay(ageMultiplier);
-        this.social.decay(ageMultiplier);
+    this.hunger.decay(ageMultiplier);
+    this.energy.decay(ageMultiplier * stageEnergyModifier);
+    this.hygiene.decay(ageMultiplier);
+    this.fun.decay(ageMultiplier);
+    this.social.decay(ageMultiplier);
+    this.applyCrossPenalties();
+    this.updateState();
 
-        // Slide 6: Need cross-penalties
+    SimulationLogger.log(String.format("[%s] H:%d | E:%d | S:%d | Status: %s", 
+        simName, 
+        hunger.getValue(), 
+        energy.getValue(), 
+        social.getValue(), 
+        this.state));
+    }
+
+    private void applyCrossPenalties() {
         if (this.hygiene.getValue() <= 10) {
-            // Hygiene ≤ 10 → Social penalty (people avoid the Sim)
             this.social.decrease(5);
         }
         if (this.fun.getValue() <= 15) {
-            // Fun ≤ 15 → Mood decreases (drains energy faster)
             this.energy.decrease(3);
         }
         if (this.social.getValue() <= 10) {
-            // Social ≤ 10 → Isolation penalty (loneliness drains fun and energy)
             this.fun.decrease(3);
             this.energy.decrease(2);
         }
-
-        this.updateState();
-
-        SimulationLogger.log("[" + simName + "] Hunger: " + this.hunger.getValue() +
-                " | Energy: " + this.energy.getValue() +
-                " | Social: " + this.social.getValue() +
-                " | Hygiene: " + this.hygiene.getValue() +
-                " | Fun: " + this.fun.getValue() +
-                " | Cash: $" + money + " | Status: " + this.state);
     }
 
     public void updateState() {
