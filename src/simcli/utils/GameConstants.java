@@ -4,6 +4,14 @@ public final class GameConstants {
     private GameConstants() {
     } // Prevent instantiation
 
+    // GameEngine
+    public static final int TICKS_PER_DAY = 24;
+    public static final int AUTOSAVE_INTERVAL_TICKS = 10;
+
+    // Commands
+    public static final int UPGRADE_CAPACITY_BONUS = 20;
+    public static final int UPGRADE_COST = 500;
+
     // Sim
     public static final int STARTING_MONEY = 500;
     public static final int STARTING_INVENTORY_CAPACITY = 10;
@@ -61,11 +69,9 @@ public final class GameConstants {
     public static final int SOCIAL_BASE_DECAY_RATE = 5;
     public static final int SOCIAL_ADDED_AMOUNT = 15;
 
-    // GameEngine
-    public static final int TICKS_PER_DAY = 24;
-    public static final int AUTOSAVE_INTERVAL_TICKS = 10;
-
-    // Commands
-    public static final int UPGRADE_CAPACITY_BONUS = 20;
-    public static final int UPGRADE_COST = 500;
+    // Health
+    public static final int HEALTH_BASE_DAMAGE = 5;
+    public static final int HEALTH_ACCELERATED_DAMAGE_MULTIPLIER = 2;
+    public static final int HEALTH_ADDED_DAMAGE = 2;
+    public static final int HEALTH_REGENERATION_RATE = 1;
 }

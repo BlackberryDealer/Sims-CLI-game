@@ -5,6 +5,7 @@ import simcli.entities.models.SimState;
 import simcli.ui.IRenderer;
 import simcli.ui.TerminalRenderer;
 import simcli.persistence.SaveManager;
+import simcli.utils.GameConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +29,7 @@ public class GameEngine {
     // CONSTRUCTOR: For Creating a New World
     public GameEngine(String worldName, List<Sim> startingNeighborhood) {
         this.worldName = worldName;
-        this.timeManager = new TimeManager(1, simcli.utils.GameConstants.TICKS_PER_DAY); // 24 ticks per day
+        this.timeManager = new TimeManager(1, GameConstants.TICKS_PER_DAY); // 24 ticks per day
         this.isGameOver = false;
         this.neighborhood = startingNeighborhood;
         this.worldManager = new WorldManager();
@@ -42,7 +43,7 @@ public class GameEngine {
     // CONSTRUCTOR: For Loading an Existing World
     public GameEngine(String worldName, int currentTick, List<Sim> loadedNeighborhood, boolean isGameOver) {
         this.worldName = worldName;
-        this.timeManager = new TimeManager(currentTick, simcli.utils.GameConstants.TICKS_PER_DAY);
+        this.timeManager = new TimeManager(currentTick, GameConstants.TICKS_PER_DAY);
         this.neighborhood = loadedNeighborhood;
         this.isGameOver = isGameOver;
         this.worldManager = new WorldManager();
@@ -167,10 +168,10 @@ public class GameEngine {
                             timeManager.getCurrentDay(), timeManager.getFormattedTime(),
                             timeManager.getTimeOfDay(), inRoom, roomName);
 
-                    int currentInDay = timeManager.getCurrentTick() % simcli.utils.GameConstants.TICKS_PER_DAY;
-                    int ticksToMorning = (simcli.utils.GameConstants.TICKS_PER_DAY - currentInDay + 8) % simcli.utils.GameConstants.TICKS_PER_DAY;
+                    int currentInDay = timeManager.getCurrentTick() % GameConstants.TICKS_PER_DAY;
+                    int ticksToMorning = (GameConstants.TICKS_PER_DAY - currentInDay + 8) % GameConstants.TICKS_PER_DAY;
                     if (ticksToMorning == 0)
-                        ticksToMorning = simcli.utils.GameConstants.TICKS_PER_DAY;
+                        ticksToMorning = GameConstants.TICKS_PER_DAY;
 
                     simcli.ui.UIManager.printMessage("\n" + activePlayer.getName() + " sleeps deeply in the bed for "
                             + ticksToMorning + " hours.");
