@@ -91,14 +91,14 @@ public class RelationshipManager {
         if (otherSim == owner) return;
         relationships.putIfAbsent(otherSim, 0);
         
-        int relBonus = GameConstants.relBonus;
-        int socialBonus = GameConstants.socialBonus;
-        int funBonus = GameConstants.funBonus;
+        int relBonus = GameConstants.RELATIONSHIP_BONUS;
+        int socialBonus = GameConstants.SOCIAL_BONUS;
+        int funBonus = GameConstants.FUN_BONUS;
         
         if (owner.hasTrait(Trait.SOCIALITE)) {
-            relBonus = (int)(relBonus * GameConstants.bonusTimes);
-            socialBonus = (int)(socialBonus * GameConstants.bonusTimes);
-            funBonus = (int)(funBonus * GameConstants.bonusTimes);
+            relBonus = (int)(relBonus * GameConstants.BONUS_TIMES);
+            socialBonus = (int)(socialBonus * GameConstants.BONUS_TIMES);
+            funBonus = (int)(funBonus * GameConstants.BONUS_TIMES);
         }
         relationships.put(otherSim, relationships.get(otherSim) + relBonus);
         owner.setCurrentAction(ActionState.SOCIALIZING);
