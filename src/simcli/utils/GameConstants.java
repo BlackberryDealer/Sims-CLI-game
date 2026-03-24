@@ -28,7 +28,9 @@ public final class GameConstants {
     public static final int SOCIAL_BONUS = 25;
     public static final int HAPPINESS_BONUS = 10;
     public static final double BONUS_TIMES = 1.5;
-    public static final int MARRIAGE_THRESHOLD = 50;
+    public static final int MARRIAGE_THRESHOLD = 100;
+    public static final int MAX_RELATIONSHIP_SCORE = 100;
+    public static final int REPRODUCE_SUCCESS_CHANCE = 50;
 
     // Needs Tracker
     public static final int STARVING_DEATH_THRESHOLD = 3;

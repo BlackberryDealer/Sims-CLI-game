@@ -11,5 +11,7 @@ public enum RelationshipStatus {
     /** Platonically high bounds of interaction */
     FRIEND,
     /** Active partnered/romantic involvement */
-    ROMANTIC
+    ROMANTIC,
+    /** Legally bound marriage */
+    MARRIED
 }

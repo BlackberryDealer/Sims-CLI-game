@@ -31,7 +31,7 @@ public class Relationship {
 
     /** Used by framework actions natively modifying arrays */
     public void setFriendshipScore(int friendshipScore) { 
-        this.friendshipScore = friendshipScore; 
+        this.friendshipScore = Math.max(0, Math.min(friendshipScore, 100)); 
     }
 
     /**

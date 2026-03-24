@@ -1,5 +1,6 @@
 package simcli.world.interactables;
 
+import simcli.engine.GameEngine;
 import simcli.engine.SimulationException;
 import simcli.engine.SimulationLogger;
 import simcli.entities.models.ActionState;
@@ -7,15 +8,18 @@ import simcli.entities.actors.NPCSim;
 import simcli.entities.actors.Sim;
 import simcli.entities.models.SkillType;
 import simcli.entities.models.Trait;
+import simcli.utils.GameConstants;
 
 import java.util.List;
 import java.util.Scanner;
 
 public class ParkBench implements Interactable {
     private final List<NPCSim> visitors;
+    private final GameEngine engine;
 
-    public ParkBench(List<NPCSim> visitors) {
+    public ParkBench(List<NPCSim> visitors, GameEngine engine) {
         this.visitors = visitors;
+        this.engine = engine;
     }
 
     @Override
@@ -26,16 +30,36 @@ public class ParkBench implements Interactable {
         SimulationLogger.prompt("\n=== Socialize at the Park ===\n");
         for (int i = 0; i < visitors.size(); i++) {
             NPCSim npc = visitors.get(i);
+            int relScore = sim.getRelationshipManager().getRelationship(npc);
+            String spouseTag = (sim.getRelationshipManager().getSpouse() == npc) ? " [SPOUSE]" : "";
             SimulationLogger.prompt("[" + (i + 1) + "] Talk to " + npc.getName()
-                    + " (Relationship: " + sim.getRelationshipManager().getRelationship(npc) + ")\n");
+                    + " (Relationship: " + relScore + "/100)" + spouseTag + "\n");
         }
         SimulationLogger.prompt("[0] Go back\nSelect person> ");
         try {
             int choice = Integer.parseInt(scanner.nextLine().trim());
             if (choice > 0 && choice <= visitors.size()) {
                 NPCSim target = visitors.get(choice - 1);
+                int relScore = sim.getRelationshipManager().getRelationship(target);
+                boolean isSpouse = sim.getRelationshipManager().getSpouse() == target;
+
+                // Build action menu dynamically
+                SimulationLogger.prompt("\n[1] Chat\n[2] Joke\n[3] Argue\n");
                 
-                SimulationLogger.prompt("\n[1] Chat\n[2] Joke\n[3] Argue\nSelect action> ");
+                // Show Propose option if relationship is maxed and both are unmarried
+                boolean canPropose = relScore >= GameConstants.MARRIAGE_THRESHOLD 
+                        && sim.getRelationshipManager().getSpouse() == null 
+                        && target.getRelationshipManager().getSpouse() == null;
+                if (canPropose) {
+                    SimulationLogger.prompt("[4] Propose Marriage\n");
+                }
+
+                // Show Have a Baby option if they are married
+                if (isSpouse) {
+                    SimulationLogger.prompt("[5] Have a Baby\n");
+                }
+
+                SimulationLogger.prompt("Select action> ");
                 int actionChoice = Integer.parseInt(scanner.nextLine().trim());
                 
                 boolean isSocialite = sim.hasTrait(Trait.SOCIALITE);
@@ -61,15 +85,51 @@ public class ParkBench implements Interactable {
                     sim.getHappiness().decrease(10);
                     sim.getEnergy().decrease(15);
                     sim.getSocial().increase(20);
+                } else if (actionChoice == 4 && canPropose) {
+                    handleProposal(sim, target);
+                } else if (actionChoice == 5 && isSpouse) {
+                    handleBaby(sim);
                 } else {
                     SimulationLogger.logWarning("Invalid action selection.");
                     return;
                 }
                 
-                SimulationLogger.log("Relationship with " + target.getName() + " is now " + sim.getRelationshipManager().getRelationship(target) + ".");
+                SimulationLogger.log("Relationship with " + target.getName() + " is now " + sim.getRelationshipManager().getRelationship(target) + "/100.");
             }
         } catch (NumberFormatException e) {
             SimulationLogger.logWarning("Invalid selection.");
+        }
+    }
+
+    /**
+     * Handles the marriage proposal flow. On success, adds the NPC to the neighborhood.
+     */
+    private void handleProposal(Sim sim, NPCSim target) {
+        boolean married = sim.getRelationshipManager().marry(target);
+        if (married) {
+            // Add the NPC to the neighborhood as a playable character
+            if (!engine.getNeighborhood().contains(target)) {
+                engine.getNeighborhood().add(target);
+                SimulationLogger.log(target.getName() + " has joined the household and is now playable!");
+            }
+        } else {
+            SimulationLogger.log("The proposal was rejected. Build a stronger relationship first.");
+        }
+    }
+
+    /**
+     * Handles the baby attempt. 50% success rate via RelationshipManager.reproduce().
+     */
+    private void handleBaby(Sim sim) {
+        try {
+            Sim child = sim.getRelationshipManager().reproduce();
+            if (child != null) {
+                engine.getNeighborhood().add(child);
+                SimulationLogger.log("The baby has been added to your household!");
+                SimulationLogger.log("Note: The child will become playable once they reach the teen stage (age 13).");
+            }
+        } catch (SimulationException e) {
+            SimulationLogger.logWarning(e.getMessage());
         }
     }
 

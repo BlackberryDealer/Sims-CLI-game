@@ -2,11 +2,11 @@ package simcli.entities.managers;
 
 import simcli.entities.actors.Sim;
 import simcli.entities.models.Relationship;
-import simcli.entities.models.RelationshipStatus;
 import simcli.entities.models.Gender;
 import simcli.engine.SimulationLogger;
 import simcli.engine.SimulationException;
 import simcli.utils.GameConstants;
+import simcli.utils.GameRandom;
 import simcli.entities.models.Trait;
 import simcli.entities.models.ActionState;
 
@@ -17,23 +17,20 @@ import java.util.ArrayList;
 
 /**
  * Manages all social bonds, interactions, and romantic relationships for a Sim.
- * Removes God-Object/Fat-Class functionality from the core Sim object.
  */
 public class RelationshipManager {
     private Sim owner;
-    private Map<Sim, Integer> relationships; // Legacy Tracker
-    private List<Relationship> relationshipRegistry; // OOP Tracker
+    private Map<Sim, Integer> relationships;
+    private List<Relationship> relationshipRegistry;
     private Sim spouse;
+    private List<Sim> children;
 
-    /**
-     * Initializes the Relationship component.
-     * @param owner The Sim retaining this component.
-     */
     public RelationshipManager(Sim owner) {
         this.owner = owner;
         this.relationships = new HashMap<>();
         this.relationshipRegistry = new ArrayList<>();
         this.spouse = null;
+        this.children = new ArrayList<>();
     }
 
     public List<Relationship> getRelationshipRegistry() { 
@@ -43,19 +40,35 @@ public class RelationshipManager {
     public Sim getSpouse() { 
         return spouse; 
     }
+
+    public void setSpouse(Sim spouse) {
+        this.spouse = spouse;
+    }
+    
+    public List<Sim> getChildren() {
+        return children;
+    }
+
+    public void addChild(Sim child) {
+        this.children.add(child);
+    }
     
     public int getRelationship(Sim otherSim) {
         return relationships.getOrDefault(otherSim, 0);
     }
+
+    public Map<Sim, Integer> getRelationships() {
+        return relationships;
+    }
     
     public void increaseRelationship(Sim otherSim, int amount) {
-        relationships.put(otherSim, getRelationship(otherSim) + amount);
+        int current = getRelationship(otherSim);
+        int newScore = Math.max(0, Math.min(current + amount, GameConstants.MAX_RELATIONSHIP_SCORE));
+        relationships.put(otherSim, newScore);
     }
 
     /**
      * Interacts with another Sim, modifying relationship scores.
-     * @param otherSim The other Sim being interacted with.
-     * @param action The string verb describing the action ("chat", "flirt", "argue").
      */
     public void interactWith(Sim otherSim, String action) {
         if (otherSim == owner) return;
@@ -84,8 +97,7 @@ public class RelationshipManager {
     }
 
     /**
-     * Legacy social interaction handling need boosts and basic trackers.
-     * @param otherSim The opposing Sim.
+     * Legacy social interaction handling — need boosts and basic trackers.
      */
     public void interactSocially(Sim otherSim) {
         if (otherSim == owner) return;
@@ -100,7 +112,11 @@ public class RelationshipManager {
             socialBonus = (int)(socialBonus * GameConstants.BONUS_TIMES);
             happinessBonus = (int)(happinessBonus * GameConstants.BONUS_TIMES);
         }
-        relationships.put(otherSim, relationships.get(otherSim) + relBonus);
+
+        int current = relationships.get(otherSim);
+        int newScore = Math.min(current + relBonus, GameConstants.MAX_RELATIONSHIP_SCORE);
+        relationships.put(otherSim, newScore);
+
         owner.setCurrentAction(ActionState.SOCIALIZING);
         
         SimulationLogger.log(owner.getName() + " socializes with " + otherSim.getName() + ".");
@@ -108,13 +124,11 @@ public class RelationshipManager {
         owner.getEnergy().decrease(10);
         owner.getHappiness().increase(happinessBonus);
         
-        // Push legacy integration through new mechanic
         interactWith(otherSim, "chat");
     }
 
     /**
      * Evaluates and establishes a marriage bond between the owner and target.
-     * @param otherSim Target sim.
      * @return boolean True if married.
      */
     public boolean marry(Sim otherSim) {
@@ -122,7 +136,6 @@ public class RelationshipManager {
         relationships.putIfAbsent(otherSim, 0);
         if (relationships.get(otherSim) >= GameConstants.MARRIAGE_THRESHOLD && this.spouse == null && otherSim.getRelationshipManager().getSpouse() == null) {
             this.spouse = otherSim;
-            // Cross-update spouse manager
             otherSim.getRelationshipManager().setSpouseExternally(owner);
             SimulationLogger.log("\n*** WEDDING BELLS! " + owner.getName() + " and " + otherSim.getName() + " are now married! ***");
             return true;
@@ -131,16 +144,16 @@ public class RelationshipManager {
     }
 
     /**
-     * Private mutator allowing cross-assignment during marriage.
+     * Package-private mutator allowing cross-assignment during marriage.
      */
     protected void setSpouseExternally(Sim spouse) {
         this.spouse = spouse;
     }
 
     /**
-     * Produces a child if correctly married.
-     * @return The child Sim.
-     * @throws SimulationException if unmarried.
+     * Produces a child if correctly married and passes the 50% success check.
+     * @return The child Sim, or null if the attempt fails (50% chance).
+     * @throws SimulationException if unmarried or same gender.
      */
     public Sim reproduce() throws SimulationException {
         if (this.spouse == null) {
@@ -149,7 +162,21 @@ public class RelationshipManager {
         if (owner.getGender() == this.spouse.getGender()) {
             throw new SimulationException(owner.getName() + " and " + this.spouse.getName() + " are of the same gender and cannot reproduce biologically.");
         }
+
+        // 50% success rate
+        if (GameRandom.RANDOM.nextInt(100) >= GameConstants.REPRODUCE_SUCCESS_CHANCE) {
+            SimulationLogger.log("\n" + owner.getName() + " and " + this.spouse.getName() + " tried to have a baby, but it didn't work out this time.");
+            return null;
+        }
+
+        Gender childGender = GameRandom.RANDOM.nextBoolean() ? Gender.MALE : Gender.FEMALE;
+        Sim child = new Sim("Baby", 0, childGender);
+        child.setChildSim(true);
+
+        this.children.add(child);
+        this.spouse.getRelationshipManager().addChild(child);
+
         SimulationLogger.log("\n*** NEW LIFE! " + owner.getName() + " and " + this.spouse.getName() + " have had a baby! ***");
-        return new Sim("Baby", 0, simcli.utils.GameRandom.RANDOM.nextBoolean() ? Gender.MALE : Gender.FEMALE);
+        return child;
     }
 }

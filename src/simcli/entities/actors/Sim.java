@@ -34,6 +34,7 @@ public class Sim implements ISimBehaviour {
     private Room currentRoom;
     private int daysAlive;
     private LifeStage currentStage;
+    private boolean isChildSim;
 
     // Component Managers
     private SimsNeedsTracker needsTracker;
@@ -55,6 +56,7 @@ public class Sim implements ISimBehaviour {
         this.money = GameConstants.STARTING_MONEY;
         this.daysAlive = 0;
         this.currentAction = ActionState.IDLE;
+        this.isChildSim = false;
 
         this.needsTracker = new SimsNeedsTracker();
         this.careerManager = new CareerManager();
@@ -173,6 +175,18 @@ public class Sim implements ISimBehaviour {
     public LifeStage getLifeStage() { return this.currentStage; }
     public boolean canWork() { return (this.currentStage != null) && this.currentStage.canWork(); }
     public String getCurrentStageName() { return (this.currentStage != null) ? this.currentStage.getStageName() : "Unknown"; }
+
+    public boolean isChildSim() { return isChildSim; }
+    public void setChildSim(boolean childSim) { this.isChildSim = childSim; }
+    
+    /**
+     * A child sim becomes playable once they reach TeenStage (age >= 13).
+     * Non-child sims are always playable.
+     */
+    public boolean isPlayable() {
+        if (!isChildSim) return true;
+        return this.age >= GameConstants.TEEN_AGE;
+    }
 
     public void ageUp() {
         this.age++;

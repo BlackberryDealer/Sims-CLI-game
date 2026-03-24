@@ -32,7 +32,8 @@ public class SwitchSimCommand implements ICommand {
         UIManager.printMessage("Current Household:");
         for (int i = 0; i < neighborhood.size(); i++) {
             Sim s = neighborhood.get(i);
-            String status = s.getState() == SimState.DEAD ? "[DEAD]" : "[Alive]";
+            String status = s.getState() == SimState.DEAD ? "[DEAD]" : 
+                           (!s.isPlayable() ? "[NOT PLAYABLE - Age: " + s.getAge() + "]" : "[Alive]");
             String marker = (s == engine.getActivePlayer()) ? " (Current)" : "";
             UIManager.printMessage("[" + (i + 1) + "] " + s.getName() + " " + status + marker);
         }
@@ -47,6 +48,12 @@ public class SwitchSimCommand implements ICommand {
                 Sim chosen = neighborhood.get(target - 1);
                 if (chosen.getState() == SimState.DEAD) {
                     UIManager.printMessage(chosen.getName() + " is deceased. Let them rest.");
+                    UIManager.prompt("\nPress ENTER to return...");
+                    scanner.nextLine();
+                    return CommandResult.NO_TICK;
+                }
+                if (!chosen.isPlayable()) {
+                    UIManager.printMessage(chosen.getName() + " is too young to be controlled. They must reach the teen stage (age 13) first.");
                     UIManager.prompt("\nPress ENTER to return...");
                     scanner.nextLine();
                     return CommandResult.NO_TICK;

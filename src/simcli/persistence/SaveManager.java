@@ -8,23 +8,21 @@ import simcli.entities.models.Gender;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class SaveManager {
     private static final String SAVE_DIR = "saves/";
 
-    // Ensures the saves directory exists
     public static void checkDirectory() {
         File dir = new File(SAVE_DIR);
         if (!dir.exists())
             dir.mkdirs();
     }
 
-    // Checks if a world name is already taken (MainMenu needs this!)
     public static boolean saveExists(String worldName) {
         return new File(SAVE_DIR + worldName + ".txt").exists();
     }
 
-    // Deletes a specific save
     public static boolean deleteSave(String worldName) {
         File file = new File(SAVE_DIR + worldName + ".txt");
         if (file.exists()) {
@@ -33,7 +31,6 @@ public class SaveManager {
         return false;
     }
 
-    // Gets a list of all current save files (MainMenu needs this!)
     public static List<String> getExistingSaves() {
         checkDirectory();
         List<String> saves = new ArrayList<>();
@@ -48,7 +45,6 @@ public class SaveManager {
         return saves;
     }
 
-    // Saves the game engine state to a text file
     public static void saveGame(GameEngine engine, String worldName) {
         checkDirectory();
         try (PrintWriter writer = new PrintWriter(new FileWriter(SAVE_DIR + worldName + ".txt"))) {
@@ -83,14 +79,15 @@ public class SaveManager {
             }
             writer.println("LOCATION:" + locIndex + "," + roomIndex);
 
+            // Save all sims
             for (Sim sim : engine.getNeighborhood()) {
-                // Format: Sim:Name,Age,Gender,JobName,Money,InventoryCapacity,Hunger,Energy,Fun,Hygiene,Social,JobTier
                 writer.println("Sim:" + sim.getName() + "," + sim.getAge() + "," +
                         sim.getGender().name() + "," + sim.getCareer().name() + "," + 
                         sim.getMoney() + "," + sim.getInventoryCapacity() + "," +
                         sim.getHunger().getValue() + "," + sim.getEnergy().getValue() + ","
                         + sim.getHappiness().getValue() + "," + sim.getHygiene().getValue() + ","
-                        + sim.getSocial().getValue() + "," + sim.getJobTier());
+                        + sim.getSocial().getValue() + "," + sim.getJobTier() + ","
+                        + sim.isChildSim());
                 
                 // Save Inventory
                 for (simcli.entities.items.Item item : sim.getInventory()) {
@@ -106,6 +103,22 @@ public class SaveManager {
                     }
                 }
             }
+
+            // Save Relationships (legacy map)
+            for (Sim sim : engine.getNeighborhood()) {
+                Map<Sim, Integer> rels = sim.getRelationshipManager().getRelationships();
+                for (Map.Entry<Sim, Integer> entry : rels.entrySet()) {
+                    writer.println("Rel:" + sim.getName() + "," + entry.getKey().getName() + "," + entry.getValue());
+                }
+            }
+
+            // Save Spouse data
+            for (Sim sim : engine.getNeighborhood()) {
+                if (sim.getRelationshipManager().getSpouse() != null) {
+                    writer.println("Spouse:" + sim.getName() + "," + sim.getRelationshipManager().getSpouse().getName());
+                }
+            }
+
         } catch (IOException e) {
             simcli.ui.UIManager.printWarning("Error saving game: " + e.getMessage());
         }
@@ -118,7 +131,6 @@ public class SaveManager {
         simcli.ui.UIManager.printMessage("=============================================");
     }
 
-    // Loads a game engine state from a text file
     public static GameEngine loadGame(String worldName) {
         try (BufferedReader reader = new BufferedReader(new FileReader(SAVE_DIR + worldName + ".txt"))) {
             String line;
@@ -131,6 +143,8 @@ public class SaveManager {
             int loadedRoomIndex = -1;
             List<Sim> loadedNeighborhood = new ArrayList<>();
             java.util.Map<Integer, String[]> parsedResStates = new java.util.HashMap<>();
+            List<String[]> relLines = new ArrayList<>();
+            List<String[]> spouseLines = new ArrayList<>();
 
             while ((line = reader.readLine()) != null) {
                 if (line.startsWith("WORLD:")) {
@@ -150,6 +164,10 @@ public class SaveManager {
                     statsMoney = Integer.parseInt(line.substring(12));
                 } else if (line.startsWith("STATS_ITEMS:")) {
                     statsItems = Integer.parseInt(line.substring(12));
+                } else if (line.startsWith("Rel:")) {
+                    relLines.add(line.substring(4).split(","));
+                } else if (line.startsWith("Spouse:")) {
+                    spouseLines.add(line.substring(7).split(","));
                 } else if (line.startsWith("Inventory:")) {
                     String[] invData = line.substring(10).split(",");
                     String ownerName = invData[0];
@@ -182,11 +200,9 @@ public class SaveManager {
                     Job loadedJob = Job.valueOf(data[3]);
                     Sim sim = new Sim(data[0], Integer.parseInt(data[1]), loadedGender, loadedJob);
 
-                    // Load the new economy stats
                     sim.setMoney(Integer.parseInt(data[4]));
                     sim.setInventoryCapacity(Integer.parseInt(data[5]));
 
-                    // Load the needs
                     sim.getHunger().setValue(Integer.parseInt(data[6]));
                     sim.getEnergy().setValue(Integer.parseInt(data[7]));
                     if (data.length > 8) {
@@ -201,6 +217,9 @@ public class SaveManager {
                     if (data.length > 11) {
                         sim.setJobTier(Integer.parseInt(data[11]));
                     }
+                    if (data.length > 12) {
+                        sim.setChildSim(Boolean.parseBoolean(data[12]));
+                    }
                     sim.updateState();
 
                     loadedNeighborhood.add(sim);
@@ -211,6 +230,50 @@ public class SaveManager {
                 simcli.ui.UIManager.printGameOverStats(loadedTick, statsMoney, statsItems);
                 simcli.ui.UIManager.printMessage("This save state is complete. Returning to Main Menu.");
                 return null;
+            }
+
+            // Post-Load: Rebuild relationships between loaded sims
+            for (String[] relData : relLines) {
+                String ownerName = relData[0];
+                String targetName = relData[1];
+                int score = Integer.parseInt(relData[2]);
+                Sim ownerSim = findSimByName(loadedNeighborhood, ownerName);
+                Sim targetSim = findSimByName(loadedNeighborhood, targetName);
+                if (ownerSim != null && targetSim != null) {
+                    ownerSim.getRelationshipManager().increaseRelationship(targetSim, score);
+                }
+            }
+
+            // Post-Load: Rebuild spouse links
+            for (String[] spouseData : spouseLines) {
+                String ownerName = spouseData[0];
+                String spouseName = spouseData[1];
+                Sim ownerSim = findSimByName(loadedNeighborhood, ownerName);
+                Sim spouseSim = findSimByName(loadedNeighborhood, spouseName);
+                if (ownerSim != null && spouseSim != null) {
+                    ownerSim.getRelationshipManager().setSpouse(spouseSim);
+                }
+            }
+
+            // Post-Load: Rebuild parent-child links (children are child sims whose parents are in neighborhood)
+            for (Sim sim : loadedNeighborhood) {
+                if (sim.isChildSim()) {
+                    // Find married parents and add this child to their children list
+                    for (Sim parent : loadedNeighborhood) {
+                        if (!parent.isChildSim() && parent.getRelationshipManager().getSpouse() != null) {
+                            boolean alreadyHasChild = false;
+                            for (Sim c : parent.getRelationshipManager().getChildren()) {
+                                if (c.getName().equals(sim.getName())) {
+                                    alreadyHasChild = true;
+                                    break;
+                                }
+                            }
+                            if (!alreadyHasChild) {
+                                parent.getRelationshipManager().addChild(sim);
+                            }
+                        }
+                    }
+                }
             }
 
             GameEngine engine = new GameEngine(loadedWorldName, loadedTick, loadedNeighborhood, isGameOver);
@@ -249,5 +312,17 @@ public class SaveManager {
             simcli.ui.UIManager.printWarning("Error loading game: " + e.getMessage());
             return null;
         }
+    }
+
+    /**
+     * Helper to find a Sim by name in the loaded neighborhood.
+     */
+    private static Sim findSimByName(List<Sim> neighborhood, String name) {
+        for (Sim s : neighborhood) {
+            if (s.getName().equals(name)) {
+                return s;
+            }
+        }
+        return null;
     }
 }

@@ -1,5 +1,6 @@
 package simcli.world;
 
+import simcli.engine.GameEngine;
 import simcli.entities.actors.Sim;
 import simcli.entities.actors.NPCSim;
 import simcli.world.interactables.ParkBench;
@@ -13,7 +14,7 @@ import java.util.List;
 public class Park extends Building {
     private final List<NPCSim> visitors;
     
-    public Park(String name) {
+    public Park(String name, GameEngine engine) {
         super(name);
         this.visitors = new ArrayList<>();
         
@@ -22,8 +23,8 @@ public class Park extends Building {
         this.visitors.add(new NPCSim("Bob", 30));
         this.visitors.add(new NPCSim("Charlie", 22));
 
-        // Add the socializing interactable (extracted to its own class)
-        this.addInteractable(new ParkBench(this.visitors));
+        // Add the socializing interactable (with engine reference for marriage/baby)
+        this.addInteractable(new ParkBench(this.visitors, engine));
     }
 
     public List<NPCSim> getVisitors() {

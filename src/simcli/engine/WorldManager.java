@@ -13,9 +13,14 @@ import java.util.List;
 public class WorldManager implements IWorldManager {
     private List<Building> cityMap;
     private Building currentLocation;
+    private GameEngine engine;
 
     public WorldManager() {
         this.cityMap = new ArrayList<>();
+    }
+
+    public void setEngine(GameEngine engine) {
+        this.engine = engine;
     }
 
     @Override
@@ -71,7 +76,7 @@ public class WorldManager implements IWorldManager {
         bookshop.addInteractable(new BookshopShelf());
         this.cityMap.add(bookshop);
 
-        Park park = new Park("City Park");
+        Park park = new Park("City Park", this.engine);
         this.cityMap.add(park);
 
         // Default spawn location

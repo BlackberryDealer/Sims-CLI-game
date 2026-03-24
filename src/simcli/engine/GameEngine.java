@@ -33,6 +33,7 @@ public class GameEngine {
         this.isGameOver = false;
         this.neighborhood = startingNeighborhood;
         this.worldManager = new WorldManager();
+        ((WorldManager)this.worldManager).setEngine(this);
         this.worldManager.setupWorld();
         this.activePlayer = startingNeighborhood.get(0);
         this.inputHandler = new InputHandler(this.worldManager, this.timeManager, this);
@@ -47,6 +48,7 @@ public class GameEngine {
         this.neighborhood = loadedNeighborhood;
         this.isGameOver = isGameOver;
         this.worldManager = new WorldManager();
+        ((WorldManager)this.worldManager).setEngine(this);
         this.worldManager.setupWorld();
         
         // Find first alive sim, or default to 0 if all dead

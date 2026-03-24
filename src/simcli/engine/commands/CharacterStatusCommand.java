@@ -38,6 +38,18 @@ public class CharacterStatusCommand extends BaseCommand {
         UIManager.printMessage(
                 "Inventory Items: " + activePlayer.getInventory().size() + " / " + activePlayer.getInventoryCapacity());
         UIManager.printMessage("Location: " + currentLocation.getName());
+        if (activePlayer.getRelationshipManager().getSpouse() != null) {
+            UIManager.printMessage("Spouse: " + activePlayer.getRelationshipManager().getSpouse().getName());
+        }
+        if (!activePlayer.getRelationshipManager().getChildren().isEmpty()) {
+            StringBuilder childInfo = new StringBuilder("Children: ");
+            for (simcli.entities.actors.Sim child : activePlayer.getRelationshipManager().getChildren()) {
+                childInfo.append(child.getName()).append(" (Age: ").append(child.getAge())
+                         .append(", ").append(child.isPlayable() ? "Playable" : "Not Playable")
+                         .append(") ");
+            }
+            UIManager.printMessage(childInfo.toString().trim());
+        }
         UIManager.printMessage("==================");
         
         pause(scanner);

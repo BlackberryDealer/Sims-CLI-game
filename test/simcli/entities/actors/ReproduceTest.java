@@ -8,6 +8,7 @@ import simcli.engine.SimulationException;
 import simcli.entities.models.Gender;
 import simcli.entities.models.Job;
 import simcli.entities.actors.Sim;
+import simcli.utils.GameConstants;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -15,17 +16,18 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests for social mechanics: relationship, marriage, and reproduction.
  *
  * Coverage:
- *  - reproduce() succeeds when Sims are married and of opposite genders
+ *  - reproduce() succeeds when Sims are married and of opposite genders (with 50% chance)
  *  - reproduce() throws when Sim is not married
  *  - reproduce() throws when both spouses are the same gender
  *  - marry() fails when relationship stat is too low
- *  - marry() succeeds when relationship stat >= 50
- *  - child returned by reproduce() starts in ChildStage (age 0 < 18)
+ *  - marry() succeeds when relationship stat >= 100
+ *  - relationship score caps at 100
+ *  - child returned by reproduce() starts in ChildStage (age 0 < 13)
+ *  - child sim isPlayable() returns false when age < 13
  */
 @DisplayName("Social Mechanics — Reproduce & Marriage Tests")
 public class ReproduceTest {
 
-    // UIManager uses static output; redirect System.out to avoid cluttering test output
     private Sim male;
     private Sim female;
     private Sim male2;
@@ -38,11 +40,27 @@ public class ReproduceTest {
     }
 
     // -----------------------------------------------------------------------
+    // Relationship score capping tests
+    // -----------------------------------------------------------------------
+
+    @Test
+    @DisplayName("Relationship score caps at 100")
+    void testRelationshipScoreCapsAt100() {
+        // Each interactSocially adds 10 to the legacy map. Do it 15 times.
+        for (int i = 0; i < 15; i++) {
+            male.getRelationshipManager().interactSocially(female);
+        }
+        int score = male.getRelationshipManager().getRelationship(female);
+        assertEquals(GameConstants.MAX_RELATIONSHIP_SCORE, score,
+                "Relationship score should cap at " + GameConstants.MAX_RELATIONSHIP_SCORE);
+    }
+
+    // -----------------------------------------------------------------------
     // Marriage prerequisite tests
     // -----------------------------------------------------------------------
 
     @Test
-    @DisplayName("marry() fails when relationship score < 50")
+    @DisplayName("marry() fails when relationship score < 100")
     void testMarryFailsWhenRelationshipTooLow() {
         // Default relationship score is 0 — should not be able to marry
         boolean result = male.getRelationshipManager().marry(female);
@@ -52,15 +70,25 @@ public class ReproduceTest {
     }
 
     @Test
-    @DisplayName("marry() succeeds when relationship score >= 50")
-    void testMarrySucceedsWithHighRelationship() {
-        // Build relationship via socialising (each call adds 10 points)
+    @DisplayName("marry() fails when relationship score is 50 (old threshold)")
+    void testMarryFailsAtOldThreshold() {
         for (int i = 0; i < 5; i++) {
             male.getRelationshipManager().interactSocially(female);
         }
-        // Relationship score is now 50
+        // Score is 50 — no longer sufficient
         boolean result = male.getRelationshipManager().marry(female);
-        assertTrue(result, "Sims should marry when relationship >= 50");
+        assertFalse(result, "Sims should not marry at score 50 (new threshold is 100)");
+    }
+
+    @Test
+    @DisplayName("marry() succeeds when relationship score >= 100")
+    void testMarrySucceedsWithHighRelationship() {
+        // Build relationship to 100 (each interactSocially adds 10)
+        for (int i = 0; i < 10; i++) {
+            male.getRelationshipManager().interactSocially(female);
+        }
+        boolean result = male.getRelationshipManager().marry(female);
+        assertTrue(result, "Sims should marry when relationship >= 100");
         assertEquals(female, male.getRelationshipManager().getSpouse(),    "Adam's spouse should be Eve");
         assertEquals(male,   female.getRelationshipManager().getSpouse(),  "Eve's spouse should be Adam");
     }
@@ -77,27 +105,49 @@ public class ReproduceTest {
     // -----------------------------------------------------------------------
 
     @Test
-    @DisplayName("reproduce() succeeds for married opposite-gender Sims")
-    void testReproduceSuccessful() throws SimulationException {
+    @DisplayName("reproduce() returns non-null at least once in multiple attempts (50% success rate)")
+    void testReproduceSuccessfulWithRetry() throws SimulationException {
         // Arrange: build relationship and marry
-        for (int i = 0; i < 5; i++) male.getRelationshipManager().interactSocially(female);
+        for (int i = 0; i < 10; i++) male.getRelationshipManager().interactSocially(female);
         male.getRelationshipManager().marry(female);
 
-        // Act
-        Sim child = male.getRelationshipManager().reproduce();
+        // Act: try multiple times to account for 50% success rate
+        Sim child = null;
+        for (int attempt = 0; attempt < 20; attempt++) {
+            child = male.getRelationshipManager().reproduce();
+            if (child != null) break;
+        }
 
         // Assert
-        assertNotNull(child, "reproduce() should return a non-null child Sim");
+        assertNotNull(child, "reproduce() should succeed at least once in 20 attempts with 50% chance");
         assertEquals(0, child.getAge(), "Newborn should have age 0");
-        // Child's LifeStage should be ChildStage (canWork == false)
         assertFalse(child.canWork(), "A newborn child should not be able to work");
         assertEquals("Child", child.getCurrentStageName(), "Newborn should be in ChildStage");
+        assertTrue(child.isChildSim(), "Child should have isChildSim flag set");
+        assertFalse(child.isPlayable(), "A newborn child should not be playable");
+    }
+
+    @Test
+    @DisplayName("reproduce() can return null (50% failure rate)")
+    void testReproduceCanFail() throws SimulationException {
+        for (int i = 0; i < 10; i++) male.getRelationshipManager().interactSocially(female);
+        male.getRelationshipManager().marry(female);
+
+        // Try many times — at least one should return null
+        boolean hadNull = false;
+        for (int attempt = 0; attempt < 50; attempt++) {
+            Sim child = male.getRelationshipManager().reproduce();
+            if (child == null) {
+                hadNull = true;
+                break;
+            }
+        }
+        assertTrue(hadNull, "reproduce() should return null at least once in 50 attempts with 50% failure rate");
     }
 
     @Test
     @DisplayName("reproduce() throws SimulationException when Sim is not married")
     void testReproduceFailsWhenNotMarried() {
-        // No marriage has taken place
         assertThrows(SimulationException.class, () -> male.getRelationshipManager().reproduce(),
                 "reproduce() must throw when the Sim has no spouse");
     }
@@ -105,17 +155,12 @@ public class ReproduceTest {
     @Test
     @DisplayName("reproduce() throws SimulationException for same-gender couple")
     void testReproduceFailsForSameGenderCouple() {
-        // Manually force-marry two males by building relation then calling marry via reflection-free helper
-        // We build 50+ relationship between male and male2 and get them married
-        for (int i = 0; i < 5; i++) male.getRelationshipManager().interactSocially(male2);
-        // marry() will silently fail because gender check is in reproduce(), not marry()
-        // Override: we access the relationship map and set score directly
+        // Build relationship to 100 and marry
         male.getRelationshipManager().increaseRelationship(male2, 100);
         male2.getRelationshipManager().increaseRelationship(male, 100);
         boolean married = male.getRelationshipManager().marry(male2);
         assertTrue(married, "Two males can still get 'married' — the biological check is in reproduce()");
 
-        // Now reproduce should throw
         assertThrows(SimulationException.class, () -> male.getRelationshipManager().reproduce(),
                 "reproduce() must throw for same-gender couple");
     }
@@ -123,12 +168,36 @@ public class ReproduceTest {
     @Test
     @DisplayName("Child returned by reproduce() is a distinct object from parents")
     void testChildIsIndependentObject() throws SimulationException {
-        for (int i = 0; i < 5; i++) male.getRelationshipManager().interactSocially(female);
+        for (int i = 0; i < 10; i++) male.getRelationshipManager().interactSocially(female);
         male.getRelationshipManager().marry(female);
 
-        Sim child = male.getRelationshipManager().reproduce();
+        Sim child = null;
+        for (int attempt = 0; attempt < 20; attempt++) {
+            child = male.getRelationshipManager().reproduce();
+            if (child != null) break;
+        }
 
+        assertNotNull(child, "Should eventually produce a child");
         assertNotSame(male,   child, "Child must not be the same object as father");
         assertNotSame(female, child, "Child must not be the same object as mother");
+    }
+
+    @Test
+    @DisplayName("Child is added to both parents' children list on reproduce()")
+    void testChildAddedToParentsList() throws SimulationException {
+        for (int i = 0; i < 10; i++) male.getRelationshipManager().interactSocially(female);
+        male.getRelationshipManager().marry(female);
+
+        Sim child = null;
+        for (int attempt = 0; attempt < 20; attempt++) {
+            child = male.getRelationshipManager().reproduce();
+            if (child != null) break;
+        }
+
+        assertNotNull(child, "Should eventually produce a child");
+        assertTrue(male.getRelationshipManager().getChildren().contains(child),
+                "Father's children list should contain the child");
+        assertTrue(female.getRelationshipManager().getChildren().contains(child),
+                "Mother's children list should contain the child");
     }
 }
