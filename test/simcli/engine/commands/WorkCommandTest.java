@@ -1,9 +1,11 @@
-package simcli.engine;
+package simcli.engine.commands;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import simcli.engine.commands.WorkCommand;
+import simcli.engine.TimeManager;
+import simcli.engine.CommandResult;
 import simcli.entities.actors.Gender;
 import simcli.entities.actors.Job;
 import simcli.entities.actors.Sim;

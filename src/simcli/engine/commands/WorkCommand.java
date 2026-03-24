@@ -33,9 +33,7 @@ public class WorkCommand implements ICommand {
         }
 
         // Slide 5: HUNGRY or STARVING states restrict work (Aligned with Proposal Slides)
-        if (activePlayer.getState() == simcli.entities.actors.SimState.HUNGRY
-                || activePlayer.getState() == simcli.entities.actors.SimState.STARVING
-                || activePlayer.getState() == simcli.entities.actors.SimState.CRITICAL) {
+        if (activePlayer.getState() == simcli.entities.actors.SimState.HUNGRY) {
             simcli.ui.UIManager.printWarning(activePlayer.getName() + " is too hungry to focus on work! Eat something first.");
             simcli.ui.UIManager.prompt("\nPress ENTER to return...");
             scanner.nextLine();
