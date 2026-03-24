@@ -51,6 +51,56 @@ public class TerminalRenderer implements IRenderer {
     }
 
     @Override
+    public void renderHouseholdDashboard(List<Sim> neighborhood, Sim activePlayer) {
+        StringBuilder inactiveStats = new StringBuilder("HOUSEHOLD: ");
+        boolean hasInactive = false;
+        for (Sim sim : neighborhood) {
+            if (sim != activePlayer && sim.getState() != simcli.entities.models.SimState.DEAD) {
+                inactiveStats.append("[").append(sim.getName()).append(": ")
+                             .append(sim.getHealth()).append("% | ")
+                             .append(sim.getState()).append("]  ");
+                hasInactive = true;
+            }
+        }
+        if (hasInactive) {
+            UIManager.printMessage(inactiveStats.toString());
+        }
+    }
+
+    @Override
+    public void renderActiveSimStats(Sim activePlayer) {
+        UIManager.printMessage("\n==========================================================================");
+        UIManager.printMessage("[" + activePlayer.getName().toUpperCase() + "] Health: " + activePlayer.getHealth() + "%" +
+                " | Hunger: " + activePlayer.getHunger().getValue() +
+                " | Energy: " + activePlayer.getEnergy().getValue() +
+                " | Hygiene: " + activePlayer.getHygiene().getValue() +
+                " | Happiness: " + activePlayer.getHappiness().getValue() +
+                " | Social: " + activePlayer.getSocial().getValue() +
+                " | Cash: $" + activePlayer.getMoney() + " | Job: " + activePlayer.getCareer().getTitle() + 
+                " | State: " + activePlayer.getState());
+        UIManager.printMessage("==========================================================================");
+    }
+
+    @Override
+    public void renderDeathStats(Sim deadSim) {
+        UIManager.printMessage("\n==========================================");
+        UIManager.printMessage("  Oh no! " + deadSim.getName() + " has tragically died!");
+        UIManager.printMessage("==========================================");
+        UIManager.printMessage("  --- Final Stats ---");
+        UIManager.printMessage("  Name:      " + deadSim.getName());
+        UIManager.printMessage("  Age:       " + deadSim.getAge());
+        UIManager.printMessage("  Hunger:    " + deadSim.getHunger().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
+        UIManager.printMessage("  Energy:    " + deadSim.getEnergy().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
+        UIManager.printMessage("  Hygiene:   " + deadSim.getHygiene().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
+        UIManager.printMessage("  Happiness: " + deadSim.getHappiness().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
+        UIManager.printMessage("  Social:    " + deadSim.getSocial().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
+        UIManager.printMessage("  Health:    " + deadSim.getHealth() + "%");
+        UIManager.printMessage("  Cash:      $" + deadSim.getMoney());
+        UIManager.printMessage("  Total Earned: $" + deadSim.getTotalMoneyEarned());
+        UIManager.printMessage("==========================================");
+    }
+
+    @Override
     public void renderActions(List<Interactable> items, boolean isResidential) {
         UIManager.printActionGrid(items, isResidential);
     }
