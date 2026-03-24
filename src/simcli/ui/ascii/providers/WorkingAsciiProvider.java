@@ -16,13 +16,16 @@ public class WorkingAsciiProvider implements IAsciiProvider {
     @Override
     public String getAsciiArt(Sim player, Building location) {
         String job = player.getCareer().getTitle();
-        return "   .---------.         \n" +
-                "   |  [" + padCenter(job, 7) + "] |  \n" +
-                "   |  _______  |       \n" +
-                "   | |  :D   | |   o   \n" +
-                "   | |_______| |  /|\\  \n" +
-                "   '-----------'  / \\  \n" +
-                "   [___keyboard__]      \n" +
+        return "          __    __\n" +
+            "         /  \\ /| |'-.\n" +
+            "        .\\__/ || |   |\n" +
+            "     _ /  `._ \\|_|_.-'\n" +
+            "    | /  \\__.`=._) (_\n" +
+            "    |/ ._/  |\"\"\"\"\"\"\"\"\"|\n" +
+            "    |'.  `\\ |         |\n" +
+            "    ;\"\"\"/ / |         |\n" +
+            "     ) /_/| |.-------.|\n" +
+            "    '  `-`' \"         \"" +
                 "   \" " + player.getName() + " is working! \"";
     }
 
