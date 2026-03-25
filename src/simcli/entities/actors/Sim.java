@@ -223,4 +223,45 @@ public class Sim implements ISimBehaviour {
     public void addTotalMoneyEarned(int amount) { this.totalMoneyEarned += amount; }
     public int getTotalItemsBought() { return totalItemsBought; }
     public void addTotalItemsBought(int amount) { this.totalItemsBought += amount; }
+
+    public WorkResult performWork() {
+        if (!canWork() || getCareer() == Job.UNEMPLOYED) {
+            return WorkResult.failure("Cannot work");
+        }
+        int multiplier = 1 + getShiftsWorkedToday();
+        getEnergy().decrease(getCareer().getEnergyDrain() * multiplier);
+        getHunger().decrease(20 * multiplier);
+        getHygiene().decrease(30 * multiplier);
+        
+        int earnings = getCareer().getSalaryAtTier(getJobTier());
+        money += earnings;
+        addTotalMoneyEarned(earnings);
+        incrementShiftsWorkedToday();
+        resetConsecutiveDaysMissed();
+        
+        boolean promoted = false;
+        if (getJobTier() < getCareer().getMaxTier()) {
+            if (simcli.utils.GameRandom.RANDOM.nextDouble() < 0.25) {
+                getCareerManager().promote(getName());
+                promoted = true;
+            }
+        }
+        
+        return WorkResult.success(earnings, promoted, multiplier > 1);
+    }
+
+    public void eat(simcli.entities.items.Consumable item) {
+        this.getHunger().increase(item.getSatiationValue());
+        this.getEnergy().increase(item.getEnergyValue());
+        this.getHappiness().increase(item.getHappinessValue());
+        this.getInventory().remove(item);
+    }
+
+    public void sleep(int ticksToMorning) {
+        int energyGain = Math.min(100, 15 * ticksToMorning);
+        int hungerLoss = 3 * ticksToMorning;
+        this.getEnergy().increase(energyGain);
+        this.getHunger().decrease(hungerLoss);
+        this.setCurrentAction(ActionState.SLEEPING);
+    }
 }

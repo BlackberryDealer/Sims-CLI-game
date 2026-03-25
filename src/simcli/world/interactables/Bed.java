@@ -13,13 +13,7 @@ public class Bed implements Interactable {
         if (ticksToMorning == 0)
             ticksToMorning = simcli.utils.GameConstants.TICKS_PER_DAY;
 
-        int energyGain = Math.min(100, 15 * ticksToMorning);
-        int hungerLoss = 3 * ticksToMorning;
-
-        sim.getEnergy().increase(energyGain);
-        sim.getHunger().decrease(hungerLoss);
-
-        sim.setCurrentAction(simcli.entities.models.ActionState.SLEEPING);
+        sim.sleep(ticksToMorning);
 
         // Throw exception to let the game engine render the sleeping ASCII art
         // and pause for the sleep animation BEFORE advancing time.

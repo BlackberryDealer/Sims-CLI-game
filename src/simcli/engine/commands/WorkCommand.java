@@ -66,28 +66,12 @@ public class WorkCommand implements ICommand {
         activePlayer.setCurrentAction(ActionState.WORKING);
         simcli.ui.UIManager.displayActionAnimation(activePlayer);
 
-        int dailyPay = activePlayer.getCareer().getSalaryAtTier(activePlayer.getJobTier());
-        simcli.ui.UIManager.printMessage(activePlayer.getName() + " works a shift as a " + activePlayer.getCareer().getTitle() + " and earns $" + dailyPay + "!");
-
-        int multiplier = 1 + activePlayer.getShiftsWorkedToday();
-        if (multiplier > 1) {
-            simcli.ui.UIManager.printMessage(activePlayer.getName() + " feels the heavy strain of overworking!");
-        }
-
-        activePlayer.getEnergy().decrease(activePlayer.getCareer().getEnergyDrain() * multiplier);
-        activePlayer.getHunger().decrease(20 * multiplier);
-        activePlayer.getHygiene().decrease(30 * multiplier);
-
-        activePlayer.setMoney(activePlayer.getMoney() + dailyPay);
-        activePlayer.addTotalMoneyEarned(dailyPay);
+        simcli.entities.models.WorkResult result = activePlayer.performWork();
         
-        activePlayer.incrementShiftsWorkedToday();
-        activePlayer.resetConsecutiveDaysMissed();
-
-        // Promotion chance after completing a shift
-        if (activePlayer.getJobTier() < activePlayer.getCareer().getMaxTier()) {
-            if (simcli.utils.GameRandom.RANDOM.nextDouble() < 0.25) {
-                activePlayer.getCareerManager().promote(activePlayer.getName());
+        if (result.isSuccess()) {
+            simcli.ui.UIManager.printMessage(activePlayer.getName() + " works a shift as a " + activePlayer.getCareer().getTitle() + " and earns $" + result.getEarnings() + "!");
+            if (result.isOverworked()) {
+                simcli.ui.UIManager.printMessage(activePlayer.getName() + " feels the heavy strain of overworking!");
             }
         }
 

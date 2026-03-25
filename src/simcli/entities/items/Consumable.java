@@ -25,10 +25,7 @@ public class Consumable extends Item {
         sim.setCurrentAction(simcli.entities.models.ActionState.EATING);
         simcli.ui.UIManager.displayActionAnimation(sim);
         simcli.ui.UIManager.printMessage(sim.getName() + " consumes the " + getObjectName() + ".");
-        sim.getHunger().increase(this.satiationValue);
-        sim.getEnergy().increase(this.energyValue);
-        sim.getHappiness().increase(this.happinessValue);
-        sim.getInventory().remove(this);
+        sim.eat(this);
     }
     
     @Override
