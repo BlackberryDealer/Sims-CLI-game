@@ -52,9 +52,6 @@ public final class GameConstants {
     public static final int ENERGY_SLEEP_ADDED_AMOUNT = 10;
     public static final int ENERGY_WORK_DECAY_AMOUNT = 2;
 
-    // Fun
-    public static final int FUN_BASE_DECAY_RATE = 2;
-
     // Happiness
     public static final int HAPPINESS_BASE_DECAY_RATE = 2;
 
