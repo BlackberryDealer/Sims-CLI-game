@@ -9,6 +9,7 @@ import simcli.entities.actors.NPCSim;
 import simcli.entities.actors.Sim;
 import simcli.entities.models.ActionState;
 import simcli.entities.models.SkillType;
+import simcli.entities.models.SocialAction;
 import simcli.entities.models.Trait;
 import simcli.utils.GameConstants;
 
@@ -41,46 +42,46 @@ public class ParkBench implements Interactable {
             if (choice > 0 && choice <= visitors.size()) {
                 NPCSim target = visitors.get(choice - 1);
                 int relScore = sim.getRelationshipManager().getRelationship(target);
-                boolean isSpouse = sim.getRelationshipManager().getSpouse() == target;
 
                 // Build action menu dynamically
-                SimulationLogger.prompt("\n[1] Chat\n[2] Joke\n[3] Argue\n");
+                SocialAction[] actions = {SocialAction.CHAT, SocialAction.JOKE, SocialAction.ARGUE};
+                for (int i = 0; i < actions.length; i++) {
+                    SimulationLogger.prompt("[" + (i + 1) + "] " + actions[i].getDisplayName() + "\n");
+                }
                 
                 // Show Propose option if relationship is maxed and both are unmarried
                 boolean canPropose = relScore >= GameConstants.MARRIAGE_THRESHOLD 
                         && sim.getRelationshipManager().getSpouse() == null 
                         && target.getRelationshipManager().getSpouse() == null;
+                int proposeChoice = actions.length + 1;
                 if (canPropose) {
-                    SimulationLogger.prompt("[4] Propose Marriage\n");
+                    SimulationLogger.prompt("[" + proposeChoice + "] Propose Marriage\n");
                 }
 
                 SimulationLogger.prompt("Select action> ");
                 int actionChoice = Integer.parseInt(scanner.nextLine().trim());
                 
-                boolean isSocialite = sim.hasTrait(Trait.SOCIALITE);
-                if (actionChoice == 1) {
-                    int relGain = isSocialite ? 8 : 5;
-                    SimulationLogger.log(sim.getName() + " chats politely with " + target.getName() + ".");
+                if (actionChoice > 0 && actionChoice <= actions.length) {
+                    SocialAction selectedAction = actions[actionChoice - 1];
+                    boolean isSocialite = sim.hasTrait(Trait.SOCIALITE);
+                    double multiplier = isSocialite ? GameConstants.BONUS_TIMES : 1.0;
+
+                    int relGain = (int) (selectedAction.getRelationshipChange() * multiplier);
+                    int happyGain = (int) (selectedAction.getHappinessChange() * multiplier);
+                    int energyLoss = (int) (selectedAction.getEnergyChange() * multiplier);
+                    int socialGain = (int) (selectedAction.getSocialChange() * multiplier);
+                    int xpGain = (int) (selectedAction.getSkillXP() * multiplier);
+
+                    SimulationLogger.log(sim.getName() + " performs " + selectedAction.getDisplayName().toLowerCase() + " with " + target.getName() + ".");
+                    
                     sim.getRelationshipManager().increaseRelationship(target, relGain);
-                    sim.getHappiness().increase(10);
-                    sim.getEnergy().decrease(5);
-                    sim.getSocial().increase(30);
-                    sim.getSkillManager().addSkillExperience(SkillType.CHARISMA, isSocialite ? 8 : 5, sim.getName(), false);
-                } else if (actionChoice == 2) {
-                    int relGain = isSocialite ? 15 : 10;
-                    SimulationLogger.log(sim.getName() + " tells a funny joke to " + target.getName() + "!");
-                    sim.getRelationshipManager().increaseRelationship(target, relGain);
-                    sim.getHappiness().increase(15);
-                    sim.getEnergy().decrease(10);
-                    sim.getSocial().increase(70);
-                    sim.getSkillManager().addSkillExperience(SkillType.CHARISMA, isSocialite ? 15 : 10, sim.getName(), false);
-                } else if (actionChoice == 3) {
-                    SimulationLogger.log(sim.getName() + " argues bitterly with " + target.getName() + ".");
-                    sim.getRelationshipManager().increaseRelationship(target, -15);
-                    sim.getHappiness().decrease(10);
-                    sim.getEnergy().decrease(15);
-                    sim.getSocial().increase(20);
-                } else if (actionChoice == 4 && canPropose) {
+                    sim.getHappiness().increase(happyGain);
+                    sim.getEnergy().decrease(-energyLoss); // energyChange is negative in enum
+                    sim.getSocial().increase(socialGain);
+                    if (xpGain > 0) {
+                        sim.getSkillManager().addSkillExperience(SkillType.CHARISMA, xpGain, sim.getName(), false);
+                    }
+                } else if (actionChoice == proposeChoice && canPropose) {
                     handleProposal(sim, target);
                 } else {
                     SimulationLogger.logWarning("Invalid action selection.");
