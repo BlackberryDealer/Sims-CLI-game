@@ -20,6 +20,7 @@ public class GameEngine {
     private TimeManager timeManager;
     private boolean isGameOver;
     private RandomEventManager randomEventManager;
+    private GameLoop gameLoop;
 
     // World Stats tracking (aggregated upon save/game over)
     private final NPCManager npcManager;
@@ -42,6 +43,7 @@ public class GameEngine {
         this.inputHandler = new InputHandler(this.worldManager, this.timeManager, this);
         this.renderer = new TerminalRenderer();
         this.randomEventManager = new RandomEventManager();
+        this.gameLoop = new GameLoop(this.timeManager, this.neighborhood, this.randomEventManager);
     }
 
     // CONSTRUCTOR: For Loading an Existing World
@@ -69,6 +71,7 @@ public class GameEngine {
         this.inputHandler = new InputHandler(this.worldManager, this.timeManager, this);
         this.renderer = new TerminalRenderer();
         this.randomEventManager = new RandomEventManager();
+        this.gameLoop = new GameLoop(this.timeManager, this.neighborhood, this.randomEventManager);
     }
 
     public Sim getActivePlayer() { return activePlayer; }
@@ -110,10 +113,6 @@ public class GameEngine {
             renderer.renderHouseholdDashboard(this.neighborhood, activePlayer);
 
             if (tickForward) {
-                for(Sim sim : this.neighborhood) {
-                    sim.tick();
-                }
-
                 if (activePlayer.getState() == SimState.DEAD) {
                     Sim deadSim = activePlayer;
                     renderer.renderDeathStats(deadSim);
@@ -161,7 +160,6 @@ public class GameEngine {
             simcli.engine.SimulationLogger.flushAndPrint();
             simcli.ui.UIManager.prompt("\nCOMMAND> ");
 
-            int previousDay = timeManager.getCurrentDay();
             String input = scanner.nextLine().toUpperCase();
 
             CommandResult result = inputHandler.handle(input, activePlayer, scanner);
@@ -202,17 +200,7 @@ public class GameEngine {
             }
 
             if (running && tickForward) {
-                timeManager.advanceTick();
-                this.randomEventManager.trigger(activePlayer, timeManager);
-
-                if (timeManager.getCurrentDay() > previousDay) {
-                    simcli.ui.UIManager
-                            .printMessage("\n*** A new day has begun! (Day " + timeManager.getCurrentDay() + ") ***");
-                    for (Sim s : neighborhood) {
-                        s.growOlderDaily();
-                        s.getCareerManager().checkTruancy(s.getName());
-                    }
-                }
+                gameLoop.processTick(activePlayer);
 
                 if (timeManager.getCurrentTick() % 10 == 0) {
                     simcli.ui.UIManager.printMessage("[System] Autosaving...");
