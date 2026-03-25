@@ -10,12 +10,12 @@ import static org.junit.jupiter.api.Assertions.*;
 public class SimsNeedsTrackerTest {
 
     @Test
-    @DisplayName("SimState becomes DEAD if hunger hits 0")
+    @DisplayName("SimState becomes DEAD if health hits 0")
     void testStarvingDeathState() {
         SimsNeedsTracker tracker = new SimsNeedsTracker();
-        tracker.getHunger().setValue(0);
+        tracker.setHealth(0);
         tracker.updateState();
-        assertEquals(SimState.DEAD, tracker.getState(), "If hunger drops to 0 or below, Sim dies.");
+        assertEquals(SimState.DEAD, tracker.getState(), "If health drops to 0 or below, Sim dies.");
     }
     
     @Test

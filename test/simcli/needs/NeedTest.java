@@ -47,12 +47,12 @@ public class NeedTest {
     // -----------------------------------------------------------------------
 
     @Test
-    @DisplayName("Hunger.decay(1.0) decreases by its base decay rate (5)")
+    @DisplayName("Hunger.decay(1.0) decreases by its base decay rate (2)")
     void testHungerDecayRate() {
         Hunger h = new Hunger();
         h.calculateDecay(createDummySim(), 1.0);
-        assertEquals(Need.MAX_VALUE - 5, h.getValue(),
-                "Hunger base decay rate is 5");
+        assertEquals(Need.MAX_VALUE - 2, h.getValue(),
+                "Hunger base decay rate is 2");
     }
 
     @Test
@@ -65,12 +65,12 @@ public class NeedTest {
     }
 
     @Test
-    @DisplayName("Hygiene.decay(1.0) decreases by its base decay rate (5)")
+    @DisplayName("Hygiene.decay(1.0) decreases by its base decay rate (2)")
     void testHygieneDecayRate() {
         Hygiene hy = new Hygiene();
         hy.calculateDecay(createDummySim(), 1.0);
-        assertEquals(Need.MAX_VALUE - 5, hy.getValue(),
-                "Hygiene base decay rate is 5");
+        assertEquals(Need.MAX_VALUE - 2, hy.getValue(),
+                "Hygiene base decay rate is 2");
     }
 
     @Test
@@ -100,8 +100,8 @@ public class NeedTest {
     void testDecayWithMultiplier() {
         Hunger h = new Hunger();
         h.calculateDecay(createDummySim(), 2.0);
-        assertEquals(Need.MAX_VALUE - 10, h.getValue(),
-                "Hunger decay with 2.0 multiplier should subtract 10");
+        assertEquals(Need.MAX_VALUE - 4, h.getValue(),
+                "Hunger decay with 2.0 multiplier should subtract 4");
     }
 
     @Test
