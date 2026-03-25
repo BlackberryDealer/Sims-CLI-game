@@ -76,7 +76,8 @@ public class WorldManager implements IWorldManager {
         bookshop.addInteractable(new BookshopShelf());
         this.cityMap.add(bookshop);
 
-        Park park = new Park("City Park", this.engine);
+        Park park = new Park("City Park", this.engine.getNpcManager());
+        park.addInteractable(new simcli.world.interactables.ParkBench(this.engine));
         this.cityMap.add(park);
 
         // Default spawn location
