@@ -88,6 +88,7 @@ public class Sim implements ISimBehaviour {
 
     // --- Property Getters ---
     public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
     public int getAge() { return age; }
     public Gender getGender() { return gender; }
     public int getMoney() { return money; }

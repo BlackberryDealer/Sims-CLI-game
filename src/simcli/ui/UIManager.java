@@ -93,6 +93,7 @@ public class UIManager {
     }
 
     public static void prompt(String message) {
+        simcli.engine.SimulationLogger.flushAndPrint();
         System.out.print(message);
     }
 

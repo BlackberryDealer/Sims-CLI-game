@@ -1,15 +1,15 @@
 package simcli.engine.commands;
 
+import java.util.Scanner;
 import simcli.engine.CommandResult;
 import simcli.engine.GameEngine;
 import simcli.engine.SimulationException;
 import simcli.engine.SimulationLogger;
 import simcli.entities.actors.Sim;
+import simcli.entities.models.Gender;
 import simcli.ui.UIManager;
 import simcli.world.Building;
 import simcli.world.Residential;
-
-import java.util.Scanner;
 
 /**
  * Command to interact with a spouse from anywhere if they are in the household.
@@ -43,29 +43,31 @@ public class SpouseInteractionCommand implements ICommand {
             return CommandResult.NO_TICK;
         }
 
-        UIManager.printMessage("\n=== Interaction with " + spouse.getName() + " ===");
-        UIManager.printMessage("[1] Go on a Date");
+        UIManager.printMessage("\n=== Marriage Options ===");
+        UIManager.printMessage("[1] Interact with Spouse (Date)");
         UIManager.printMessage("[2] Have a Baby");
         
         // Check for any baby (non-playable child) in household
-        Sim baby = findBabyInHousehold();
-        if (baby != null) {
-            UIManager.printMessage("[3] Feed Baby (" + baby.getName() + ")");
+        boolean hasBabies = hasBabiesInHousehold();
+        if (hasBabies) {
+            UIManager.printMessage("[3] Feed Babies");
         }
         
-        UIManager.printMessage("[0] Cancel");
+        UIManager.printMessage("[0] Back");
         UIManager.prompt("Select action> ");
 
         try {
-            int choice = Integer.parseInt(scanner.nextLine().trim());
+            String input = scanner.nextLine().trim();
+            if (input.equals("0")) return CommandResult.NO_TICK;
+
+            int choice = Integer.parseInt(input);
             if (choice == 1) {
                 handleDate(activePlayer, spouse);
                 return CommandResult.TICK_FORWARD;
             } else if (choice == 2) {
-                handleHaveBaby(activePlayer);
-                return CommandResult.TICK_FORWARD;
-            } else if (choice == 3 && baby != null) {
-                handleFeedBaby(activePlayer, baby);
+                return handleHaveBaby(activePlayer);
+            } else if (choice == 3 && hasBabies) {
+                handleFeedBabies(activePlayer);
                 return CommandResult.TICK_FORWARD;
             }
         } catch (NumberFormatException e) {
@@ -75,13 +77,13 @@ public class SpouseInteractionCommand implements ICommand {
         return CommandResult.NO_TICK;
     }
 
-    private Sim findBabyInHousehold() {
+    private boolean hasBabiesInHousehold() {
         for (Sim s : engine.getNeighborhood()) {
             if (s.isChildSim() && !s.isPlayable()) {
-                return s;
+                return true;
             }
         }
-        return null;
+        return false;
     }
 
     private void handleDate(Sim sim, Sim spouse) {
@@ -95,11 +97,7 @@ public class SpouseInteractionCommand implements ICommand {
         spouse.getRelationshipManager().increaseRelationship(sim, 10);
     }
 
-    private void handleHaveBaby(Sim sim) {
-        UIManager.prompt("Enter a name for the baby: ");
-        String babyName = scanner.nextLine().trim();
-        if (babyName.isEmpty()) babyName = "Baby";
-
+    private CommandResult handleHaveBaby(Sim sim) {
         // Teleport both to the first residential building (Home)
         Building home = null;
         for (Building b : engine.getWorldManager().getCityMap()) {
@@ -119,22 +117,39 @@ public class SpouseInteractionCommand implements ICommand {
             }
             
             SimulationLogger.log("Teleported home to " + home.getName() + " to try for a baby...");
+            
             try {
-                Sim child = sim.getRelationshipManager().reproduce(babyName);
-                if (child != null) {
+                Gender babyGender = sim.getRelationshipManager().attemptPregnancy(); 
+                if (babyGender != null) {
+                    UIManager.prompt("Enter a name for the new " + babyGender + " baby: ");
+                    String babyName = scanner.nextLine().trim();
+                    if (babyName.isEmpty()) babyName = "Baby " + sim.getName();
+                    
+                    Sim child = sim.getRelationshipManager().finalizeBaby(babyName, babyGender);
+
                     engine.getNeighborhood().add(child);
                     SimulationLogger.log(child.getName() + " has been added to your household!");
+                    return CommandResult.TICK_FORWARD;
                 }
             } catch (SimulationException e) {
                 SimulationLogger.logWarning(e.getMessage());
             }
         }
+        return CommandResult.NO_TICK;
     }
 
-    private void handleFeedBaby(Sim parent, Sim baby) {
-        SimulationLogger.log(parent.getName() + " feeds " + baby.getName() + " some warm milk.");
-        baby.getHunger().increase(50);
-        parent.getSocial().increase(10);
-        parent.getHappiness().increase(5);
+    private void handleFeedBabies(Sim parent) {
+        int count = 0;
+        for (Sim s : engine.getNeighborhood()) {
+            if (s.isChildSim() && !s.isPlayable()) {
+                s.getHunger().increase(50);
+                count++;
+            }
+        }
+        if (count > 0) {
+            SimulationLogger.log(parent.getName() + " feeds all " + count + " babies in the household.");
+            parent.getSocial().increase(10);
+            parent.getHappiness().increase(5);
+        }
     }
 }

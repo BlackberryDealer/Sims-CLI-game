@@ -1,17 +1,16 @@
 package simcli.world.interactables;
 
+import java.util.List;
+import java.util.Scanner;
 import simcli.engine.GameEngine;
 import simcli.engine.SimulationException;
 import simcli.engine.SimulationLogger;
-import simcli.entities.models.ActionState;
 import simcli.entities.actors.NPCSim;
 import simcli.entities.actors.Sim;
+import simcli.entities.models.ActionState;
 import simcli.entities.models.SkillType;
 import simcli.entities.models.Trait;
 import simcli.utils.GameConstants;
-
-import java.util.List;
-import java.util.Scanner;
 
 public class ParkBench implements Interactable {
     private final GameEngine engine;
@@ -55,11 +54,6 @@ public class ParkBench implements Interactable {
                     SimulationLogger.prompt("[4] Propose Marriage\n");
                 }
 
-                // Show Have a Baby option if they are married
-                if (isSpouse) {
-                    SimulationLogger.prompt("[5] Have a Baby\n");
-                }
-
                 SimulationLogger.prompt("Select action> ");
                 int actionChoice = Integer.parseInt(scanner.nextLine().trim());
                 
@@ -88,8 +82,6 @@ public class ParkBench implements Interactable {
                     sim.getSocial().increase(20);
                 } else if (actionChoice == 4 && canPropose) {
                     handleProposal(sim, target);
-                } else if (actionChoice == 5 && isSpouse) {
-                    handleBaby(sim, scanner);
                 } else {
                     SimulationLogger.logWarning("Invalid action selection.");
                     return;
@@ -122,25 +114,6 @@ public class ParkBench implements Interactable {
         }
     }
 
-    /**
-     * Handles the baby attempt. 50% success rate via RelationshipManager.reproduce().
-     */
-    private void handleBaby(Sim sim, Scanner scanner) {
-        SimulationLogger.prompt("Enter a name for the baby: ");
-        String babyName = scanner.nextLine().trim();
-        if (babyName.isEmpty()) babyName = "Baby";
-
-        try {
-            Sim child = sim.getRelationshipManager().reproduce(babyName);
-            if (child != null) {
-                engine.getNeighborhood().add(child);
-                SimulationLogger.log(child.getName() + " has been added to your household!");
-                SimulationLogger.log("Note: The child will become playable once they reach the teen stage (age 13).");
-            }
-        } catch (SimulationException e) {
-            SimulationLogger.logWarning(e.getMessage());
-        }
-    }
 
     @Override
     public String getObjectName() {

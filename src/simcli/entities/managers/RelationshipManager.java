@@ -1,19 +1,18 @@
 package simcli.entities.managers;
 
-import simcli.entities.actors.Sim;
-import simcli.entities.models.Relationship;
-import simcli.entities.models.Gender;
-import simcli.engine.SimulationLogger;
-import simcli.engine.SimulationException;
-import simcli.utils.GameConstants;
-import simcli.utils.GameRandom;
-import simcli.entities.models.Trait;
-import simcli.entities.models.ActionState;
-
-import java.util.Map;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ArrayList;
+import java.util.Map;
+import simcli.engine.SimulationException;
+import simcli.engine.SimulationLogger;
+import simcli.entities.actors.Sim;
+import simcli.entities.models.ActionState;
+import simcli.entities.models.Gender;
+import simcli.entities.models.Relationship;
+import simcli.entities.models.Trait;
+import simcli.utils.GameConstants;
+import simcli.utils.GameRandom;
 
 /**
  * Manages all social bonds, interactions, and romantic relationships for a Sim.
@@ -148,7 +147,12 @@ public class RelationshipManager {
      * @return The child Sim, or null if the attempt fails (50% chance).
      * @throws SimulationException if unmarried or same gender.
      */
-    public Sim reproduce(String childName) throws SimulationException {
+    /**
+     * Step 1: Checks the rules and rolls the 50% chance.
+     * @return The Gender of the baby if successful, or null if it fails.
+     * @throws SimulationException if unmarried or same gender.
+     */
+    public Gender attemptPregnancy() throws SimulationException {
         if (this.spouse == null) {
             throw new SimulationException(owner.getName() + " is not married and cannot reproduce.");
         }
@@ -158,16 +162,27 @@ public class RelationshipManager {
 
         // 50% success rate
         if (GameRandom.RANDOM.nextInt(100) < GameConstants.REPRODUCE_SUCCESS_CHANCE) {
-            Gender childGender = GameRandom.RANDOM.nextBoolean() ? Gender.MALE : Gender.FEMALE;
-            Sim child = new Sim(childName, 0, childGender);
-            child.setChildSim(true);
-            this.addChild(child);
-            spouse.getRelationshipManager().addChild(child);
-            SimulationLogger.log("\n*** NEW LIFE! " + owner.getName() + " and " + this.spouse.getName() + " have had a baby named " + childName + "! ***");
-            return child;
+            // Log the immediate success message before creating the baby
+            SimulationLogger.log("\nSuccess! " + owner.getName() + " and " + this.spouse.getName() + " are expecting a baby!");
+            return GameRandom.RANDOM.nextBoolean() ? Gender.MALE : Gender.FEMALE;
         } else {
-            SimulationLogger.log("\n" + owner.getName() + " and " + this.spouse.getName() + " tried to have a baby, but it didn't work out this time.");
+            SimulationLogger.log("\n" + owner.getName() + " and " + this.spouse.getName() + " tried to have a baby, but were unsuccessful this time.");
             return null;
         }
+    }
+
+    /**
+     * Step 2: Creates the actual Sim object using the name provided by the UI.
+     */
+    public Sim finalizeBaby(String childName, Gender childGender) {
+        Sim child = new Sim(childName, 0, childGender);
+        child.setChildSim(true);
+        
+        this.addChild(child);
+        spouse.getRelationshipManager().addChild(child);
+        
+        // Updated to match the requested final format
+        SimulationLogger.log("\n*** NEW LIFE! " + child.getName() + " has been born! ***");
+        return child;
     }
 }
