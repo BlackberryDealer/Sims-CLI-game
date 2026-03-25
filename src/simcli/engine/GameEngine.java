@@ -64,7 +64,6 @@ public class GameEngine {
         }
         this.activePlayer = firstAlive;
         this.npcManager = new NPCManager();
-        this.npcManager.replenishNPCs(3);
         
         this.inputHandler = new InputHandler(this.worldManager, this.timeManager, this);
         this.renderer = new TerminalRenderer();

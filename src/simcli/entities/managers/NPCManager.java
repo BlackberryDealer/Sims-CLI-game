@@ -22,6 +22,8 @@ public class NPCManager {
         "Alice", "Diana", "Fiona", "Hannah", "Julia", "Laura", "Nina", "Paula", "Rose", "Tina", "Wendy", "Yara"
     };
 
+    private static final int MAX_NPCS = 8;
+    
     public NPCManager() {
         this.activeNPCs = new ArrayList<>();
     }
@@ -51,10 +53,11 @@ public class NPCManager {
     }
 
     /**
-     * Ensures the park has a minimum number of NPCs.
+     * Ensures the park has a minimum number of NPCs, without exceeding the global cap.
      */
     public void replenishNPCs(int targetCount) {
-        while (activeNPCs.size() < targetCount) {
+        int actualTarget = Math.min(targetCount, MAX_NPCS);
+        while (activeNPCs.size() < actualTarget) {
             activeNPCs.add(generateRandomNPC());
         }
     }
