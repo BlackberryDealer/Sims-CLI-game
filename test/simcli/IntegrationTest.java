@@ -50,10 +50,13 @@ public class IntegrationTest {
 
         // Setup base test state
         activePlayer = new Sim("TestDummy", 25, Gender.MALE, Job.UNEMPLOYED);
-        worldManager = new WorldManager();
-        worldManager.setupWorld();
+        
+        // Instantiate a functional GameEngine to avoid NullPointerExceptions when Park checks for NPCManager
+        GameEngine testEngine = new GameEngine("TestIntegrationWorld", 1, java.util.Collections.singletonList(activePlayer), true);
+        
+        worldManager = testEngine.getWorldManager();
         timeManager = new TimeManager(1, 24); // Monday, Tick 1
-        inputHandler = new InputHandler(worldManager, timeManager, null);
+        inputHandler = new InputHandler(worldManager, timeManager, testEngine);
     }
 
     @AfterEach

@@ -6,9 +6,10 @@
     "configurations": [
         {
             "type": "java",
-            "name": "Current File",
+            "name": "Run Game (Terminal)",
             "request": "launch",
-            "mainClass": "${file}"
+            "mainClass": "simcli.Main",
+            "console": "integratedTerminal"
         }
     ]
 }

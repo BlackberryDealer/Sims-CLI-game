@@ -1,0 +1,549 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="JUnit Jupiter" tests="31" skipped="0" failures="0" errors="12" time="0.744" hostname="CAPUCINNO" timestamp="2026-03-25T17:44:30">
+<properties>
+<property name="file.encoding" value="UTF-8"/>
+<property name="file.separator" value="\"/>
+<property name="java.class.path" value="lib\junit-platform-console-standalone.jar"/>
+<property name="java.class.version" value="69.0"/>
+<property name="java.home" value="C:\Program Files\Java\jdk-25"/>
+<property name="java.io.tmpdir" value="C:\Users\afifj\AppData\Local\Temp\"/>
+<property name="java.library.path" value="C:\Program Files\Java\jdk-25\bin;C:\WINDOWS\Sun\Java\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\Program Files\Common Files\Oracle\Java\javapath;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\Git\cmd;C:\Program Files\PuTTY\;C:\Users\afifj\AppData\Local\Microsoft\WindowsApps;C:\Users\afifj\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\afifj\AppData\Local\Python\bin;C:\Users\afifj\AppData\Local\Programs\Antigravity\bin;."/>
+<property name="java.runtime.name" value="Java(TM) SE Runtime Environment"/>
+<property name="java.runtime.version" value="25.0.1+8-LTS-27"/>
+<property name="java.specification.name" value="Java Platform API Specification"/>
+<property name="java.specification.vendor" value="Oracle Corporation"/>
+<property name="java.specification.version" value="25"/>
+<property name="java.vendor" value="Oracle Corporation"/>
+<property name="java.vendor.url" value="https://java.oracle.com/"/>
+<property name="java.vendor.url.bug" value="https://bugreport.java.com/bugreport/"/>
+<property name="java.version" value="25.0.1"/>
+<property name="java.version.date" value="2025-10-21"/>
+<property name="java.vm.compressedOopsMode" value="Zero based"/>
+<property name="java.vm.info" value="mixed mode, sharing"/>
+<property name="java.vm.name" value="Java HotSpot(TM) 64-Bit Server VM"/>
+<property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
+<property name="java.vm.specification.vendor" value="Oracle Corporation"/>
+<property name="java.vm.specification.version" value="25"/>
+<property name="java.vm.vendor" value="Oracle Corporation"/>
+<property name="java.vm.version" value="25.0.1+8-LTS-27"/>
+<property name="jdk.debug" value="release"/>
+<property name="line.separator" value="
+"/>
+<property name="native.encoding" value="Cp1252"/>
+<property name="os.arch" value="amd64"/>
+<property name="os.name" value="Windows 11"/>
+<property name="os.version" value="10.0"/>
+<property name="path.separator" value=";"/>
+<property name="stderr.encoding" value="cp437"/>
+<property name="stdin.encoding" value="cp437"/>
+<property name="stdout.encoding" value="cp437"/>
+<property name="sun.arch.data.model" value="64"/>
+<property name="sun.boot.library.path" value="C:\Program Files\Java\jdk-25\bin"/>
+<property name="sun.cpu.endian" value="little"/>
+<property name="sun.cpu.isalist" value="amd64"/>
+<property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
+<property name="sun.java.command" value="lib\junit-platform-console-standalone.jar --class-path bin;bin\test --scan-class-path --include-package simcli --disable-ansi-colors --reports-dir=test-reports"/>
+<property name="sun.java.launcher" value="SUN_STANDARD"/>
+<property name="sun.jnu.encoding" value="Cp1252"/>
+<property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
+<property name="sun.os.patch.level" value=""/>
+<property name="user.country" value="SG"/>
+<property name="user.dir" value="C:\Users\afifj\OneDrive\Desktop\programming\code\SIMS\Sims-CLI-game"/>
+<property name="user.home" value="C:\Users\afifj"/>
+<property name="user.language" value="en"/>
+<property name="user.name" value="afifj"/>
+<property name="user.script" value=""/>
+<property name="user.timezone" value="Asia/Singapore"/>
+<property name="user.variant" value=""/>
+</properties>
+<testcase name="testAdvanceTickByOne()" classname="simcli.engine.TimeManagerTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:simcli.engine.TimeManagerTest]/[method:testAdvanceTickByOne()]
+display-name: advanceTick() increments tick by exactly 1
+]]></system-out>
+</testcase>
+<testcase name="testSleepFromEveningTick20()" classname="simcli.engine.TimeManagerTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:simcli.engine.TimeManagerTest]/[method:testSleepFromEveningTick20()]
+display-name: Sleep from tick 20 (8 PM) advances exactly 12 ticks to 8 AM
+]]></system-out>
+</testcase>
+<testcase name="testTravelToCurrentLocation()" classname="simcli.IntegrationTest" time="0">
+<error message="Cannot invoke &quot;simcli.engine.GameEngine.getNpcManager()&quot; because &quot;this.engine&quot; is null" type="java.lang.NullPointerException"><![CDATA[java.lang.NullPointerException: Cannot invoke "simcli.engine.GameEngine.getNpcManager()" because "this.engine" is null
+	at simcli.engine.WorldManager.setupWorld(WorldManager.java:79)
+	at simcli.IntegrationTest.setUp(IntegrationTest.java:54)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+]]></error>
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:simcli.IntegrationTest]/[method:testTravelToCurrentLocation()]
+display-name: Edge Case: Travel to the exact location you are already standing in
+]]></system-out>
+</testcase>
+<testcase name="testTimeOfDayMorning()" classname="simcli.engine.TimeManagerTest" time="0.002">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:simcli.engine.TimeManagerTest]/[method:testTimeOfDayMorning()]
+display-name: getTimeOfDay() returns 'Morning' in first quarter of day
+]]></system-out>
+</testcase>
+<testcase name="testHouseInfoInCommercialLocation()" classname="simcli.IntegrationTest" time="0.013">
+<error message="Cannot invoke &quot;simcli.engine.GameEngine.getNpcManager()&quot; because &quot;this.engine&quot; is null" type="java.lang.NullPointerException"><![CDATA[java.lang.NullPointerException: Cannot invoke "simcli.engine.GameEngine.getNpcManager()" because "this.engine" is null
+	at simcli.engine.WorldManager.setupWorld(WorldManager.java:79)
+	at simcli.IntegrationTest.setUp(IntegrationTest.java:54)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+]]></error>
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:simcli.IntegrationTest]/[method:testHouseInfoInCommercialLocation()]
+display-name: Edge Case: Check House Info in a Commercial Location
+]]></system-out>
+</testcase>
+<testcase name="testWorkOnMonday()" classname="simcli.engine.commands.WorkCommandTest" time="0.634">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:simcli.engine.commands.WorkCommandTest]/[method:testWorkOnMonday()]
+display-name: Working on Monday advances ticks
+]]></system-out>
+</testcase>
+<testcase name="testWorkOnSundayBlocked()" classname="simcli.engine.commands.WorkCommandTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:simcli.engine.commands.WorkCommandTest]/[method:testWorkOnSundayBlocked()]
+display-name: Working on Sunday is blocked and returns NO_TICK
+]]></system-out>
+</testcase>
+<testcase name="testCommandMenuRejectsInvalidStringBugs(String)[5]" classname="simcli.IntegrationTest" time="0">
+<error message="Cannot invoke &quot;simcli.engine.GameEngine.getNpcManager()&quot; because &quot;this.engine&quot; is null" type="java.lang.NullPointerException"><![CDATA[java.lang.NullPointerException: Cannot invoke "simcli.engine.GameEngine.getNpcManager()" because "this.engine" is null
+	at simcli.engine.WorldManager.setupWorld(WorldManager.java:79)
+	at simcli.IntegrationTest.setUp(IntegrationTest.java:54)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+]]></error>
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:simcli.IntegrationTest]/[test-template:testCommandMenuRejectsInvalidStringBugs(java.lang.String)]/[test-template-invocation:#5]
+display-name: [5] null
+]]></system-out>
+</testcase>
+<testcase name="testFormattedTimeAtTick5()" classname="simcli.engine.TimeManagerTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:simcli.engine.TimeManagerTest]/[method:testFormattedTimeAtTick5()]
+display-name: getFormattedTime() returns '05:00' at tick 5
+]]></system-out>
+</testcase>
+<testcase name="testCommandMenuRejectsInvalidStringBugs(String)[6]" classname="simcli.IntegrationTest" time="0.001">
+<error message="Cannot invoke &quot;simcli.engine.GameEngine.getNpcManager()&quot; because &quot;this.engine&quot; is null" type="java.lang.NullPointerException"><![CDATA[java.lang.NullPointerException: Cannot invoke "simcli.engine.GameEngine.getNpcManager()" because "this.engine" is null
+	at simcli.engine.WorldManager.setupWorld(WorldManager.java:79)
+	at simcli.IntegrationTest.setUp(IntegrationTest.java:54)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+]]></error>
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:simcli.IntegrationTest]/[test-template:testCommandMenuRejectsInvalidStringBugs(java.lang.String)]/[test-template-invocation:#6]
+display-name: [6] DROP DATABASE;
+]]></system-out>
+</testcase>
+<testcase name="testCommandMenuRejectsInvalidStringBugs(String)[3]" classname="simcli.IntegrationTest" time="0">
+<error message="Cannot invoke &quot;simcli.engine.GameEngine.getNpcManager()&quot; because &quot;this.engine&quot; is null" type="java.lang.NullPointerException"><![CDATA[java.lang.NullPointerException: Cannot invoke "simcli.engine.GameEngine.getNpcManager()" because "this.engine" is null
+	at simcli.engine.WorldManager.setupWorld(WorldManager.java:79)
+	at simcli.IntegrationTest.setUp(IntegrationTest.java:54)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+]]></error>
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:simcli.IntegrationTest]/[test-template:testCommandMenuRejectsInvalidStringBugs(java.lang.String)]/[test-template-invocation:#3]
+display-name: [3] 99
+]]></system-out>
+</testcase>
+<testcase name="testSleepFromMorning()" classname="simcli.engine.TimeManagerTest" time="0.001">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:simcli.engine.TimeManagerTest]/[method:testSleepFromMorning()]
+display-name: Sleep from tick 8 (8 AM) advances a full 24 ticks
+]]></system-out>
+</testcase>
+<testcase name="testCommandMenuRejectsInvalidStringBugs(String)[4]" classname="simcli.IntegrationTest" time="0">
+<error message="Cannot invoke &quot;simcli.engine.GameEngine.getNpcManager()&quot; because &quot;this.engine&quot; is null" type="java.lang.NullPointerException"><![CDATA[java.lang.NullPointerException: Cannot invoke "simcli.engine.GameEngine.getNpcManager()" because "this.engine" is null
+	at simcli.engine.WorldManager.setupWorld(WorldManager.java:79)
+	at simcli.IntegrationTest.setUp(IntegrationTest.java:54)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+]]></error>
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:simcli.IntegrationTest]/[test-template:testCommandMenuRejectsInvalidStringBugs(java.lang.String)]/[test-template-invocation:#4]
+display-name: [4] 
+]]></system-out>
+</testcase>
+<testcase name="testFormattedTimeAtTick14()" classname="simcli.engine.TimeManagerTest" time="0.007">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:simcli.engine.TimeManagerTest]/[method:testFormattedTimeAtTick14()]
+display-name: getFormattedTime() returns '14:00' at tick 14
+]]></system-out>
+</testcase>
+<testcase name="testCommandMenuRejectsInvalidStringBugs(String)[1]" classname="simcli.IntegrationTest" time="0">
+<error message="Cannot invoke &quot;simcli.engine.GameEngine.getNpcManager()&quot; because &quot;this.engine&quot; is null" type="java.lang.NullPointerException"><![CDATA[java.lang.NullPointerException: Cannot invoke "simcli.engine.GameEngine.getNpcManager()" because "this.engine" is null
+	at simcli.engine.WorldManager.setupWorld(WorldManager.java:79)
+	at simcli.IntegrationTest.setUp(IntegrationTest.java:54)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+]]></error>
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:simcli.IntegrationTest]/[test-template:testCommandMenuRejectsInvalidStringBugs(java.lang.String)]/[test-template-invocation:#1]
+display-name: [1] HELLO
+]]></system-out>
+</testcase>
+<testcase name="testCommandMenuRejectsInvalidStringBugs(String)[2]" classname="simcli.IntegrationTest" time="0.001">
+<error message="Cannot invoke &quot;simcli.engine.GameEngine.getNpcManager()&quot; because &quot;this.engine&quot; is null" type="java.lang.NullPointerException"><![CDATA[java.lang.NullPointerException: Cannot invoke "simcli.engine.GameEngine.getNpcManager()" because "this.engine" is null
+	at simcli.engine.WorldManager.setupWorld(WorldManager.java:79)
+	at simcli.IntegrationTest.setUp(IntegrationTest.java:54)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+]]></error>
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:simcli.IntegrationTest]/[test-template:testCommandMenuRejectsInvalidStringBugs(java.lang.String)]/[test-template-invocation:#2]
+display-name: [2] -1
+]]></system-out>
+</testcase>
+<testcase name="testAdvanceTicksByN()" classname="simcli.engine.TimeManagerTest" time="0.015">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:simcli.engine.TimeManagerTest]/[method:testAdvanceTicksByN()]
+display-name: advanceTicks(n) increments tick by exactly n
+]]></system-out>
+</testcase>
+<testcase name="testDayOneAtTickOne()" classname="simcli.engine.TimeManagerTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:simcli.engine.TimeManagerTest]/[method:testDayOneAtTickOne()]
+display-name: getCurrentDay() returns 1 on tick 1
+]]></system-out>
+</testcase>
+<testcase name="testUnderageJobApplication()" classname="simcli.IntegrationTest" time="0.001">
+<error message="Cannot invoke &quot;simcli.engine.GameEngine.getNpcManager()&quot; because &quot;this.engine&quot; is null" type="java.lang.NullPointerException"><![CDATA[java.lang.NullPointerException: Cannot invoke "simcli.engine.GameEngine.getNpcManager()" because "this.engine" is null
+	at simcli.engine.WorldManager.setupWorld(WorldManager.java:79)
+	at simcli.IntegrationTest.setUp(IntegrationTest.java:54)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+]]></error>
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:simcli.IntegrationTest]/[method:testUnderageJobApplication()]
+display-name: Edge Case: Apply for a job you are too young for (Age Boundary)
+]]></system-out>
+</testcase>
+<testcase name="testTimeOfDayEvening()" classname="simcli.engine.TimeManagerTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:simcli.engine.TimeManagerTest]/[method:testTimeOfDayEvening()]
+display-name: getTimeOfDay() returns 'Evening' in third quarter
+]]></system-out>
+</testcase>
+<testcase name="testCancelOverworkMaintainsState()" classname="simcli.IntegrationTest" time="0">
+<error message="Cannot invoke &quot;simcli.engine.GameEngine.getNpcManager()&quot; because &quot;this.engine&quot; is null" type="java.lang.NullPointerException"><![CDATA[java.lang.NullPointerException: Cannot invoke "simcli.engine.GameEngine.getNpcManager()" because "this.engine" is null
+	at simcli.engine.WorldManager.setupWorld(WorldManager.java:79)
+	at simcli.IntegrationTest.setUp(IntegrationTest.java:54)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+]]></error>
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:simcli.IntegrationTest]/[method:testCancelOverworkMaintainsState()]
+display-name: Edge Case: Cancel an Overwork shift (State Validation)
+]]></system-out>
+</testcase>
+<testcase name="testTimeOfDayAfternoon()" classname="simcli.engine.TimeManagerTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:simcli.engine.TimeManagerTest]/[method:testTimeOfDayAfternoon()]
+display-name: getTimeOfDay() returns 'Afternoon' in second quarter
+]]></system-out>
+</testcase>
+<testcase name="testAdvanceTicksByZero()" classname="simcli.engine.TimeManagerTest" time="0.001">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:simcli.engine.TimeManagerTest]/[method:testAdvanceTicksByZero()]
+display-name: advanceTicks(0) does NOT change the tick
+]]></system-out>
+</testcase>
+<testcase name="testWorkOnSaturdayBlocked()" classname="simcli.engine.commands.WorkCommandTest" time="0.004">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:simcli.engine.commands.WorkCommandTest]/[method:testWorkOnSaturdayBlocked()]
+display-name: Working on Saturday is blocked and returns NO_TICK
+]]></system-out>
+</testcase>
+<testcase name="testUpgradeRoomWithoutMoney()" classname="simcli.IntegrationTest" time="0.001">
+<error message="Cannot invoke &quot;simcli.engine.GameEngine.getNpcManager()&quot; because &quot;this.engine&quot; is null" type="java.lang.NullPointerException"><![CDATA[java.lang.NullPointerException: Cannot invoke "simcli.engine.GameEngine.getNpcManager()" because "this.engine" is null
+	at simcli.engine.WorldManager.setupWorld(WorldManager.java:79)
+	at simcli.IntegrationTest.setUp(IntegrationTest.java:54)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+]]></error>
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:simcli.IntegrationTest]/[method:testUpgradeRoomWithoutMoney()]
+display-name: Edge Case: Upgrade Room with $0 (Financial Boundary)
+]]></system-out>
+</testcase>
+<testcase name="testSleepLandsAtCorrectTick()" classname="simcli.engine.TimeManagerTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:simcli.engine.TimeManagerTest]/[method:testSleepLandsAtCorrectTick()]
+display-name: Sleep fast-forward actually lands at tick % 24 == 8
+]]></system-out>
+</testcase>
+<testcase name="testDayThreeAtTick49()" classname="simcli.engine.TimeManagerTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:simcli.engine.TimeManagerTest]/[method:testDayThreeAtTick49()]
+display-name: getCurrentDay() returns 3 when tick crosses 48 boundary
+]]></system-out>
+</testcase>
+<testcase name="testMoveRoomInCommercialLocation()" classname="simcli.IntegrationTest" time="0.001">
+<error message="Cannot invoke &quot;simcli.engine.GameEngine.getNpcManager()&quot; because &quot;this.engine&quot; is null" type="java.lang.NullPointerException"><![CDATA[java.lang.NullPointerException: Cannot invoke "simcli.engine.GameEngine.getNpcManager()" because "this.engine" is null
+	at simcli.engine.WorldManager.setupWorld(WorldManager.java:79)
+	at simcli.IntegrationTest.setUp(IntegrationTest.java:54)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+]]></error>
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:simcli.IntegrationTest]/[method:testMoveRoomInCommercialLocation()]
+display-name: Edge Case: Try to Move Rooms inside a Supermarket (Non-Residential)
+]]></system-out>
+</testcase>
+<testcase name="testSleepFromMidnight()" classname="simcli.engine.TimeManagerTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:simcli.engine.TimeManagerTest]/[method:testSleepFromMidnight()]
+display-name: Sleep from tick 0 (midnight) advances exactly 8 ticks to 8 AM
+]]></system-out>
+</testcase>
+<testcase name="testDayTwoAtTick25()" classname="simcli.engine.TimeManagerTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:simcli.engine.TimeManagerTest]/[method:testDayTwoAtTick25()]
+display-name: getCurrentDay() returns 2 when tick crosses 24 boundary
+]]></system-out>
+</testcase>
+<testcase name="testTimeOfDayNight()" classname="simcli.engine.TimeManagerTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:simcli.engine.TimeManagerTest]/[method:testTimeOfDayNight()]
+display-name: getTimeOfDay() returns 'Night' in final quarter
+]]></system-out>
+</testcase>
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]
+display-name: JUnit Jupiter
+]]></system-out>
+</testsuite>
