@@ -59,12 +59,12 @@ public final class GameConstants {
     public static final int HAPPINESS_BASE_DECAY_RATE = 2;
 
     // Hunger
-    public static final int HUNGER_BASE_DECAY_RATE = 5;
+    public static final int HUNGER_BASE_DECAY_RATE = 2;
     public static final int HUNGER_ACCELERATED_DECAY_RATE = 3;
     public static final int HUNGER_DECELERATED_DECAY_RATE = 3;
 
     // Hygiene
-    public static final int HYGIENE_BASE_DECAY_RATE = 5;
+    public static final int HYGIENE_BASE_DECAY_RATE = 2;
     public static final int HYGIENE_ACCELERATED_DECAY_RATE = 4;
 
     // Social

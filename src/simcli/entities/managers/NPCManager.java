@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * Manages a persistent pool of NPCs in the world.
  */
-public class NPCManager {
+public class NPCManager implements NPCProvider {
     private final List<NPCSim> activeNPCs;
     
     private static final String[] MALE_NAMES = {
