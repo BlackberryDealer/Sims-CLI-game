@@ -28,4 +28,9 @@ public class Furniture extends Item {
     public Item copyItem() {
         return new Furniture(getObjectName(), getPrice(), this.spaceScore);
     }
+
+    @Override
+    public String toSaveString() {
+        return String.format("Furniture,%s,%d,%d", getObjectName(), getPrice(), getSpaceScore());
+    }
 }

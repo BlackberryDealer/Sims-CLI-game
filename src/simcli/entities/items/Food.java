@@ -9,4 +9,9 @@ public class Food extends Consumable {
     public Item copyItem() {
         return new Food(getObjectName(), getPrice(), getSatiationValue(), getEnergyValue());
     }
+
+    @Override
+    public String toSaveString() {
+        return String.format("Food,%s,%d,%d,%d", getObjectName(), getPrice(), getSatiationValue(), getEnergyValue());
+    }
 }

@@ -1,8 +1,9 @@
 package simcli.entities.items;
 
 import simcli.world.interactables.Interactable;
+import simcli.persistence.Savable;
 
-public abstract class Item implements Interactable {
+public abstract class Item implements Interactable, Savable {
     private String name;
     private int price;
 

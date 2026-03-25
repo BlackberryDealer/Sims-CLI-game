@@ -35,4 +35,9 @@ public class Consumable extends Item {
     public Item copyItem() {
         return new Consumable(getObjectName(), getPrice(), this.satiationValue, this.energyValue, this.happinessValue);
     }
+
+    @Override
+    public String toSaveString() {
+        return String.format("Consumable,%s,%d,%d,%d,%d", getObjectName(), getPrice(), getSatiationValue(), getEnergyValue(), getHappinessValue());
+    }
 }

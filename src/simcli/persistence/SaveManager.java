@@ -93,16 +93,7 @@ public class SaveManager {
                 
                 // Save Inventory
                 for (simcli.entities.items.Item item : sim.getInventory()) {
-                    if (item instanceof simcli.entities.items.Furniture) {
-                        simcli.entities.items.Furniture f = (simcli.entities.items.Furniture) item;
-                        writer.println("Inventory:" + sim.getName() + ",Furniture," + f.getObjectName() + "," + f.getPrice() + "," + f.getSpaceScore());
-                    } else if (item instanceof simcli.entities.items.Food) {
-                        simcli.entities.items.Food f = (simcli.entities.items.Food) item;
-                        writer.println("Inventory:" + sim.getName() + ",Food," + f.getObjectName() + "," + f.getPrice() + "," + f.getSatiationValue() + "," + f.getEnergyValue());
-                    } else if (item instanceof simcli.entities.items.Consumable) {
-                        simcli.entities.items.Consumable c = (simcli.entities.items.Consumable) item;
-                        writer.println("Inventory:" + sim.getName() + ",Consumable," + c.getObjectName() + "," + c.getPrice() + "," + c.getSatiationValue() + "," + c.getEnergyValue() + "," + c.getHappinessValue());
-                    }
+                    writer.println("Inventory:" + sim.getName() + "," + item.toSaveString());
                 }
             }
 
@@ -153,7 +144,7 @@ public class SaveManager {
             java.util.Map<Integer, String[]> parsedResStates = new java.util.HashMap<>();
             List<String[]> relLines = new ArrayList<>();
             List<String[]> spouseLines = new ArrayList<>();
-            List<String[]> inventoryLines = new ArrayList<>();
+            List<String> inventoryLines = new ArrayList<>();
 
             String activePlayerName = null;
 
@@ -182,7 +173,7 @@ public class SaveManager {
                 } else if (line.startsWith("Spouse:")) {
                     spouseLines.add(line.substring(7).split(","));
                 } else if (line.startsWith("Inventory:")) {
-                    inventoryLines.add(line.substring(10).split(","));
+                    inventoryLines.add(line.substring(10));
                 } else if (line.startsWith("NPC:")) {
                     String[] data = line.substring(4).split(",");
                     Gender gender = Gender.valueOf(data[2]);
@@ -224,19 +215,17 @@ public class SaveManager {
             allSims.addAll(loadedNPCs);
 
             // Load Inventory
-            for (String[] invData : inventoryLines) {
-                String ownerName = invData[0];
-                Sim owner = findSimByName(allSims, ownerName);
-                if (owner != null) {
-                    String type = invData[1];
-                    String itemName = invData[2];
-                    int price = Integer.parseInt(invData[3]);
-                    if (type.equals("Furniture")) {
-                        owner.addItem(new simcli.entities.items.Furniture(itemName, price, Integer.parseInt(invData[4])));
-                    } else if (type.equals("Food")) {
-                        owner.addItem(new simcli.entities.items.Food(itemName, price, Integer.parseInt(invData[4]), Integer.parseInt(invData[5])));
-                    } else if (type.equals("Consumable")) {
-                        owner.addItem(new simcli.entities.items.Consumable(itemName, price, Integer.parseInt(invData[4]), Integer.parseInt(invData[5]), Integer.parseInt(invData[6])));
+            for (String invLine : inventoryLines) {
+                int firstComma = invLine.indexOf(',');
+                if (firstComma != -1) {
+                    String ownerName = invLine.substring(0, firstComma);
+                    Sim owner = findSimByName(allSims, ownerName);
+                    if (owner != null) {
+                        String itemData = invLine.substring(firstComma + 1);
+                        Savable item = Savable.fromSaveString(itemData);
+                        if (item instanceof simcli.entities.items.Item) {
+                            owner.addItem((simcli.entities.items.Item) item);
+                        }
                     }
                 }
             }
