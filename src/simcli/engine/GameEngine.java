@@ -34,12 +34,12 @@ public class GameEngine {
         this.timeManager = new TimeManager(1, GameConstants.TICKS_PER_DAY); // 24 ticks per day
         this.isGameOver = false;
         this.neighborhood = startingNeighborhood;
+        this.npcManager = new NPCManager();
+        this.npcManager.replenishNPCs(3);
         this.worldManager = new WorldManager();
         ((WorldManager)this.worldManager).setEngine(this);
         this.worldManager.setupWorld();
         this.activePlayer = startingNeighborhood.get(0);
-        this.npcManager = new NPCManager();
-        this.npcManager.replenishNPCs(3);
         this.inputHandler = new InputHandler(this.worldManager, this.timeManager, this);
         this.renderer = new TerminalRenderer();
         this.randomEventManager = new RandomEventManager();
@@ -52,6 +52,7 @@ public class GameEngine {
         this.timeManager = new TimeManager(currentTick, GameConstants.TICKS_PER_DAY);
         this.neighborhood = loadedNeighborhood;
         this.isGameOver = isGameOver;
+        this.npcManager = new NPCManager();
         this.worldManager = new WorldManager();
         ((WorldManager)this.worldManager).setEngine(this);
         this.worldManager.setupWorld();
@@ -65,7 +66,6 @@ public class GameEngine {
             }
         }
         this.activePlayer = firstAlive;
-        this.npcManager = new NPCManager();
         
         this.inputHandler = new InputHandler(this.worldManager, this.timeManager, this);
         this.renderer = new TerminalRenderer();
