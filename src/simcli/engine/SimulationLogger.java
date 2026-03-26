@@ -1,5 +1,8 @@
 package simcli.engine;
 
+import simcli.entities.actors.Sim;
+import simcli.ui.UIManager;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,7 +11,7 @@ import java.util.List;
  */
 public class SimulationLogger {
     private static final List<String> logs = new ArrayList<>();
-    private static simcli.entities.actors.Sim simToAnimate = null;
+    private static Sim simToAnimate = null;
 
     public static void log(String message) {
         logs.add(message);
@@ -18,7 +21,7 @@ public class SimulationLogger {
         logs.add("[WARNING] " + message);
     }
 
-    public static void logAnimation(simcli.entities.actors.Sim player) {
+    public static void logAnimation(Sim player) {
         simToAnimate = player;
     }
     
@@ -33,7 +36,7 @@ public class SimulationLogger {
         }
         logs.clear();
         if (simToAnimate != null) {
-            simcli.ui.UIManager.displayActionAnimation(simToAnimate);
+            UIManager.displayActionAnimation(simToAnimate);
             simToAnimate = null;
         }
     }

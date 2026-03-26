@@ -1,5 +1,9 @@
 package simcli.engine;
 
+import simcli.entities.actors.Sim;
+
+import java.util.List;
+
 public class TimeManager {
     private int currentTick;
     private int ticksPerDay;
@@ -69,11 +73,11 @@ public class TimeManager {
      * Determines if a year has passed, checking all sims.
      * @param sims Map of simulations.
      */
-    public void processYearlyAging(java.util.List<simcli.entities.actors.Sim> sims) {
+    public void processYearlyAging(List<Sim> sims) {
         final int TICKS_PER_YEAR = this.ticksPerDay * 3;
         
         if (this.currentTick % TICKS_PER_YEAR == 0) {
-            for (simcli.entities.actors.Sim sim : sims) {
+            for (Sim sim : sims) {
                 sim.ageUp();
             }
         }
