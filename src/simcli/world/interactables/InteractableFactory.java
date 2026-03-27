@@ -1,7 +1,11 @@
 package simcli.world.interactables;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Supplier;
+
 public class InteractableFactory {
-    private static final java.util.Map<String, java.util.function.Supplier<Interactable>> FACTORY = new java.util.HashMap<>();
+    private static final Map<String, Supplier<Interactable>> FACTORY = new HashMap<>();
     static {
         FACTORY.put("Bed", Bed::new);
         FACTORY.put("Computer", Computer::new);
@@ -12,7 +16,7 @@ public class InteractableFactory {
     }
 
     public static Interactable create(String name) {
-        java.util.function.Supplier<Interactable> supplier = FACTORY.get(name);
+        Supplier<Interactable> supplier = FACTORY.get(name);
         return supplier != null ? supplier.get() : null;
     }
 }

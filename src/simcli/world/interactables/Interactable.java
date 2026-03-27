@@ -3,10 +3,12 @@ import simcli.engine.SimulationException;
 import simcli.engine.TimeManager;
 import simcli.entities.actors.Sim;
 
+import java.util.Scanner;
+
 /**
  * Interface defining objects that Sims can use.
  */
 public interface Interactable {
-    void interact(Sim sim, java.util.Scanner scanner, TimeManager timeManager) throws SimulationException;
+    void interact(Sim sim, Scanner scanner, TimeManager timeManager) throws SimulationException;
     String getObjectName();
 }

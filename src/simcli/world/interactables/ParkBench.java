@@ -5,6 +5,7 @@ import java.util.Scanner;
 import simcli.engine.GameEngine;
 import simcli.engine.SimulationException;
 import simcli.engine.SimulationLogger;
+import simcli.engine.TimeManager;
 import simcli.entities.actors.NPCSim;
 import simcli.entities.actors.Sim;
 import simcli.entities.models.ActionState;
@@ -21,7 +22,7 @@ public class ParkBench implements Interactable {
     }
 
     @Override
-    public void interact(Sim sim, Scanner scanner, simcli.engine.TimeManager timeManager) throws SimulationException {
+    public void interact(Sim sim, Scanner scanner, TimeManager timeManager) throws SimulationException {
         sim.setCurrentAction(ActionState.SOCIALIZING);
         SimulationLogger.logAnimation(sim);
 

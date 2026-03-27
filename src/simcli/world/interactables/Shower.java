@@ -1,7 +1,13 @@
 package simcli.world.interactables;
 
 import simcli.engine.SimulationException;
+import simcli.engine.TimeManager;
 import simcli.entities.actors.Sim;
+import simcli.entities.models.ActionState;
+import simcli.needs.Need;
+import simcli.ui.UIManager;
+
+import java.util.Scanner;
 
 public class Shower implements Interactable {
 
@@ -11,11 +17,11 @@ public class Shower implements Interactable {
     }
 
     @Override
-    public void interact(Sim sim, java.util.Scanner scanner, simcli.engine.TimeManager timeManager) throws SimulationException {
-        sim.setCurrentAction(simcli.entities.models.ActionState.PLAYING); // closest match for a refreshing activity
-        simcli.ui.UIManager.printMessage(sim.getName() + " takes a long, refreshing shower.");
+    public void interact(Sim sim, Scanner scanner, TimeManager timeManager) throws SimulationException {
+        sim.setCurrentAction(ActionState.PLAYING); // closest match for a refreshing activity
+        UIManager.printMessage(sim.getName() + " takes a long, refreshing shower.");
         sim.getHygiene().increase(50);
-        simcli.ui.UIManager.printMessage(
-                "Hygiene is now " + sim.getHygiene().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
+        UIManager.printMessage(
+                "Hygiene is now " + sim.getHygiene().getValue() + " / " + Need.MAX_VALUE);
     }
 }
