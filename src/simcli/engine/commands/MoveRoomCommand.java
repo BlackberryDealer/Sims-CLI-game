@@ -28,15 +28,22 @@ public class MoveRoomCommand extends BaseCommand {
             UIManager.printMessage("\n=== MOVE ROOM ===");
             List<Room> rooms = res.getRooms();
             for (int i = 0; i < rooms.size(); i++) {
-                UIManager.printMessage("[" + (i + 1) + "] " + rooms.get(i).getName());
+                Room room = rooms.get(i);
+                String currentTag = (room == activePlayer.getCurrentRoom()) ? " (Current)" : "";
+                UIManager.printMessage("[" + (i + 1) + "] " + room.getName() + currentTag);
             }
             UIManager.printMessage("[0] Cancel");
             UIManager.prompt("Select Room> ");
             try {
                 int rChoice = Integer.parseInt(scanner.nextLine().trim());
                 if (rChoice > 0 && rChoice <= rooms.size()) {
-                    activePlayer.setCurrentRoom(rooms.get(rChoice - 1));
-                    UIManager.printMessage("Moved to " + activePlayer.getCurrentRoom().getName() + ".");
+                    Room selectedRoom = rooms.get(rChoice - 1);
+                    if (selectedRoom == activePlayer.getCurrentRoom()) {
+                        UIManager.printMessage("You are already in " + selectedRoom.getName() + "!");
+                    } else {
+                        activePlayer.setCurrentRoom(selectedRoom);
+                        UIManager.printMessage("Moved to " + activePlayer.getCurrentRoom().getName() + ".");
+                    }
                 }
             } catch (NumberFormatException e) {
                 UIManager.printMessage("Invalid input.");
