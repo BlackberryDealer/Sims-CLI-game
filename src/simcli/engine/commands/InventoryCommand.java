@@ -38,14 +38,15 @@ public class InventoryCommand extends BaseCommand {
 
         while (managingInventory) {
             List<Item> inv = activePlayer.getInventory();
-            int totalPages = (int) Math.ceil((double) inv.size() / pageSize);
+            int inventorySize = inv.size();
+            int totalPages = (int) Math.ceil((double) inventorySize / pageSize);
             if (totalPages == 0)
                 totalPages = 1;
             if (currentPage >= totalPages)
                 currentPage = totalPages - 1;
 
             UIManager.printMessage("\n=== INVENTORY (Page " + (currentPage + 1) + " of " + totalPages + ") ===");
-            UIManager.printMessage("Capacity: " + inv.size() + " / " + activePlayer.getInventoryCapacity());
+            UIManager.printMessage("Capacity: " + inventorySize + " / " + activePlayer.getInventoryCapacity());
 
             if (inv.isEmpty()) {
                 UIManager.printMessage("Your inventory is empty.");
@@ -54,13 +55,18 @@ public class InventoryCommand extends BaseCommand {
             }
 
             int startIdx = currentPage * pageSize;
-            int endIdx = Math.min(startIdx + pageSize, inv.size());
+            int endIdx = Math.min(startIdx + pageSize, inventorySize);
 
             for (int i = startIdx; i < endIdx; i++) {
                 UIManager.printMessage("[" + (i - startIdx + 1) + "] " + inv.get(i).getObjectName());
             }
 
-            UIManager.printMessage("\n[N] Next Page   [P] Previous Page");
+            if (inventorySize > pageSize) {
+                UIManager.printMessage("\n[N] Next Page   [P] Previous Page");
+            } else {
+                UIManager.printMessage("");
+            }
+
             UIManager.printMessage("[0] Back");
             UIManager.prompt("Select item to Use/Place> ");
 
@@ -68,10 +74,10 @@ public class InventoryCommand extends BaseCommand {
 
             if (invInput.equals("0")) {
                 managingInventory = false;
-            } else if (invInput.equals("N")) {
+            } else if (invInput.equals("N") && inventorySize > pageSize) {
                 if (currentPage < totalPages - 1)
                     currentPage++;
-            } else if (invInput.equals("P")) {
+            } else if (invInput.equals("P") && inventorySize > pageSize) {
                 if (currentPage > 0)
                     currentPage--;
             } else {
