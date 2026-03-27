@@ -1,5 +1,6 @@
 package simcli.entities.actors;
 
+import simcli.entities.items.Consumable;
 import simcli.entities.models.*;
 
 import simcli.needs.SimsNeedsTracker;
@@ -22,6 +23,7 @@ import simcli.entities.lifecycle.LifeStage;
 import simcli.entities.lifecycle.TeenStage;
 import simcli.needs.Need;
 import simcli.utils.GameConstants;
+import simcli.utils.GameRandom;
 import simcli.world.Room;
 
 public class Sim implements ISimBehaviour {
@@ -64,7 +66,7 @@ public class Sim implements ISimBehaviour {
         this.skillManager = new SkillManager();
         this.traits = new ArrayList<>();
         Trait[] allTraits = Trait.values();
-        this.traits.add(allTraits[simcli.utils.GameRandom.RANDOM.nextInt(allTraits.length)]);
+        this.traits.add(allTraits[GameRandom.RANDOM.nextInt(allTraits.length)]);
 
         this.relationshipManager = new RelationshipManager(this);
         this.totalMoneyEarned = money;
@@ -242,7 +244,7 @@ public class Sim implements ISimBehaviour {
         
         boolean promoted = false;
         if (getJobTier() < getCareer().getMaxTier()) {
-            if (simcli.utils.GameRandom.RANDOM.nextDouble() < 0.25) {
+            if (GameRandom.RANDOM.nextDouble() < 0.25) {
                 getCareerManager().promote(getName());
                 promoted = true;
             }
@@ -251,7 +253,7 @@ public class Sim implements ISimBehaviour {
         return WorkResult.success(earnings, promoted, multiplier > 1);
     }
 
-    public void eat(simcli.entities.items.Consumable item) {
+    public void eat(Consumable item) {
         this.getHunger().increase(item.getSatiationValue());
         this.getEnergy().increase(item.getEnergyValue());
         this.getHappiness().increase(item.getHappinessValue());

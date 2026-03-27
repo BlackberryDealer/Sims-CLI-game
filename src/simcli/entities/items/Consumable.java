@@ -1,8 +1,13 @@
 package simcli.entities.items;
 
+import simcli.engine.TimeManager;
 import simcli.entities.actors.Sim;
 
 import simcli.engine.SimulationException;
+import simcli.entities.models.ActionState;
+import simcli.ui.UIManager;
+
+import java.util.Scanner;
 
 public class Consumable extends Item {
     private int satiationValue;
@@ -21,10 +26,10 @@ public class Consumable extends Item {
     public int getHappinessValue() { return happinessValue; }
 
     @Override
-    public void interact(Sim sim, java.util.Scanner scanner, simcli.engine.TimeManager timeManager) throws SimulationException {
-        sim.setCurrentAction(simcli.entities.models.ActionState.EATING);
-        simcli.ui.UIManager.displayActionAnimation(sim);
-        simcli.ui.UIManager.printMessage(sim.getName() + " consumes the " + getObjectName() + ".");
+    public void interact(Sim sim, Scanner scanner, TimeManager timeManager) throws SimulationException {
+        sim.setCurrentAction(ActionState.EATING);
+        UIManager.displayActionAnimation(sim);
+        UIManager.printMessage(sim.getName() + " consumes the " + getObjectName() + ".");
         sim.eat(this);
     }
     

@@ -6,7 +6,10 @@ import simcli.entities.models.SimState;
 import simcli.ui.IRenderer;
 import simcli.ui.TerminalRenderer;
 import simcli.persistence.SaveManager;
+import simcli.ui.UIManager;
 import simcli.utils.GameConstants;
+import simcli.world.Residential;
+import simcli.world.interactables.Interactable;
 
 import java.util.List;
 import java.util.Scanner;
@@ -34,12 +37,12 @@ public class GameEngine {
         this.timeManager = new TimeManager(1, GameConstants.TICKS_PER_DAY); // 24 ticks per day
         this.isGameOver = false;
         this.neighborhood = startingNeighborhood;
+        this.npcManager = new NPCManager();
+        this.npcManager.replenishNPCs(3);
         this.worldManager = new WorldManager();
         ((WorldManager)this.worldManager).setEngine(this);
         this.worldManager.setupWorld();
         this.activePlayer = startingNeighborhood.get(0);
-        this.npcManager = new NPCManager();
-        this.npcManager.replenishNPCs(3);
         this.inputHandler = new InputHandler(this.worldManager, this.timeManager, this);
         this.renderer = new TerminalRenderer();
         this.randomEventManager = new RandomEventManager();
@@ -52,6 +55,7 @@ public class GameEngine {
         this.timeManager = new TimeManager(currentTick, GameConstants.TICKS_PER_DAY);
         this.neighborhood = loadedNeighborhood;
         this.isGameOver = isGameOver;
+        this.npcManager = new NPCManager();
         this.worldManager = new WorldManager();
         ((WorldManager)this.worldManager).setEngine(this);
         this.worldManager.setupWorld();
@@ -65,7 +69,6 @@ public class GameEngine {
             }
         }
         this.activePlayer = firstAlive;
-        this.npcManager = new NPCManager();
         
         this.inputHandler = new InputHandler(this.worldManager, this.timeManager, this);
         this.renderer = new TerminalRenderer();
@@ -101,7 +104,7 @@ public class GameEngine {
             renderer.clear();
             renderer.printHint();
 
-            boolean inRoom = this.worldManager.getCurrentLocation() instanceof simcli.world.Residential
+            boolean inRoom = this.worldManager.getCurrentLocation() instanceof Residential
                     && activePlayer.getCurrentRoom() != null;
             String roomName = inRoom ? activePlayer.getCurrentRoom().getName() : "";
 
@@ -121,24 +124,23 @@ public class GameEngine {
                     if (this.activePlayer == null) {
                         this.isGameOver = true;
                         aggregateStats();
-                        simcli.ui.UIManager.printGameOverStats(this.timeManager.getCurrentTick(),
+                        UIManager.printGameOverStats(this.timeManager.getCurrentTick(),
                                 this.sessionTotalMoney, this.sessionTotalItems);
-                        simcli.ui.UIManager.printMessage("Saving final state...");
+                        UIManager.printMessage("Saving final state...");
                         SaveManager.saveGame(this, this.worldName);
                         running = false;
-                        simcli.ui.UIManager.prompt("\nPress ENTER to end simulation...");
+                        UIManager.prompt("\nPress ENTER to end simulation...");
                         scanner.nextLine();
                         break;
                     } else {
-                        simcli.ui.UIManager.printMessage("Switching control to " + activePlayer.getName() + ".");
+                        UIManager.printMessage("Switching control to " + activePlayer.getName() + ".");
                         this.worldManager.getCurrentLocation().enter(activePlayer);
-                        simcli.ui.UIManager.prompt("\nPress ENTER to continue...");
+                        UIManager.prompt("\nPress ENTER to continue...");
                         scanner.nextLine();
                         continue;
                     }
                 } else if (activePlayer.getState() == SimState.HUNGRY) {
-                    simcli.ui.UIManager
-                            .printMessage("\n[WARNING] " + activePlayer.getName() + " is HUNGRY! Feed them!");
+                    UIManager.printMessage("\n[WARNING] " + activePlayer.getName() + " is HUNGRY! Feed them!");
                 }
             }
 
@@ -146,18 +148,17 @@ public class GameEngine {
 
             renderer.renderActiveSimStats(activePlayer, this.neighborhood);
 
-            simcli.ui.UIManager.printMessage("Inventory Logs: " + activePlayer.getInventory().size() + " items");
-
-            List<simcli.world.interactables.Interactable> items;
+            UIManager.printMessage("Inventory Logs: " + activePlayer.getInventory().size() + " items");
+            List<Interactable> items;
             if (inRoom) {
                 items = activePlayer.getCurrentRoom().getInteractables();
             } else {
                 items = this.worldManager.getCurrentLocation().getInteractables();
             }
 
-            renderer.renderActions(activePlayer, items, this.worldManager.getCurrentLocation() instanceof simcli.world.Residential);
-            simcli.engine.SimulationLogger.flushAndPrint();
-            simcli.ui.UIManager.prompt("\nCOMMAND> ");
+            renderer.renderActions(activePlayer, items, this.worldManager.getCurrentLocation() instanceof Residential);
+            SimulationLogger.flushAndPrint();
+            UIManager.prompt("\nCOMMAND> ");
 
             String input = scanner.nextLine().toUpperCase();
 
@@ -181,19 +182,19 @@ public class GameEngine {
                     if (ticksToMorning == 0)
                         ticksToMorning = GameConstants.TICKS_PER_DAY;
 
-                    simcli.ui.UIManager.printMessage("\n" + activePlayer.getName() + " sleeps deeply in the bed for "
+                    UIManager.printMessage("\n" + activePlayer.getName() + " sleeps deeply in the bed for "
                             + ticksToMorning + " hours.");
-                    simcli.ui.UIManager.sleepAnimation();
+                    UIManager.sleepAnimation();
 
                     timeManager.advanceTicks(ticksToMorning - 1);
                     tickForward = true;
                     break;
                 case SAVE_AND_EXIT:
                     running = false;
-                    simcli.ui.UIManager.printMessage("Saving game...");
+                    UIManager.printMessage("Saving game...");
                     SaveManager.saveGame(this, this.worldName);
-                    simcli.ui.UIManager.printMessage("Game Saved! Returning to Main Menu...\n");
-                    simcli.ui.UIManager.prompt("Press ENTER to exit...");
+                    UIManager.printMessage("Game Saved! Returning to Main Menu...\n");
+                    UIManager.prompt("Press ENTER to exit...");
                     scanner.nextLine();
                     continue; // Will break out of loop since running is false
             }
@@ -202,11 +203,11 @@ public class GameEngine {
                 gameLoop.processTick(activePlayer);
 
                 if (timeManager.getCurrentTick() % 10 == 0) {
-                    simcli.ui.UIManager.printMessage("[System] Autosaving...");
+                    UIManager.printMessage("[System] Autosaving...");
                     SaveManager.saveGame(this, this.worldName);
                 }
 
-                simcli.ui.UIManager.prompt("\nPress ENTER to continue to the next turn...");
+                UIManager.prompt("\nPress ENTER to continue to the next turn...");
                 scanner.nextLine();
             }
         }

@@ -7,6 +7,8 @@ import simcli.engine.TimeManager;
 import simcli.entities.actors.Sim;
 import simcli.entities.models.Job;
 import simcli.entities.models.ActionState;
+import simcli.entities.models.SimState;
+import simcli.entities.models.WorkResult;
 import simcli.ui.UIManager;
 
 import java.util.Scanner;
@@ -39,7 +41,7 @@ public class WorkCommand extends BaseCommand {
         }
 
         // Slide 5: HUNGRY or STARVING states restrict work (Aligned with Proposal Slides)
-        if (activePlayer.getState() == simcli.entities.models.SimState.HUNGRY) {
+        if (activePlayer.getState() == SimState.HUNGRY) {
             UIManager.printWarning(activePlayer.getName() + " is too hungry to focus on work! Eat something first.");
             pause(scanner);
             return CommandResult.NO_TICK;
@@ -70,7 +72,7 @@ public class WorkCommand extends BaseCommand {
         activePlayer.setCurrentAction(ActionState.WORKING);
         UIManager.displayActionAnimation(activePlayer);
 
-        simcli.entities.models.WorkResult result = activePlayer.performWork();
+        WorkResult result = activePlayer.performWork();
         
         if (result.isSuccess()) {
             UIManager.printMessage(activePlayer.getName() + " works a shift as a " + activePlayer.getCareer().getTitle() + " and earns $" + result.getEarnings() + "!");

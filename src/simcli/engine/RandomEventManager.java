@@ -2,14 +2,15 @@ package simcli.engine;
 
 import simcli.entities.actors.Sim;
 import simcli.entities.models.SimState;
+import simcli.utils.GameRandom;
 
 public class RandomEventManager {
     public void trigger(Sim activePlayer, TimeManager timeManager) {
         if (activePlayer.getState() == SimState.DEAD) return;
 
-        double chance = simcli.utils.GameRandom.RANDOM.nextDouble();
+        double chance = GameRandom.RANDOM.nextDouble();
         if (chance < 0.05) { // 5% chance per tick to trigger an event
-            double eventRoll = simcli.utils.GameRandom.RANDOM.nextDouble();
+            double eventRoll = GameRandom.RANDOM.nextDouble();
             if (eventRoll < 0.20) {
                 SimulationLogger.log("\n*** RANDOM EVENT! You found $50 on the ground! ***");
                 activePlayer.setMoney(activePlayer.getMoney() + 50);

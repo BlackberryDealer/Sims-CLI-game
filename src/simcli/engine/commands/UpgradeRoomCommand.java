@@ -3,6 +3,7 @@ package simcli.engine.commands;
 import simcli.engine.CommandResult;
 import simcli.entities.actors.Sim;
 import simcli.ui.UIManager;
+import simcli.utils.GameConstants;
 import simcli.world.Building;
 import simcli.world.Residential;
 import simcli.world.Room;
@@ -26,7 +27,7 @@ public class UpgradeRoomCommand extends BaseCommand {
         if (currentLocation.isResidential()) {
             Residential res = (Residential) currentLocation;
             UIManager.printMessage("\n=== UPGRADE ROOM ===");
-            UIManager.printMessage("Cost: $" + simcli.utils.GameConstants.UPGRADE_COST + " for +" + simcli.utils.GameConstants.UPGRADE_CAPACITY_BONUS + " Capacity");
+            UIManager.printMessage("Cost: $" + GameConstants.UPGRADE_COST + " for +" + GameConstants.UPGRADE_CAPACITY_BONUS + " Capacity");
             UIManager.printMessage("Your Cash: $" + activePlayer.getMoney());
             List<Room> rooms = res.getRooms();
             for (int i = 0; i < rooms.size(); i++) {
@@ -40,7 +41,7 @@ public class UpgradeRoomCommand extends BaseCommand {
                 int rChoice = Integer.parseInt(scanner.nextLine().trim());
                 if (rChoice > 0 && rChoice <= rooms.size()) {
                     Room targetRoom = rooms.get(rChoice - 1);
-                    targetRoom.upgradeCapacity(activePlayer, simcli.utils.GameConstants.UPGRADE_CAPACITY_BONUS, simcli.utils.GameConstants.UPGRADE_COST);
+                    targetRoom.upgradeCapacity(activePlayer, GameConstants.UPGRADE_CAPACITY_BONUS, GameConstants.UPGRADE_COST);
                 }
             } catch (Exception e) {
                 UIManager.printMessage("Invalid selection.");
