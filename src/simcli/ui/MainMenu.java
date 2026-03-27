@@ -1,11 +1,14 @@
 package simcli.ui;
 
 import simcli.engine.GameEngine;
+import simcli.engine.SimulationLogger;
 import simcli.persistence.SaveManager;
 import simcli.entities.models.Gender;
 import simcli.entities.models.Job;
 import simcli.entities.actors.Sim;
+import simcli.utils.GameConstants;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -90,7 +93,7 @@ public class MainMenu {
             }
         }
 
-        List<Sim> startingNeighborhood = new java.util.ArrayList<>();
+        List<Sim> startingNeighborhood = new ArrayList<>();
         for (int i = 0; i < simCount; i++) {
             UIManager.printMessage("\n--- Creating Sim " + (i + 1) + " ---");
             UIManager.prompt("Enter your Sim's Name: ");
@@ -102,7 +105,7 @@ public class MainMenu {
 
             int age = 21;
             while (true) {
-                UIManager.prompt("Enter your Sim's Age (" + simcli.utils.GameConstants.ADULT_AGE + "-" + (simcli.utils.GameConstants.DEATH_AGE - 1) + "): ");
+                UIManager.prompt("Enter your Sim's Age (" + GameConstants.ADULT_AGE + "-" + (GameConstants.DEATH_AGE - 1) + "): ");
                 try {
                     String inputAge = scanner.nextLine().trim();
                     if (inputAge.isEmpty()) {
@@ -110,11 +113,11 @@ public class MainMenu {
                         break;
                     }
                     int parsedAge = Integer.parseInt(inputAge);
-                    if (parsedAge >= simcli.utils.GameConstants.ADULT_AGE && parsedAge < simcli.utils.GameConstants.DEATH_AGE) {
+                    if (parsedAge >= GameConstants.ADULT_AGE && parsedAge < GameConstants.DEATH_AGE) {
                         age = parsedAge;
                         break;
                     } else {
-                        UIManager.printMessage("Age must be between " + simcli.utils.GameConstants.ADULT_AGE + " and " + (simcli.utils.GameConstants.DEATH_AGE - 1) + ". Please try again.");
+                        UIManager.printMessage("Age must be between " + GameConstants.ADULT_AGE + " and " + (GameConstants.DEATH_AGE - 1) + ". Please try again.");
                     }
                 } catch (NumberFormatException e) {
                     UIManager.printMessage("Invalid age format. Please enter a valid number.");
@@ -145,7 +148,7 @@ public class MainMenu {
     }
 
     private void loadWorld() {
-        simcli.engine.SimulationLogger.reset();
+        SimulationLogger.reset();
         List<String> saves = SaveManager.getExistingSaves();
 
         if (saves.isEmpty()) {

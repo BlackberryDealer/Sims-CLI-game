@@ -1,6 +1,7 @@
 package simcli.ui;
 
 import simcli.entities.actors.Sim;
+import simcli.world.Building;
 import simcli.world.interactables.Interactable;
 
 import java.util.List;
@@ -22,8 +23,8 @@ public interface IRenderer {
      * Renders the main HUD showing day, time, location, and the
      * active player's current need values.
      */
-    void renderHUD(Sim player, simcli.world.Building location, int day, String formattedTime,
-            String timeOfDay, boolean inRoom, String roomName);
+    void renderHUD(Sim player, Building location, int day, String formattedTime,
+                   String timeOfDay, boolean inRoom, String roomName);
 
     /**
      * Renders a compact dashboard of other alive Sims in the neighborhood

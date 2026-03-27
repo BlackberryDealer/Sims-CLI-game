@@ -1,6 +1,8 @@
 package simcli.ui;
 
 import simcli.entities.actors.Sim;
+import simcli.entities.models.*;
+import simcli.needs.Need;
 import simcli.world.Building;
 import simcli.world.interactables.Interactable;
 import simcli.ui.ascii.AsciiEngine;
@@ -47,7 +49,7 @@ public class TerminalRenderer implements IRenderer {
         }
         
         // Reset action to IDLE after rendering so art doesn't persist next frame
-        player.setCurrentAction(simcli.entities.models.ActionState.IDLE);
+        player.setCurrentAction(ActionState.IDLE);
     }
 
     @Override
@@ -55,7 +57,7 @@ public class TerminalRenderer implements IRenderer {
         StringBuilder inactiveStats = new StringBuilder("HOUSEHOLD: ");
         boolean hasInactive = false;
         for (Sim sim : neighborhood) {
-            if (sim != activePlayer && sim.getState() != simcli.entities.models.SimState.DEAD) {
+            if (sim != activePlayer && sim.getState() != SimState.DEAD) {
                 inactiveStats.append("[").append(sim.getName()).append(": ")
                              .append(sim.getHealth()).append("% | ")
                              .append(sim.getState()).append("]  ");
@@ -98,11 +100,11 @@ public class TerminalRenderer implements IRenderer {
         UIManager.printMessage("  --- Final Stats ---");
         UIManager.printMessage("  Name:      " + deadSim.getName());
         UIManager.printMessage("  Age:       " + deadSim.getAge());
-        UIManager.printMessage("  Hunger:    " + deadSim.getHunger().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
-        UIManager.printMessage("  Energy:    " + deadSim.getEnergy().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
-        UIManager.printMessage("  Hygiene:   " + deadSim.getHygiene().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
-        UIManager.printMessage("  Happiness: " + deadSim.getHappiness().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
-        UIManager.printMessage("  Social:    " + deadSim.getSocial().getValue() + " / " + simcli.needs.Need.MAX_VALUE);
+        UIManager.printMessage("  Hunger:    " + deadSim.getHunger().getValue() + " / " + Need.MAX_VALUE);
+        UIManager.printMessage("  Energy:    " + deadSim.getEnergy().getValue() + " / " + Need.MAX_VALUE);
+        UIManager.printMessage("  Hygiene:   " + deadSim.getHygiene().getValue() + " / " + Need.MAX_VALUE);
+        UIManager.printMessage("  Happiness: " + deadSim.getHappiness().getValue() + " / " + Need.MAX_VALUE);
+        UIManager.printMessage("  Social:    " + deadSim.getSocial().getValue() + " / " + Need.MAX_VALUE);
         UIManager.printMessage("  Health:    " + deadSim.getHealth() + "%");
         UIManager.printMessage("  Cash:      $" + deadSim.getMoney());
         UIManager.printMessage("  Total Earned: $" + deadSim.getTotalMoneyEarned());

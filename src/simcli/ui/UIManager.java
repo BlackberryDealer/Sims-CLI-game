@@ -1,5 +1,9 @@
 package simcli.ui;
 
+import simcli.engine.SimulationLogger;
+import simcli.entities.actors.Sim;
+import simcli.ui.ascii.AsciiEngine;
+import simcli.utils.GameRandom;
 import simcli.world.interactables.Interactable;
 import java.util.List;
 
@@ -26,7 +30,7 @@ public class UIManager {
     }
 
     public static void printHint() {
-        int index = simcli.utils.GameRandom.RANDOM.nextInt(HINTS.length);
+        int index = GameRandom.RANDOM.nextInt(HINTS.length);
         System.out.println("[" + HINTS[index] + "]");
     }
 
@@ -48,9 +52,9 @@ public class UIManager {
         }
     }
 
-    public static void displayActionAnimation(simcli.entities.actors.Sim player) {
+    public static void displayActionAnimation(Sim player) {
         clearScreen();
-        System.out.println(new simcli.ui.ascii.AsciiEngine().render(player, null));
+        System.out.println(new AsciiEngine().render(player, null));
         System.out.println();
         try {
             Thread.sleep(600);
@@ -58,7 +62,7 @@ public class UIManager {
         }
     }
 
-    public static void printActionGrid(simcli.entities.actors.Sim player, List<Interactable> items, boolean isResidential) {
+    public static void printActionGrid(Sim player, List<Interactable> items, boolean isResidential) {
         System.out.println("\nAvailable Actions:");
         for (int i = 0; i < items.size(); i++) {
             System.out.printf("[%2d] Use %-15s", (i + 1), items.get(i).getObjectName());
@@ -93,7 +97,7 @@ public class UIManager {
     }
 
     public static void prompt(String message) {
-        simcli.engine.SimulationLogger.flushAndPrint();
+        SimulationLogger.flushAndPrint();
         System.out.print(message);
     }
 
