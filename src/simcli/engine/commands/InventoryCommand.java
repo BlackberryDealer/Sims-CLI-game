@@ -17,21 +17,19 @@ import java.util.List;
 import java.util.Scanner;
 
 public class InventoryCommand extends BaseCommand {
+    private final CommandContext ctx;
 
-    private final Sim activePlayer;
-    private final Scanner scanner;
-    private final Building currentLocation;
-    private final TimeManager timeManager;
-
-    public InventoryCommand(Sim activePlayer, Scanner scanner, Building currentLocation, TimeManager timeManager) {
-        this.activePlayer = activePlayer;
-        this.scanner = scanner;
-        this.currentLocation = currentLocation;
-        this.timeManager = timeManager;
+    public InventoryCommand(CommandContext ctx) {
+        this.ctx = ctx;
     }
 
     @Override
     protected CommandResult run() throws SimulationException, SleepEventException {
+        Sim activePlayer = ctx.getActivePlayer();
+        Scanner scanner = ctx.getScanner();
+        Building currentLocation = ctx.getCurrentLocation();
+        TimeManager timeManager = ctx.getTimeManager();
+
         boolean managingInventory = true;
         int pageSize = 10;
         int currentPage = 0;
@@ -113,7 +111,6 @@ public class InventoryCommand extends BaseCommand {
                                 }
                             }
                         } else {
-                            // Call the interaction on the item natively (so Consume propagates appropriately)
                             selectedItem.interact(activePlayer, scanner, timeManager);
                         }
                     } else {

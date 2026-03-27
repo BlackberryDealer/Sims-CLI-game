@@ -12,18 +12,18 @@ import java.util.List;
 import java.util.Scanner;
 
 public class UpgradeRoomCommand extends BaseCommand {
-    private final Sim activePlayer;
-    private final Scanner scanner;
-    private final Building currentLocation;
+    private final CommandContext ctx;
 
-    public UpgradeRoomCommand(Sim activePlayer, Scanner scanner, Building currentLocation) {
-        this.activePlayer = activePlayer;
-        this.scanner = scanner;
-        this.currentLocation = currentLocation;
+    public UpgradeRoomCommand(CommandContext ctx) {
+        this.ctx = ctx;
     }
 
     @Override
     protected CommandResult run() {
+        Sim activePlayer = ctx.getActivePlayer();
+        Scanner scanner = ctx.getScanner();
+        Building currentLocation = ctx.getCurrentLocation();
+
         if (currentLocation.isResidential()) {
             Residential res = (Residential) currentLocation;
             UIManager.printMessage("\n=== UPGRADE ROOM ===");

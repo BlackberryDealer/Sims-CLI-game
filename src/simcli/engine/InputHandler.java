@@ -10,13 +10,16 @@ import simcli.world.interactables.Interactable;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * Processes raw player input and dispatches to the appropriate command.
+ * Builds a {@link CommandContext} per invocation to keep command constructors clean.
+ */
 public class InputHandler implements IInputHandler {
     private final IWorldManager worldManager;
     private final TimeManager timeManager;
+    private final IGameEngine engine;
 
-    private final GameEngine engine;
-
-    public InputHandler(IWorldManager worldManager, TimeManager timeManager, GameEngine engine) {
+    public InputHandler(IWorldManager worldManager, TimeManager timeManager, IGameEngine engine) {
         this.worldManager = worldManager;
         this.timeManager = timeManager;
         this.engine = engine;
@@ -33,45 +36,49 @@ public class InputHandler implements IInputHandler {
             items = currentLocation.getInteractables();
         }
 
+        // Build a shared context for all commands
+        CommandContext ctx = new CommandContext(
+                activePlayer, scanner, timeManager, worldManager, currentLocation, engine);
+
         try {
             ICommand command = null;
 
             switch (input) {
                 case "W":
-                    command = new WorkCommand(activePlayer, scanner, timeManager);
+                    command = new WorkCommand(ctx);
                     break;
                 case "J":
-                    command = new JobMarketCommand(activePlayer, scanner);
+                    command = new JobMarketCommand(ctx);
                     break;
                 case "T":
-                    command = new TravelCommand(activePlayer, scanner, currentLocation, worldManager);
+                    command = new TravelCommand(ctx);
                     break;
                 case "M":
-                    command = new MoveRoomCommand(activePlayer, scanner, currentLocation);
+                    command = new MoveRoomCommand(ctx);
                     break;
                 case "H":
-                    command = new HouseInfoCommand(scanner, currentLocation);
+                    command = new HouseInfoCommand(ctx);
                     break;
                 case "I":
-                    command = new CharacterStatusCommand(activePlayer, scanner, currentLocation);
+                    command = new CharacterStatusCommand(ctx);
                     break;
                 case "V":
-                    command = new InventoryCommand(activePlayer, scanner, currentLocation, timeManager);
+                    command = new InventoryCommand(ctx);
                     break;
                 case "U":
-                    command = new UpgradeRoomCommand(activePlayer, scanner, currentLocation);
+                    command = new UpgradeRoomCommand(ctx);
                     break;
                 case "S":
                     return CommandResult.SAVE_AND_EXIT;
                 case "K":
-                    command = new SwitchSimCommand(engine, scanner);
+                    command = new SwitchSimCommand(ctx);
                     break;
                 case "L":
-                    command = new SpouseInteractionCommand(engine, scanner);
+                    command = new SpouseInteractionCommand(ctx);
                     break;
                 default:
                     int choice = Integer.parseInt(input) - 1;
-                    command = new InteractCommand(activePlayer, scanner, timeManager, items, choice);
+                    command = new InteractCommand(ctx, items, choice);
                     break;
             }
 

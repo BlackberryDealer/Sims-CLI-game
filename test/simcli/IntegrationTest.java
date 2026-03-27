@@ -26,6 +26,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.Scanner;
 
+import simcli.engine.commands.CommandContext;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -112,7 +114,8 @@ public class IntegrationTest {
         // Simulate choosing Room [1]
         ByteArrayInputStream in = new ByteArrayInputStream("1\n\n".getBytes());
         Scanner mockScanner = new Scanner(in);
-        simcli.engine.commands.UpgradeRoomCommand command = new simcli.engine.commands.UpgradeRoomCommand(activePlayer, mockScanner, home);
+        CommandContext ctx = new CommandContext(activePlayer, mockScanner, timeManager, worldManager, home, null);
+        simcli.engine.commands.UpgradeRoomCommand command = new simcli.engine.commands.UpgradeRoomCommand(ctx);
         
         CommandResult result = command.execute();
 
@@ -131,7 +134,8 @@ public class IntegrationTest {
         // Simulate pressing 'W', and then 'N' to the "Are you sure?" prompt
         ByteArrayInputStream in = new ByteArrayInputStream("N\n\n".getBytes());
         Scanner mockScanner = new Scanner(in);
-        simcli.engine.commands.WorkCommand command = new simcli.engine.commands.WorkCommand(activePlayer, mockScanner, timeManager);
+        CommandContext ctx = new CommandContext(activePlayer, mockScanner, timeManager, null, null, null);
+        simcli.engine.commands.WorkCommand command = new simcli.engine.commands.WorkCommand(ctx);
         
         try {
             CommandResult result = command.execute();
@@ -152,7 +156,8 @@ public class IntegrationTest {
         ByteArrayInputStream in = new ByteArrayInputStream("3\n\n".getBytes());
         Scanner mockScanner = new Scanner(in);
         
-        simcli.engine.commands.JobMarketCommand jobMarket = new simcli.engine.commands.JobMarketCommand(teen, mockScanner);
+        CommandContext ctx = new CommandContext(teen, mockScanner, null, null, null, null);
+        simcli.engine.commands.JobMarketCommand jobMarket = new simcli.engine.commands.JobMarketCommand(ctx);
         CommandResult result = jobMarket.execute();
 
         assertEquals(CommandResult.NO_TICK, result);
@@ -170,7 +175,8 @@ public class IntegrationTest {
         // Simulate Travel 'T', then picking the Dorm '1'
         ByteArrayInputStream in = new ByteArrayInputStream("1\n\n".getBytes());
         Scanner mockScanner = new Scanner(in);
-        simcli.engine.commands.TravelCommand command = new simcli.engine.commands.TravelCommand(activePlayer, mockScanner, home, worldManager);
+        CommandContext ctx = new CommandContext(activePlayer, mockScanner, timeManager, worldManager, home, null);
+        simcli.engine.commands.TravelCommand command = new simcli.engine.commands.TravelCommand(ctx);
         
         CommandResult result = command.execute();
 

@@ -12,26 +12,24 @@ import java.util.List;
 import java.util.Scanner;
 
 public class TravelCommand extends BaseCommand {
-    private final Sim activePlayer;
-    private final Scanner scanner;
-    private final Building currentLocation;
-    private final IWorldManager worldManager;
+    private final CommandContext ctx;
 
-    public TravelCommand(Sim activePlayer, Scanner scanner, Building currentLocation, IWorldManager worldManager) {
-        this.activePlayer = activePlayer;
-        this.scanner = scanner;
-        this.currentLocation = currentLocation;
-        this.worldManager = worldManager;
+    public TravelCommand(CommandContext ctx) {
+        this.ctx = ctx;
     }
 
     @Override
     protected CommandResult run() {
+        Sim activePlayer = ctx.getActivePlayer();
+        Scanner scanner = ctx.getScanner();
+        Building currentLocation = ctx.getCurrentLocation();
+        IWorldManager worldManager = ctx.getWorldManager();
+
         List<Building> cityMap = worldManager.getCityMap();
         UIManager.printMessage("\nAvailable Locations:");
         for (int i = 0; i < cityMap.size(); i++) {
             Building b = cityMap.get(i);
             String label = b.getName();
-            // Show "FOR SALE" tag for unowned residential properties
             if (b instanceof Residential) {
                 Residential res = (Residential) b;
                 if (!res.isOwned()) {
@@ -55,7 +53,6 @@ public class TravelCommand extends BaseCommand {
                     return CommandResult.NO_TICK;
                 }
 
-                // Check if target is an unowned residential — prompt to purchase
                 if (target instanceof Residential) {
                     Residential res = (Residential) target;
                     if (!res.isOwned()) {

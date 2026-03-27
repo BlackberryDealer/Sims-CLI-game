@@ -1,9 +1,9 @@
 package simcli.engine;
 
-import simcli.entities.actors.Sim;
-
-import java.util.List;
-
+/**
+ * Manages the simulation clock: ticks, days, time of day, and day-of-week.
+ * Pure time tracking — aging is handled by {@link LifecycleManager}.
+ */
 public class TimeManager {
     private int currentTick;
     private int ticksPerDay;
@@ -55,8 +55,7 @@ public class TimeManager {
 
     public String getDayOfWeek() {
         int day = getCurrentDay();
-        // Day 1 = Monday, Day 2 = Tuesday... Day 7 = Sunday
-        int dayOfWeek = (day - 1) % 7; 
+        int dayOfWeek = (day - 1) % 7;
         switch (dayOfWeek) {
             case 0: return "Monday";
             case 1: return "Tuesday";
@@ -68,18 +67,5 @@ public class TimeManager {
             default: return "Monday";
         }
     }
-
-    /**
-     * Determines if a year has passed, checking all sims.
-     * @param sims Map of simulations.
-     */
-    public void processYearlyAging(List<Sim> sims) {
-        final int TICKS_PER_YEAR = this.ticksPerDay * 3;
-        
-        if (this.currentTick % TICKS_PER_YEAR == 0) {
-            for (Sim sim : sims) {
-                sim.ageUp();
-            }
-        }
-    }
 }
+

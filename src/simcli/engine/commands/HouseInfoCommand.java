@@ -10,16 +10,17 @@ import simcli.world.interactables.Interactable;
 import java.util.Scanner;
 
 public class HouseInfoCommand extends BaseCommand {
-    private final Scanner scanner;
-    private final Building currentLocation;
+    private final CommandContext ctx;
 
-    public HouseInfoCommand(Scanner scanner, Building currentLocation) {
-        this.scanner = scanner;
-        this.currentLocation = currentLocation;
+    public HouseInfoCommand(CommandContext ctx) {
+        this.ctx = ctx;
     }
 
     @Override
     protected CommandResult run() {
+        Scanner scanner = ctx.getScanner();
+        Building currentLocation = ctx.getCurrentLocation();
+
         if (currentLocation.isResidential()) {
             Residential res = (Residential) currentLocation;
             UIManager.printMessage("\n=== HOUSE INFO: " + res.getName() + " ===");

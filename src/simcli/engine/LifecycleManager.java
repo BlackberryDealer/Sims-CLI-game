@@ -2,37 +2,34 @@ package simcli.engine;
 
 import simcli.entities.actors.Sim;
 
+import java.util.List;
+
 /**
- * LifecycleManager — drives simulation time and fires age transitions.
+ * LifecycleManager — the single authority for Sim aging in the simulation.
  *
  * <h2>Responsibility (Single Responsibility Principle)</h2>
- * <p>This class does exactly one thing: count ticks and call
- * {@link Sim#ageUp()} when a full year has elapsed. It knows nothing about
- * needs, inventory, jobs, or rendering. Those concerns belong elsewhere.</p>
+ * <p>This class does exactly one thing: track elapsed ticks and call
+ * {@link Sim#growOlderDaily()} on every Sim in the neighborhood when a
+ * full in-game day has elapsed. It knows nothing about needs, inventory,
+ * jobs, or rendering. Those concerns belong elsewhere.</p>
  *
  * <h2>How it fits into the State Pattern</h2>
- * <p>{@code processTick()} calls {@link Sim#ageUp()}, which in turn calls
- * {@code currentStage.getNextStage(age)} on the Sim's private stage. If the
- * stage returns a new object, the Sim swaps its "brain" polymorphically.
- * This manager never touches the stage directly — it only tells the Sim that
- * a birthday has occurred.</p>
+ * <p>Daily aging ({@code growOlderDaily()}) internally triggers
+ * {@link Sim#ageUp()} when enough days have passed for a birthday.
+ * {@code ageUp()} in turn calls {@code currentStage.getNextStage(age)}
+ * on the Sim's private stage, performing the State Pattern transition
+ * polymorphically. This manager never touches the stage directly.</p>
  *
  * <h2>Encapsulation</h2>
- * <p>Both fields are {@code private} with public read-only getters. External
- * code cannot manipulate the tick clock, preventing inconsistent state.</p>
+ * <p>Both fields are {@code private final} with public read-only getters.
+ * External code cannot manipulate the tick clock, preventing inconsistent state.</p>
  */
 public class LifecycleManager {
 
-    // -------------------------------------------------------------------------
-    // Private Fields
-    // -------------------------------------------------------------------------
-
     /**
-     * How many simulation ticks equal one in-game year.
-     * Set to a small number (e.g. {@code 1} or {@code 3}) for fast testing;
-     * set to {@code 365} or {@code 24 * 365} for realistic gameplay.
+     * How many simulation ticks equal one in-game day.
      */
-    private final int ticksPerYear;
+    private final int ticksPerDay;
 
     /**
      * Total ticks processed since this manager was created.
@@ -40,85 +37,57 @@ public class LifecycleManager {
      */
     private long currentTick;
 
-    // -------------------------------------------------------------------------
-    // Constructor
-    // -------------------------------------------------------------------------
-
     /**
      * Creates a new {@code LifecycleManager}.
      *
-     * @param ticksPerYear number of ticks that constitute one in-game year.
-     *                     Must be &gt;= 1.
-     * @throws IllegalArgumentException if {@code ticksPerYear} is less than 1.
+     * @param ticksPerDay number of ticks that constitute one in-game day.
+     *                    Must be >= 1.
+     * @throws IllegalArgumentException if {@code ticksPerDay} is less than 1.
      */
-    public LifecycleManager(int ticksPerYear) {
-        if (ticksPerYear < 1) {
+    public LifecycleManager(int ticksPerDay) {
+        if (ticksPerDay < 1) {
             throw new IllegalArgumentException(
-                    "ticksPerYear must be >= 1, but was: " + ticksPerYear);
+                    "ticksPerDay must be >= 1, but was: " + ticksPerDay);
         }
-        this.ticksPerYear = ticksPerYear;
-        this.currentTick  = 0L;
+        this.ticksPerDay = ticksPerDay;
+        this.currentTick = 0L;
     }
-
-    // -------------------------------------------------------------------------
-    // Core Method
-    // -------------------------------------------------------------------------
 
     /**
      * Advances the simulation clock by one tick.
      *
-     * <p>When the number of elapsed ticks becomes evenly divisible by
-     * {@link #ticksPerYear}, a full in-game year has passed and
-     * {@link Sim#ageUp()} is called on the provided Sim. The Sim's
-     * {@code ageUp()} method then performs the State Pattern transition check
-     * internally — this manager never inspects or modifies the stage directly.</p>
+     * <p>When the tick count crosses a day boundary (becomes divisible by
+     * {@link #ticksPerDay}), {@link Sim#growOlderDaily()} is called on
+     * every Sim in the neighborhood, triggering the daily aging cycle.</p>
      *
-     * <p>Game-loop usage:</p>
-     * <pre>
-     *   LifecycleManager lm = new LifecycleManager(365);
-     *   Sim alice = new Sim("Alice", 17, Gender.FEMALE);
-     *   for (int i = 0; i &lt; 365; i++) {
-     *       lm.processTick(alice); // after 365 ticks, Alice.ageUp() fires
-     *   }
-     * </pre>
-     *
-     * @param sim the {@link Sim} whose age to manage; must not be {@code null}.
-     * @throws IllegalArgumentException if {@code sim} is {@code null}.
+     * @param neighborhood the list of all Sims in the household; must not be {@code null}.
+     * @throws IllegalArgumentException if {@code neighborhood} is {@code null}.
      */
-    public void processTick(Sim sim) {
-        if (sim == null) {
+    public void processTick(List<Sim> neighborhood) {
+        if (neighborhood == null) {
             throw new IllegalArgumentException(
-                    "Cannot process a tick for a null Sim.");
+                    "Cannot process a tick for a null neighborhood.");
         }
 
-        // Advance the clock.
+        long previousDay = this.currentTick / this.ticksPerDay;
         this.currentTick++;
+        long currentDay = this.currentTick / this.ticksPerDay;
 
-        // Has a full year elapsed?
-        if (this.currentTick % this.ticksPerYear == 0) {
-            simcli.ui.UIManager.printMessage(
-                "[LifecycleManager] Year boundary reached at tick "
-                + this.currentTick + ". Calling ageUp() on '"
-                + sim.getName() + "'..."
-            );
-            // Delegate to the Sim — the State Pattern transition happens inside
-            // Sim.ageUp() via the currentStage reference. This manager is
-            // completely decoupled from the concrete stage classes.
-            sim.ageUp();
+        // Has a full day elapsed?
+        if (currentDay > previousDay) {
+            for (Sim sim : neighborhood) {
+                sim.growOlderDaily();
+            }
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Getters (read-only access to private fields)
-    // -------------------------------------------------------------------------
-
     /**
-     * Returns the configured number of ticks per in-game year.
+     * Returns the configured number of ticks per in-game day.
      *
-     * @return ticks-per-year value set at construction.
+     * @return ticks-per-day value set at construction.
      */
-    public int getTicksPerYear() {
-        return ticksPerYear;
+    public int getTicksPerDay() {
+        return ticksPerDay;
     }
 
     /**

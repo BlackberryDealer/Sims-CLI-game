@@ -1,5 +1,6 @@
 package simcli.engine;
 
+import simcli.entities.managers.NPCManager;
 import simcli.world.Building;
 import simcli.world.Commercial;
 import simcli.world.Park;
@@ -10,16 +11,28 @@ import simcli.world.interactables.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Manages the game world layout — buildings, rooms, furniture, and the
+ * player's current location.
+ * 
+ * <p>Dependencies are injected via the constructor, eliminating the previous
+ * circular dependency with GameEngine (the old {@code setEngine()} pattern).</p>
+ */
 public class WorldManager implements IWorldManager {
-    private List<Building> cityMap;
+    private final List<Building> cityMap;
+    private final NPCManager npcManager;
+    private final IGameEngine engine;
     private Building currentLocation;
-    private GameEngine engine;
 
-    public WorldManager() {
+    /**
+     * Creates a WorldManager with all required dependencies injected upfront.
+     * 
+     * @param npcManager the NPC manager needed for Park creation
+     * @param engine     the engine reference needed for ParkBench interactions
+     */
+    public WorldManager(NPCManager npcManager, IGameEngine engine) {
         this.cityMap = new ArrayList<>();
-    }
-
-    public void setEngine(GameEngine engine) {
+        this.npcManager = npcManager;
         this.engine = engine;
     }
 
@@ -76,7 +89,7 @@ public class WorldManager implements IWorldManager {
         bookshop.addInteractable(new BookshopShelf());
         this.cityMap.add(bookshop);
 
-        Park park = new Park("City Park", this.engine.getNpcManager());
+        Park park = new Park("City Park", this.npcManager);
         park.addInteractable(new ParkBench(this.engine));
         this.cityMap.add(park);
 

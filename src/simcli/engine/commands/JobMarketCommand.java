@@ -7,16 +7,17 @@ import simcli.entities.actors.Sim;
 import simcli.ui.UIManager;
 
 public class JobMarketCommand extends BaseCommand {
-    private final Sim activePlayer;
-    private final Scanner scanner;
+    private final CommandContext ctx;
 
-    public JobMarketCommand(Sim activePlayer, Scanner scanner) {
-        this.activePlayer = activePlayer;
-        this.scanner = scanner;
+    public JobMarketCommand(CommandContext ctx) {
+        this.ctx = ctx;
     }
 
     @Override
     protected CommandResult run() {
+        Sim activePlayer = ctx.getActivePlayer();
+        Scanner scanner = ctx.getScanner();
+
         if (activePlayer.canWork()) {
             UIManager.printMessage("\n=== JOB MARKET ===");
             UIManager.printMessage("Active Sim: " + activePlayer.getName() + " (Age: " + activePlayer.getAge() + ")");

@@ -1,6 +1,7 @@
 package simcli.persistence;
 
 import simcli.engine.GameEngine;
+import simcli.engine.IGameEngine;
 import simcli.entities.models.Job;
 import simcli.entities.actors.Sim;
 import simcli.entities.actors.NPCSim;
@@ -46,7 +47,7 @@ public class SaveManager {
         return saves;
     }
 
-    public static void saveGame(GameEngine engine, String worldName) {
+    public static void saveGame(IGameEngine engine, String worldName) {
         checkDirectory();
         try (PrintWriter writer = new PrintWriter(new FileWriter(SAVE_DIR + worldName + ".txt"))) {
             writer.println("WORLD:" + engine.getWorldName());

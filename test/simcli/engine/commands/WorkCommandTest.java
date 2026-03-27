@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import simcli.engine.commands.WorkCommand;
+import simcli.engine.commands.CommandContext;
 import simcli.entities.models.Gender;
 import simcli.entities.models.Job;
 import simcli.engine.TimeManager;
@@ -31,7 +32,8 @@ public class WorkCommandTest {
         // Day 1 is Monday.
         TimeManager tm = new TimeManager(1, 24);
         Scanner scanner = new Scanner(System.in);
-        WorkCommand command = new WorkCommand(adultSim, scanner, tm);
+        CommandContext ctx = new CommandContext(adultSim, scanner, tm, null, null, null);
+        WorkCommand command = new WorkCommand(ctx);
 
         assertEquals("Monday", tm.getDayOfWeek());
 
@@ -51,7 +53,8 @@ public class WorkCommandTest {
         ByteArrayInputStream in = new ByteArrayInputStream("\n".getBytes());
         Scanner mockScanner = new Scanner(in);
 
-        WorkCommand command = new WorkCommand(adultSim, mockScanner, tm);
+        CommandContext ctx = new CommandContext(adultSim, mockScanner, tm, null, null, null);
+        WorkCommand command = new WorkCommand(ctx);
 
         assertEquals("Saturday", tm.getDayOfWeek());
 
@@ -70,7 +73,8 @@ public class WorkCommandTest {
         ByteArrayInputStream in = new ByteArrayInputStream("\n".getBytes());
         Scanner mockScanner = new Scanner(in);
 
-        WorkCommand command = new WorkCommand(adultSim, mockScanner, tm);
+        CommandContext ctx = new CommandContext(adultSim, mockScanner, tm, null, null, null);
+        WorkCommand command = new WorkCommand(ctx);
 
         assertEquals("Sunday", tm.getDayOfWeek());
 

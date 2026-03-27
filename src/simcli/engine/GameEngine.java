@@ -14,93 +14,123 @@ import simcli.world.interactables.Interactable;
 import java.util.List;
 import java.util.Scanner;
 
-public class GameEngine {
-    private List<Sim> neighborhood;
-    private IWorldManager worldManager;
-    private IInputHandler inputHandler;
-    private IRenderer renderer;
-    private String worldName;
-    private TimeManager timeManager;
-    private boolean isGameOver;
-    private RandomEventManager randomEventManager;
-    private GameLoop gameLoop;
-
-    // World Stats tracking (aggregated upon save/game over)
+/**
+ * Central coordinator (Facade) for the game simulation.
+ * 
+ * <p>Delegates state management to {@link GameStateManager},
+ * statistics tracking to {@link StatisticsTracker}, world layout to
+ * {@link WorldManager}, and aging to {@link LifecycleManager}.</p>
+ * 
+ * <p>Implements {@link IGameEngine} so that consumers (commands,
+ * interactables, persistence) depend on the interface, not this class.</p>
+ */
+public class GameEngine implements IGameEngine {
+    private final IWorldManager worldManager;
+    private final IInputHandler inputHandler;
+    private final IRenderer renderer;
+    private final String worldName;
+    private final TimeManager timeManager;
+    private final RandomEventManager randomEventManager;
+    private final GameLoop gameLoop;
     private final NPCManager npcManager;
-    private int sessionTotalMoney;
-    private int sessionTotalItems;
-    private Sim activePlayer;
+    private final GameStateManager stateManager;
+    private final StatisticsTracker statisticsTracker;
 
     // CONSTRUCTOR: For Creating a New World
     public GameEngine(String worldName, List<Sim> startingNeighborhood) {
         this.worldName = worldName;
-        this.timeManager = new TimeManager(1, GameConstants.TICKS_PER_DAY); // 24 ticks per day
-        this.isGameOver = false;
-        this.neighborhood = startingNeighborhood;
+        this.timeManager = new TimeManager(1, GameConstants.TICKS_PER_DAY);
         this.npcManager = new NPCManager();
         this.npcManager.replenishNPCs(3);
-        this.worldManager = new WorldManager();
-        ((WorldManager)this.worldManager).setEngine(this);
+        this.stateManager = new GameStateManager(startingNeighborhood, startingNeighborhood.get(0));
+        this.statisticsTracker = new StatisticsTracker();
+        this.worldManager = new WorldManager(this.npcManager, this);
         this.worldManager.setupWorld();
-        this.activePlayer = startingNeighborhood.get(0);
         this.inputHandler = new InputHandler(this.worldManager, this.timeManager, this);
         this.renderer = new TerminalRenderer();
         this.randomEventManager = new RandomEventManager();
-        this.gameLoop = new GameLoop(this.timeManager, this.neighborhood, this.randomEventManager);
+        LifecycleManager lifecycleManager = new LifecycleManager(GameConstants.TICKS_PER_DAY);
+        this.gameLoop = new GameLoop(this.timeManager, startingNeighborhood, this.randomEventManager, lifecycleManager);
     }
 
     // CONSTRUCTOR: For Loading an Existing World
     public GameEngine(String worldName, int currentTick, List<Sim> loadedNeighborhood, boolean isGameOver) {
         this.worldName = worldName;
         this.timeManager = new TimeManager(currentTick, GameConstants.TICKS_PER_DAY);
-        this.neighborhood = loadedNeighborhood;
-        this.isGameOver = isGameOver;
         this.npcManager = new NPCManager();
-        this.worldManager = new WorldManager();
-        ((WorldManager)this.worldManager).setEngine(this);
-        this.worldManager.setupWorld();
-        
-        // Find first alive sim, or default to 0 if all dead
+        this.statisticsTracker = new StatisticsTracker();
+
+        // Find first alive sim, or default to index 0 if all dead
         Sim firstAlive = loadedNeighborhood.get(0);
-        for(Sim s : loadedNeighborhood) {
-            if(s.getState() != SimState.DEAD) {
+        for (Sim s : loadedNeighborhood) {
+            if (s.getState() != SimState.DEAD) {
                 firstAlive = s;
                 break;
             }
         }
-        this.activePlayer = firstAlive;
-        
+        this.stateManager = new GameStateManager(loadedNeighborhood, firstAlive);
+        this.stateManager.setGameOver(isGameOver);
+
+        this.worldManager = new WorldManager(this.npcManager, this);
+        this.worldManager.setupWorld();
         this.inputHandler = new InputHandler(this.worldManager, this.timeManager, this);
         this.renderer = new TerminalRenderer();
         this.randomEventManager = new RandomEventManager();
-        this.gameLoop = new GameLoop(this.timeManager, this.neighborhood, this.randomEventManager);
+        LifecycleManager lifecycleManager = new LifecycleManager(GameConstants.TICKS_PER_DAY);
+        this.gameLoop = new GameLoop(this.timeManager, loadedNeighborhood, this.randomEventManager, lifecycleManager);
     }
 
-    public Sim getActivePlayer() { return activePlayer; }
-    public void setActivePlayer(Sim sim) { this.activePlayer = sim; }
+    // -------------------------------------------------------------------------
+    // IGameEngine Implementation — delegates to managers
+    // -------------------------------------------------------------------------
 
+    @Override
+    public Sim getActivePlayer() { return stateManager.getActivePlayer(); }
 
+    @Override
+    public void setActivePlayer(Sim sim) { stateManager.setActivePlayer(sim); }
 
-    public IWorldManager getWorldManager() {
-        return worldManager;
-    }
+    @Override
+    public IWorldManager getWorldManager() { return worldManager; }
 
-    public NPCManager getNpcManager() {
-        return npcManager;
-    }
+    @Override
+    public NPCManager getNpcManager() { return npcManager; }
+
+    @Override
+    public List<Sim> getNeighborhood() { return stateManager.getNeighborhood(); }
+
+    @Override
+    public String getWorldName() { return worldName; }
+
+    @Override
+    public int getCurrentTick() { return timeManager.getCurrentTick(); }
+
+    @Override
+    public boolean isGameOver() { return stateManager.isGameOver(); }
+
+    @Override
+    public int getSessionTotalMoney() { return statisticsTracker.getSessionTotalMoney(); }
+
+    @Override
+    public int getSessionTotalItems() { return statisticsTracker.getSessionTotalItems(); }
+
+    // -------------------------------------------------------------------------
+    // Game Loop
+    // -------------------------------------------------------------------------
 
     public void run(Scanner scanner) {
         boolean running = true;
         boolean tickForward = true;
-        
-        for (Sim sim : this.neighborhood) {
+        List<Sim> neighborhood = stateManager.getNeighborhood();
+
+        for (Sim sim : neighborhood) {
             if (sim.getCurrentRoom() == null && sim.getState() != SimState.DEAD) {
                 this.worldManager.getCurrentLocation().enter(sim);
             }
         }
 
         while (running) {
-            Sim activePlayer = this.activePlayer;
+            Sim activePlayer = stateManager.getActivePlayer();
             renderer.clear();
             renderer.printHint();
 
@@ -112,20 +142,20 @@ public class GameEngine {
                     timeManager.getCurrentDay(), timeManager.getFormattedTime(),
                     timeManager.getTimeOfDay(), inRoom, roomName);
 
-            renderer.renderHouseholdDashboard(this.neighborhood, activePlayer);
+            renderer.renderHouseholdDashboard(neighborhood, activePlayer);
 
             if (tickForward) {
                 if (activePlayer.getState() == SimState.DEAD) {
                     Sim deadSim = activePlayer;
                     renderer.renderDeathStats(deadSim);
 
-                    this.activePlayer = getNextAliveSim();
-                    activePlayer = this.activePlayer;
-                    if (this.activePlayer == null) {
-                        this.isGameOver = true;
-                        aggregateStats();
+                    stateManager.setActivePlayer(stateManager.getNextAliveSim());
+                    activePlayer = stateManager.getActivePlayer();
+                    if (activePlayer == null) {
+                        stateManager.setGameOver(true);
+                        statisticsTracker.aggregate(neighborhood);
                         UIManager.printGameOverStats(this.timeManager.getCurrentTick(),
-                                this.sessionTotalMoney, this.sessionTotalItems);
+                                statisticsTracker.getSessionTotalMoney(), statisticsTracker.getSessionTotalItems());
                         UIManager.printMessage("Saving final state...");
                         SaveManager.saveGame(this, this.worldName);
                         running = false;
@@ -146,7 +176,7 @@ public class GameEngine {
 
             tickForward = true;
 
-            renderer.renderActiveSimStats(activePlayer, this.neighborhood);
+            renderer.renderActiveSimStats(activePlayer, neighborhood);
 
             UIManager.printMessage("Inventory Logs: " + activePlayer.getInventory().size() + " items");
             List<Interactable> items;
@@ -196,7 +226,7 @@ public class GameEngine {
                     UIManager.printMessage("Game Saved! Returning to Main Menu...\n");
                     UIManager.prompt("Press ENTER to exit...");
                     scanner.nextLine();
-                    continue; // Will break out of loop since running is false
+                    continue;
             }
 
             if (running && tickForward) {
@@ -211,47 +241,5 @@ public class GameEngine {
                 scanner.nextLine();
             }
         }
-    }
-
-    private Sim getNextAliveSim() {
-        for (Sim sim : neighborhood) {
-            if (sim.getState() != SimState.DEAD) {
-                return sim;
-            }
-        }
-        return null;
-    }
-
-    private void aggregateStats() {
-        this.sessionTotalMoney = 0;
-        this.sessionTotalItems = 0;
-        for (Sim sim : neighborhood) {
-            this.sessionTotalMoney += sim.getTotalMoneyEarned();
-            this.sessionTotalItems += sim.getTotalItemsBought();
-        }
-    }
-
-    public String getWorldName() {
-        return worldName;
-    }
-
-    public int getCurrentTick() {
-        return timeManager.getCurrentTick();
-    }
-
-    public List<Sim> getNeighborhood() {
-        return neighborhood;
-    }
-
-    public boolean isGameOver() {
-        return isGameOver;
-    }
-
-    public int getSessionTotalMoney() {
-        return sessionTotalMoney;
-    }
-
-    public int getSessionTotalItems() {
-        return sessionTotalItems;
     }
 }

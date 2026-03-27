@@ -1,7 +1,7 @@
 package simcli.engine.commands;
 
 import simcli.engine.CommandResult;
-import simcli.engine.GameEngine;
+import simcli.engine.IGameEngine;
 import simcli.entities.actors.Sim;
 import simcli.ui.UIManager;
 
@@ -11,20 +11,20 @@ import simcli.entities.models.SimState;
 
 /**
  * Command to switch control to another playable Sim in the household.
- * Displays all household members with their status and validates the selection.
  */
 public class SwitchSimCommand extends BaseCommand {
-    private final GameEngine engine;
-    private final Scanner scanner;
+    private final CommandContext ctx;
 
-    public SwitchSimCommand(GameEngine engine, Scanner scanner) {
-        this.engine = engine;
-        this.scanner = scanner;
+    public SwitchSimCommand(CommandContext ctx) {
+        this.ctx = ctx;
     }
 
     @Override
     protected CommandResult run() {
+        IGameEngine engine = ctx.getEngine();
+        Scanner scanner = ctx.getScanner();
         List<Sim> neighborhood = engine.getNeighborhood();
+
         UIManager.printMessage("\n=== Switch Sim ===");
         if (neighborhood.size() <= 1) {
             UIManager.printMessage("There is no one else in your household to switch to.");
@@ -35,7 +35,7 @@ public class SwitchSimCommand extends BaseCommand {
         UIManager.printMessage("Current Household:");
         for (int i = 0; i < neighborhood.size(); i++) {
             Sim s = neighborhood.get(i);
-            String status = s.getState() == SimState.DEAD ? "[DEAD]" : 
+            String status = s.getState() == SimState.DEAD ? "[DEAD]" :
                            (!s.isPlayable() ? "[NOT PLAYABLE - Age: " + s.getAge() + "]" : "[Alive]");
             String marker = (s == engine.getActivePlayer()) ? " (Current)" : "";
             UIManager.printMessage("[" + (i + 1) + "] " + s.getName() + " " + status + marker);
@@ -46,7 +46,7 @@ public class SwitchSimCommand extends BaseCommand {
         try {
             int target = Integer.parseInt(scanner.nextLine().trim());
             if (target == 0) return CommandResult.NO_TICK;
-            
+
             if (target > 0 && target <= neighborhood.size()) {
                 Sim chosen = neighborhood.get(target - 1);
                 if (chosen.getState() == SimState.DEAD) {
@@ -59,11 +59,11 @@ public class SwitchSimCommand extends BaseCommand {
                     pause(scanner);
                     return CommandResult.NO_TICK;
                 }
-                
+
                 engine.setActivePlayer(chosen);
                 UIManager.printMessage("Switched control to " + chosen.getName() + ".");
                 pause(scanner);
-                
+
                 return CommandResult.NO_TICK;
             } else {
                 UIManager.printWarning("Invalid selection.");

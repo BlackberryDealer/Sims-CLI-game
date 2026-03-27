@@ -2,7 +2,7 @@ package simcli.world.interactables;
 
 import java.util.List;
 import java.util.Scanner;
-import simcli.engine.GameEngine;
+import simcli.engine.IGameEngine;
 import simcli.engine.SimulationException;
 import simcli.engine.SimulationLogger;
 import simcli.entities.actors.NPCSim;
@@ -14,9 +14,9 @@ import simcli.entities.models.Trait;
 import simcli.utils.GameConstants;
 
 public class ParkBench implements Interactable {
-    private final GameEngine engine;
+    private final IGameEngine engine;
 
-    public ParkBench(GameEngine engine) {
+    public ParkBench(IGameEngine engine) {
         this.engine = engine;
     }
 
