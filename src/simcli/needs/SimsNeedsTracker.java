@@ -66,7 +66,7 @@ public class SimsNeedsTracker {
             int healthLoss = GameConstants.HEALTH_BASE_DAMAGE + (this.starvingTicks * GameConstants.HEALTH_ACCELERATED_DAMAGE_MULTIPLIER); // Accelerating damage
             this.health = Math.max(0, this.health - healthLoss);
             SimulationLogger.logWarning(simName + " is STARVING! Health dropping rapidly! (-" + healthLoss + " HP)");
-        } else if (this.hunger.getValue() <= simcli.utils.GameConstants.HUNGER_WARNING_LEVEL) {
+        } else if (this.hunger.getValue() <= GameConstants.HUNGER_WARNING_LEVEL) {
             // Slow health drain when hungry but not starving
             this.health = Math.max(0, this.health - GameConstants.HEALTH_ADDED_DAMAGE);
             this.starvingTicks = 0; // Reset accelerator when eating again
