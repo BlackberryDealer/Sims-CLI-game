@@ -1,13 +1,19 @@
 package simcli.persistence;
 
 import simcli.engine.GameEngine;
+import simcli.entities.items.Item;
 import simcli.entities.models.Job;
 import simcli.entities.actors.Sim;
 import simcli.entities.actors.NPCSim;
 import simcli.entities.models.Gender;
 
+import simcli.entities.models.SimState;
+import simcli.ui.UIManager;
+import simcli.world.*;
+
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -59,12 +65,12 @@ public class SaveManager {
             }
 
             // Save Building States
-            List<simcli.world.Building> map = engine.getWorldManager().getCityMap();
+            List<Building> map = engine.getWorldManager().getCityMap();
             for (int i = 0; i < map.size(); i++) {
-                if (map.get(i) instanceof simcli.world.Residential) {
-                    simcli.world.Residential res = (simcli.world.Residential) map.get(i);
+                if (map.get(i) instanceof Residential) {
+                    Residential res = (Residential) map.get(i);
                     StringBuilder sb = new StringBuilder("ResState:" + i + "," + res.isOwned());
-                    for (simcli.world.Room r : res.getRooms()) {
+                    for (Room r : res.getRooms()) {
                         sb.append(",").append(r.getMaxCapacity());
                     }
                     writer.println(sb.toString());
@@ -75,8 +81,8 @@ public class SaveManager {
             int locIndex = map.indexOf(engine.getWorldManager().getCurrentLocation());
             int roomIndex = -1;
             Sim activeSim = engine.getActivePlayer();
-            if (engine.getWorldManager().getCurrentLocation() instanceof simcli.world.Residential && activeSim.getCurrentRoom() != null) {
-                simcli.world.Residential res = (simcli.world.Residential) engine.getWorldManager().getCurrentLocation();
+            if (engine.getWorldManager().getCurrentLocation() instanceof Residential && activeSim.getCurrentRoom() != null) {
+                Residential res = (Residential) engine.getWorldManager().getCurrentLocation();
                 roomIndex = res.getRooms().indexOf(activeSim.getCurrentRoom());
             }
             writer.println("LOCATION:" + locIndex + "," + roomIndex);
@@ -92,7 +98,7 @@ public class SaveManager {
                         + sim.isChildSim());
                 
                 // Save Inventory
-                for (simcli.entities.items.Item item : sim.getInventory()) {
+                for (Item item : sim.getInventory()) {
                     writer.println("Inventory:" + sim.getName() + "," + item.toSaveString());
                 }
             }
@@ -125,7 +131,7 @@ public class SaveManager {
             }
 
         } catch (IOException e) {
-            simcli.ui.UIManager.printWarning("Error saving game: " + e.getMessage());
+            UIManager.printWarning("Error saving game: " + e.getMessage());
         }
     }
 
@@ -141,7 +147,7 @@ public class SaveManager {
             int loadedRoomIndex = -1;
             List<Sim> loadedNeighborhood = new ArrayList<>();
             List<NPCSim> loadedNPCs = new ArrayList<>();
-            java.util.Map<Integer, String[]> parsedResStates = new java.util.HashMap<>();
+            Map<Integer, String[]> parsedResStates = new HashMap<>();
             List<String[]> relLines = new ArrayList<>();
             List<String[]> spouseLines = new ArrayList<>();
             List<String> inventoryLines = new ArrayList<>();
@@ -207,7 +213,7 @@ public class SaveManager {
             }
 
             if (isGameOver) {
-                simcli.ui.UIManager.printGameOverStats(loadedTick, statsMoney, statsItems);
+                UIManager.printGameOverStats(loadedTick, statsMoney, statsItems);
                 return null;
             }
 
@@ -223,8 +229,8 @@ public class SaveManager {
                     if (owner != null) {
                         String itemData = invLine.substring(firstComma + 1);
                         Savable item = Savable.fromSaveString(itemData);
-                        if (item instanceof simcli.entities.items.Item) {
-                            owner.addItem((simcli.entities.items.Item) item);
+                        if (item instanceof Item) {
+                            owner.addItem((Item) item);
                         }
                     }
                 }
@@ -264,7 +270,7 @@ public class SaveManager {
             // Restore active player if saved
             if (activePlayerName != null) {
                 Sim savedActive = findSimByName(loadedNeighborhood, activePlayerName);
-                if (savedActive != null && savedActive.getState() != simcli.entities.models.SimState.DEAD) {
+                if (savedActive != null && savedActive.getState() != SimState.DEAD) {
                     engine.setActivePlayer(savedActive);
                 }
             }
@@ -274,15 +280,15 @@ public class SaveManager {
             }
 
             // Post-Load injection
-            List<simcli.world.Building> map = engine.getWorldManager().getCityMap();
+            List<Building> map = engine.getWorldManager().getCityMap();
             for (Map.Entry<Integer, String[]> entry : parsedResStates.entrySet()) {
-                simcli.world.Residential res = (simcli.world.Residential) map.get(entry.getKey());
+                Residential res = (Residential) map.get(entry.getKey());
                 res.setOwned(Boolean.parseBoolean(entry.getValue()[1]));
             }
             if (loadedLocIndex >= 0 && loadedLocIndex < map.size()) {
                 engine.getWorldManager().setCurrentLocation(map.get(loadedLocIndex));
-                if (engine.getWorldManager().getCurrentLocation() instanceof simcli.world.Residential && loadedRoomIndex >= 0) {
-                    simcli.world.Residential res = (simcli.world.Residential) engine.getWorldManager().getCurrentLocation();
+                if (engine.getWorldManager().getCurrentLocation() instanceof Residential && loadedRoomIndex >= 0) {
+                    Residential res = (Residential) engine.getWorldManager().getCurrentLocation();
                     loadedNeighborhood.get(0).setCurrentRoom(res.getRooms().get(loadedRoomIndex));
                 }
             }
