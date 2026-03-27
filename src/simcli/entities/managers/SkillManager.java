@@ -5,6 +5,7 @@ import simcli.entities.models.SkillType;
 import java.util.HashMap;
 import java.util.Map;
 import simcli.engine.SimulationLogger;
+import simcli.utils.GameConstants;
 
 public class SkillManager {
     private Map<SkillType, Integer> skills;
@@ -22,7 +23,7 @@ public class SkillManager {
 
     public void addSkillExperience(SkillType type, int amount, String simName, boolean isFastLearner) {
         if (isFastLearner) {
-            amount = (int)(amount * simcli.utils.GameConstants.BONUS_TIMES); // 50% extra xp
+            amount = (int)(amount * GameConstants.BONUS_TIMES); // 50% extra xp
         }
         int current = skills.get(type);
         int newExp = current + amount;
