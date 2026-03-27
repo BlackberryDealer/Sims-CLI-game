@@ -66,7 +66,7 @@ public class Sim implements ISimBehaviour {
         this.skillManager = new SkillManager();
         this.traits = new ArrayList<>();
         Trait[] allTraits = Trait.values();
-        this.traits.add(allTraits[simcli.utils.GameRandom.RANDOM.nextInt(allTraits.length)]);
+        this.traits.add(allTraits[GameRandom.RANDOM.nextInt(allTraits.length)]);
 
         this.relationshipManager = new RelationshipManager(this);
         this.totalMoneyEarned = money;
