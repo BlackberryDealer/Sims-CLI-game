@@ -1,11 +1,13 @@
 package simcli.entities.models;
 
+import simcli.utils.GameConstants;
+
 public enum Job {
     UNEMPLOYED("Unemployed", 0, 0, 0, 0, 100, 1.0, 1),
-    SOFTWARE_ENGINEER("Software Engineer", 150, 4, 30, simcli.utils.GameConstants.ADULT_AGE, simcli.utils.GameConstants.ELDER_AGE, 1.2, 5),
-    HARDWARE_TECHNICIAN("Hardware Technician", 120, 5, 45, simcli.utils.GameConstants.ADULT_AGE, 55, 1.1, 4),
-    FREELANCE_PHOTOGRAPHER("Freelance Photographer", 80, 2, 15, simcli.utils.GameConstants.ADULT_AGE, 80, simcli.utils.GameConstants.BONUS_TIMES, 3),
-    PERSONAL_TRAINER("Personal Trainer", 90, 3, 60, simcli.utils.GameConstants.ADULT_AGE, 40, 1.3, 3);
+    SOFTWARE_ENGINEER("Software Engineer", 150, 4, 30, GameConstants.ADULT_AGE, GameConstants.ELDER_AGE, 1.2, 5),
+    HARDWARE_TECHNICIAN("Hardware Technician", 120, 5, 45, GameConstants.ADULT_AGE, 55, 1.1, 4),
+    FREELANCE_PHOTOGRAPHER("Freelance Photographer", 80, 2, 15, GameConstants.ADULT_AGE, 80, GameConstants.BONUS_TIMES, 3),
+    PERSONAL_TRAINER("Personal Trainer", 90, 3, 60, GameConstants.ADULT_AGE, 40, 1.3, 3);
 
     private final String title;
     private final int baseSalary;
