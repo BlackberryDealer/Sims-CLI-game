@@ -19,6 +19,7 @@ import java.util.Map;
 
 public class SaveManager {
     private static final String SAVE_DIR = "saves/";
+    private static final String FILE_FORMAT = ".txt";
 
     public static void checkDirectory() {
         File dir = new File(SAVE_DIR);
@@ -27,11 +28,11 @@ public class SaveManager {
     }
 
     public static boolean saveExists(String worldName) {
-        return new File(SAVE_DIR + worldName + ".txt").exists();
+        return new File(SAVE_DIR + worldName + FILE_FORMAT).exists();
     }
 
     public static boolean deleteSave(String worldName) {
-        File file = new File(SAVE_DIR + worldName + ".txt");
+        File file = new File(SAVE_DIR + worldName + FILE_FORMAT);
         if (file.exists()) {
             return file.delete();
         }
@@ -42,11 +43,11 @@ public class SaveManager {
         checkDirectory();
         List<String> saves = new ArrayList<>();
         File dir = new File(SAVE_DIR);
-        File[] files = dir.listFiles((d, name) -> name.endsWith(".txt"));
+        File[] files = dir.listFiles((d, name) -> name.endsWith(FILE_FORMAT));
 
         if (files != null) {
             for (File f : files) {
-                saves.add(f.getName().replace(".txt", ""));
+                saves.add(f.getName().replace(FILE_FORMAT, ""));
             }
         }
         return saves;
@@ -54,7 +55,7 @@ public class SaveManager {
 
     public static void saveGame(GameEngine engine, String worldName) {
         checkDirectory();
-        try (PrintWriter writer = new PrintWriter(new FileWriter(SAVE_DIR + worldName + ".txt"))) {
+        try (PrintWriter writer = new PrintWriter(new FileWriter(SAVE_DIR + worldName + FILE_FORMAT))) {
             writer.println("WORLD:" + engine.getWorldName());
             writer.println("TICK:" + engine.getCurrentTick());
             writer.println("ACTIVE_PLAYER_NAME:" + engine.getActivePlayer().getName());
@@ -136,7 +137,7 @@ public class SaveManager {
     }
 
     public static GameEngine loadGame(String worldName) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(SAVE_DIR + worldName + ".txt"))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(SAVE_DIR + worldName + FILE_FORMAT))) {
             String line;
             String loadedWorldName = "Unknown";
             int loadedTick = 1;
