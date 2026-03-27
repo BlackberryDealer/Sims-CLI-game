@@ -25,7 +25,7 @@ public class TravelCommand extends BaseCommand {
     }
 
     @Override
-    public CommandResult execute() {
+    protected CommandResult run() {
         List<Building> cityMap = worldManager.getCityMap();
         UIManager.printMessage("\nAvailable Locations:");
         for (int i = 0; i < cityMap.size(); i++) {

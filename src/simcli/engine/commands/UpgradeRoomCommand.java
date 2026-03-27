@@ -22,7 +22,7 @@ public class UpgradeRoomCommand extends BaseCommand {
     }
 
     @Override
-    public CommandResult execute() {
+    protected CommandResult run() {
         if (currentLocation.isResidential()) {
             Residential res = (Residential) currentLocation;
             UIManager.printMessage("\n=== UPGRADE ROOM ===");

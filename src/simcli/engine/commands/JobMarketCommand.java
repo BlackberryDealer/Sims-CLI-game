@@ -16,7 +16,7 @@ public class JobMarketCommand extends BaseCommand {
     }
 
     @Override
-    public CommandResult execute() {
+    protected CommandResult run() {
         if (activePlayer.canWork()) {
             UIManager.printMessage("\n=== JOB MARKET ===");
             UIManager.printMessage("Active Sim: " + activePlayer.getName() + " (Age: " + activePlayer.getAge() + ")");

@@ -29,7 +29,7 @@ public class InventoryCommand extends BaseCommand {
     }
 
     @Override
-    public CommandResult execute() throws SimulationException, SleepEventException {
+    protected CommandResult run() throws SimulationException, SleepEventException {
         boolean managingInventory = true;
         int pageSize = 10;
         int currentPage = 0;

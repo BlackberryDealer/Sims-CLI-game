@@ -19,7 +19,7 @@ public class HouseInfoCommand extends BaseCommand {
     }
 
     @Override
-    public CommandResult execute() {
+    protected CommandResult run() {
         if (currentLocation.isResidential()) {
             Residential res = (Residential) currentLocation;
             UIManager.printMessage("\n=== HOUSE INFO: " + res.getName() + " ===");

@@ -13,8 +13,9 @@ import simcli.world.Residential;
 
 /**
  * Command to interact with a spouse from anywhere if they are in the household.
+ * Supports dating, having babies, and feeding babies.
  */
-public class SpouseInteractionCommand implements ICommand {
+public class SpouseInteractionCommand extends BaseCommand {
     private final GameEngine engine;
     private final Scanner scanner;
 
@@ -24,22 +25,20 @@ public class SpouseInteractionCommand implements ICommand {
     }
 
     @Override
-    public CommandResult execute() throws SimulationException {
+    protected CommandResult run() throws SimulationException {
         Sim activePlayer = engine.getActivePlayer();
         Sim spouse = activePlayer.getRelationshipManager().getSpouse();
         
         if (spouse == null) {
             UIManager.printMessage("You are not married. Find someone special at the park first!");
-            UIManager.prompt("\nPress ENTER to continue...");
-            scanner.nextLine();
+            pause(scanner);
             return CommandResult.NO_TICK;
         }
 
         // Check if spouse is in the household
         if (!engine.getNeighborhood().contains(spouse)) {
             UIManager.printMessage(spouse.getName() + " is currently busy and not at home.");
-            UIManager.prompt("\nPress ENTER to continue...");
-            scanner.nextLine();
+            pause(scanner);
             return CommandResult.NO_TICK;
         }
 

@@ -9,7 +9,11 @@ import java.util.List;
 import java.util.Scanner;
 import simcli.entities.models.SimState;
 
-public class SwitchSimCommand implements ICommand {
+/**
+ * Command to switch control to another playable Sim in the household.
+ * Displays all household members with their status and validates the selection.
+ */
+public class SwitchSimCommand extends BaseCommand {
     private final GameEngine engine;
     private final Scanner scanner;
 
@@ -19,13 +23,12 @@ public class SwitchSimCommand implements ICommand {
     }
 
     @Override
-    public CommandResult execute() {
+    protected CommandResult run() {
         List<Sim> neighborhood = engine.getNeighborhood();
         UIManager.printMessage("\n=== Switch Sim ===");
         if (neighborhood.size() <= 1) {
             UIManager.printMessage("There is no one else in your household to switch to.");
-            UIManager.prompt("\nPress ENTER to return...");
-            scanner.nextLine();
+            pause(scanner);
             return CommandResult.NO_TICK;
         }
 
@@ -48,34 +51,29 @@ public class SwitchSimCommand implements ICommand {
                 Sim chosen = neighborhood.get(target - 1);
                 if (chosen.getState() == SimState.DEAD) {
                     UIManager.printMessage(chosen.getName() + " is deceased. Let them rest.");
-                    UIManager.prompt("\nPress ENTER to return...");
-                    scanner.nextLine();
+                    pause(scanner);
                     return CommandResult.NO_TICK;
                 }
                 if (!chosen.isPlayable()) {
                     UIManager.printMessage(chosen.getName() + " is too young to be controlled. They must reach the teen stage (age 13) first.");
-                    UIManager.prompt("\nPress ENTER to return...");
-                    scanner.nextLine();
+                    pause(scanner);
                     return CommandResult.NO_TICK;
                 }
                 
                 engine.setActivePlayer(chosen);
                 UIManager.printMessage("Switched control to " + chosen.getName() + ".");
-                UIManager.prompt("\nPress ENTER to continue...");
-                scanner.nextLine();
+                pause(scanner);
                 
                 return CommandResult.NO_TICK;
             } else {
                 UIManager.printWarning("Invalid selection.");
-                UIManager.prompt("\nPress ENTER to return...");
-                scanner.nextLine();
+                pause(scanner);
                 return CommandResult.NO_TICK;
             }
 
         } catch (NumberFormatException e) {
              UIManager.printWarning("Invalid input.");
-             UIManager.prompt("\nPress ENTER to return...");
-             scanner.nextLine();
+             pause(scanner);
              return CommandResult.NO_TICK;
         }
     }

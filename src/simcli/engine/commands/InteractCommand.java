@@ -27,7 +27,7 @@ public class InteractCommand extends BaseCommand {
     }
 
     @Override
-    public CommandResult execute() throws SimulationException, SleepEventException {
+    protected CommandResult run() throws SimulationException, SleepEventException {
         if (choiceIndex >= 0 && choiceIndex < items.size()) {
             items.get(choiceIndex).interact(activePlayer, scanner, timeManager);
             return CommandResult.TICK_FORWARD;

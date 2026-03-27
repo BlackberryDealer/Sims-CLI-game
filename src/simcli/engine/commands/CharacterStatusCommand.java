@@ -19,7 +19,7 @@ public class CharacterStatusCommand extends BaseCommand {
     }
 
     @Override
-    public CommandResult execute() {
+    protected CommandResult run() {
         UIManager.printMessage("\n=== CHARACTER STATUS ===");
         UIManager.printMessage("Name: " + activePlayer.getName());
         UIManager.printMessage("Age: " + activePlayer.getAge());

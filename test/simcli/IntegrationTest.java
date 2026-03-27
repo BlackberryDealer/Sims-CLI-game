@@ -103,7 +103,7 @@ public class IntegrationTest {
 
     @Test
     @DisplayName("Edge Case: Upgrade Room with $0 (Financial Boundary)")
-    void testUpgradeRoomWithoutMoney() {
+    void testUpgradeRoomWithoutMoney() throws Exception {
         activePlayer.setMoney(0);
         
         Building home = worldManager.getCityMap().get(0); // Dorm
@@ -145,7 +145,7 @@ public class IntegrationTest {
 
     @Test
     @DisplayName("Edge Case: Apply for a job you are too young for (Age Boundary)")
-    void testUnderageJobApplication() {
+    void testUnderageJobApplication() throws Exception {
         Sim teen = new Sim("Timmy", 15, Gender.MALE, Job.UNEMPLOYED);
         
         // Job Option 3 is usually SOFTWARE_ENGINEER (req 21+)
@@ -163,7 +163,7 @@ public class IntegrationTest {
 
     @Test
     @DisplayName("Edge Case: Travel to the exact location you are already standing in")
-    void testTravelToCurrentLocation() {
+    void testTravelToCurrentLocation() throws Exception {
         Building home = worldManager.getCityMap().get(0); // Dorm
         worldManager.setCurrentLocation(home);
 
