@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import simcli.entities.items.Furniture;
 import simcli.entities.actors.Sim;
+import simcli.ui.UIManager;
 import simcli.world.interactables.Interactable;
 
 public class Room {
@@ -38,9 +39,9 @@ public class Room {
         if (sim.getMoney() >= cost) {
             sim.setMoney(sim.getMoney() - cost);
             this.maxCapacity += extraSpace;
-            simcli.ui.UIManager.printMessage("Success! " + this.name + " upgraded. New capacity: " + this.maxCapacity);
+            UIManager.printMessage("Success! " + this.name + " upgraded. New capacity: " + this.maxCapacity);
         } else {
-            simcli.ui.UIManager.printMessage("Not enough money! Upgrade costs $" + cost);
+            UIManager.printMessage("Not enough money! Upgrade costs $" + cost);
         }
     }
 }
