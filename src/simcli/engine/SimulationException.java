@@ -1,12 +1,7 @@
 package simcli.engine;
-/**
- * Custom checked exception to handle invalid simulation actions gracefully.
- *
- * <p>Thrown by commands when game rules prevent execution (e.g. interacting
- * with an unavailable object, performing an action while in the wrong state).
- * {@link InputHandler} catches this and displays the message as a warning
- * to the player without crashing the game.</p>
- */
+// Thrown when game rules block an action (e.g. too young to work, no money).
+// InputHandler catches this and shows a warning — the game never crashes.
+// Using a checked exception forces commands to declare what can go wrong.
 public class SimulationException extends Exception {
 
     /**

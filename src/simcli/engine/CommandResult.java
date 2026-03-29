@@ -1,10 +1,8 @@
 package simcli.engine;
 
-/**
- * Represents the outcome of a player command, allowing InputHandler
- * to communicate control-flow intent back to GameEngine without
- * needing a direct reference to it.
- */
+// Control-flow signal between commands and the engine.
+// Commands return one of these to say "what should happen next"
+// without ever calling GameEngine methods directly.
 public enum CommandResult {
 
     /** A normal action was performed — the game clock should advance. */

@@ -10,11 +10,9 @@ import simcli.entities.models.SimState;
 import simcli.entities.models.WorkResult;
 import simcli.ui.UIManager;
 
-/**
- * Command to send the active Sim to work a shift at their current job.
- * Validates employment status, life stage, hunger state, overwork limits,
- * and weekday restrictions before executing.
- */
+// Validates a chain of preconditions before letting the Sim work.
+// Order matters: life-stage → employment → hunger state → overwork → weekday.
+// Any failure short-circuits with NO_TICK (no time passes).
 public class WorkCommand extends BaseCommand {
 
     /**
@@ -47,7 +45,7 @@ public class WorkCommand extends BaseCommand {
             return CommandResult.NO_TICK;
         }
 
-        // Slide 5: HUNGRY or STARVING states restrict work (Aligned with Proposal Slides)
+        // hunger gating — Sim must eat before they can focus on work
         if (activePlayer.getState() == SimState.HUNGRY) {
             UIManager.printWarning(activePlayer.getName() + " is too hungry to focus on work! Eat something first.");
             pause();
@@ -75,7 +73,7 @@ public class WorkCommand extends BaseCommand {
             return CommandResult.NO_TICK;
         }
 
-        // Execution Core
+        // all preconditions passed — actually perform the shift
         activePlayer.setCurrentAction(ActionState.WORKING);
         UIManager.displayActionAnimation(activePlayer);
 

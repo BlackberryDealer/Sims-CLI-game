@@ -8,16 +8,11 @@ import simcli.world.interactables.Interactable;
 
 import java.util.List;
 
-/**
- * Command that interacts with a specific item at the current location or room.
- *
- * <p>Delegates to the chosen {@link Interactable}'s own
- * {@link Interactable#interact} method, which may throw
- * {@link SleepEventException} (e.g. using a bed) or
- * {@link SimulationException} (e.g. action not allowed).</p>
- */
+// Bridges the Command System to the Interactable subsystem.
+// Delegates to whichever Interactable the player chose (polymorphism on the item side).
+// This is the only command that takes an extra constructor param beyond ctx.
 public class InteractCommand extends BaseCommand {
-    private final int choiceIndex;
+    private final int choiceIndex; // index the player picked from the action menu
 
     /**
      * InteractCommand is the only command that needs an extra parameter beyond

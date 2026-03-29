@@ -1,14 +1,8 @@
 package simcli.engine;
 
-/**
- * Signals that the active Sim has gone to sleep.
- *
- * <p>Thrown by the {@link simcli.engine.commands.ICommand#execute()} method
- * (typically via {@link simcli.world.interactables.Interactable#interact})
- * when the player interacts with a bed. {@link InputHandler} catches this
- * and returns {@link CommandResult#SLEEP_EVENT}, which causes
- * {@link GameEngine} to fast-forward the clock to the next morning.</p>
- */
+// Specialised signal: "the Sim is going to sleep."
+// Extends SimulationException so it travels through the same catch chain,
+// but InputHandler checks for it first and maps it to SLEEP_EVENT.
 public class SleepEventException extends SimulationException {
 
     /**

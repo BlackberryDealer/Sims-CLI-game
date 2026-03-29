@@ -7,15 +7,9 @@ import simcli.ui.UIManager;
 import java.util.List;
 import simcli.entities.models.SimState;
 
-/**
- * Command to switch control to another playable Sim in the household.
- * Displays all household members with their status and validates the selection.
- *
- * <p>Previously coupled to {@code GameEngine} directly. Now uses
- * {@link CommandContext#getNeighborhood()} and
- * {@link CommandContext#switchActivePlayer(Sim)} to read and mutate state
- * without knowing about the engine.</p>
- */
+// Switches the "active" Sim in the household.
+// Key integration point: uses ctx.switchActivePlayer() callback
+// so we mutate GameEngine state without importing GameEngine.
 public class SwitchSimCommand extends BaseCommand {
 
     /**
@@ -73,6 +67,7 @@ public class SwitchSimCommand extends BaseCommand {
                     return CommandResult.NO_TICK;
                 }
                 
+                // callback fires back into GameEngine.setActivePlayer
                 ctx.switchActivePlayer(chosen);
                 UIManager.printMessage("Switched control to " + chosen.getName() + ".");
                 pause();

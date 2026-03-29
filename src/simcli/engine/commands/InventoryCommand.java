@@ -14,13 +14,9 @@ import simcli.world.interactables.Interactable;
 
 import java.util.List;
 
-/**
- * Command that opens the active Sim's inventory management menu.
- *
- * <p>Supports paginated browsing, using consumable items directly, and
- * placing {@link Furniture} into the current room of a residential building.
- * The menu loops until the player chooses to go back.</p>
- */
+// Manages the Sim's inventory with pagination, item use, and furniture placement.
+// Uses instanceof to branch between Furniture (placeable) and other items (consumable).
+// The loop runs until the player backs out — time does not advance.
 public class InventoryCommand extends BaseCommand {
 
     /**

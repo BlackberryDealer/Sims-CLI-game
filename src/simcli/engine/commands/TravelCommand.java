@@ -9,13 +9,9 @@ import simcli.world.Residential;
 
 import java.util.List;
 
-/**
- * Command that travels between buildings on the city map.
- *
- * <p>Displays all locations (with for-sale tags on unowned residential
- * properties), allows the player to purchase a property on arrival, and
- * triggers the travel animation upon successful movement.</p>
- */
+// Handles moving between buildings on the city map.
+// Uses instanceof to check if a destination is Residential
+// (polymorphism — the command treats buildings generically, only downcasting when needed).
 public class TravelCommand extends BaseCommand {
 
     /**
@@ -68,7 +64,7 @@ public class TravelCommand extends BaseCommand {
                     return CommandResult.NO_TICK;
                 }
 
-                // Check if target is an unowned residential — prompt to purchase
+                // downcast only when we actually need Residential-specific behaviour
                 if (target instanceof Residential) {
                     Residential res = (Residential) target;
                     if (!res.isOwned()) {

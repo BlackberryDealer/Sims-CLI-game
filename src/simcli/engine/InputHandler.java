@@ -10,14 +10,9 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.function.Consumer;
 
-/**
- * Translates raw user input into {@link ICommand} objects and executes them.
- *
- * <p>The handler builds a single {@link CommandContext} per invocation and
- * passes it to every command, eliminating the need for bespoke constructor
- * signatures. It no longer holds a reference to {@code GameEngine} — all
- * the data it needs is injected via fine-grained dependencies.</p>
- */
+// Factory + dispatcher: maps raw user input to the right Command object.
+// Builds one shared CommandContext per turn, then instantiates the matching command.
+// Never holds a reference to GameEngine — only the specific dependencies it needs.
 public class InputHandler implements IInputHandler {
     private final IWorldManager worldManager;
     private final TimeManager timeManager;
@@ -55,7 +50,7 @@ public class InputHandler implements IInputHandler {
             items = currentLocation.getInteractables();
         }
 
-        // Build the shared context once — every command reads from it.
+        // one context shared by whichever command we instantiate below
         CommandContext ctx = new CommandContext.Builder()
                 .activePlayer(activePlayer)
                 .neighborhood(neighborhood)
@@ -110,8 +105,10 @@ public class InputHandler implements IInputHandler {
                     break;
             }
 
+            // polymorphic dispatch — every command handles execute() the same way
             return command.execute();
 
+        // exceptions become results — keeps the game loop clean
         } catch (SleepEventException e) {
             return CommandResult.SLEEP_EVENT;
         } catch (SimulationException e) {

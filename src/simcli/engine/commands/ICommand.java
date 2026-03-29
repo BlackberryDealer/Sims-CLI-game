@@ -4,19 +4,13 @@ import simcli.engine.CommandResult;
 import simcli.engine.SimulationException;
 import simcli.engine.SleepEventException;
 
-/**
- * The Command interface for the Command Pattern.
- * Encapsulates a request as an object, letting us parameterize clients
- * with different requests and avoid massive if/else blocks in InputHandler.
- */
+// Contract that every player action must fulfill.
+// Each action (work, travel, interact, etc.) becomes its own class
+// instead of living inside one giant if/else chain in InputHandler.
 public interface ICommand {
 
-    /**
-     * Executes the command.
-     * 
-     * @return The CommandResult indicating how the GameEngine should proceed next.
-     * @throws SimulationException If the rule logic prevents execution.
-     * @throws SleepEventException If the command triggers a sleep/rest transition.
-     */
+    // Returns a result telling the engine whether to advance time or not.
+    // Throws SimulationException if the game rules block the action,
+    // or SleepEventException to signal a sleep-skip to next morning.
     CommandResult execute() throws SimulationException, SleepEventException;
 }

@@ -5,64 +5,33 @@ import simcli.engine.SimulationException;
 import simcli.engine.SleepEventException;
 import simcli.ui.UIManager;
 
-/**
- * Abstract base class for all commands in the Command Pattern.
- * 
- * <p>Uses the <b>Template Method Pattern</b>: {@link #execute()} defines the
- * fixed execution contract with callers (e.g. InputHandler), while subclasses
- * implement their specific logic in the {@link #run()} hook method.</p>
- * 
- * <p>Making {@code execute()} final enforces the Open/Closed Principle —
- * the template is closed to modification but open to extension via {@code run()}.</p>
- *
- * <p>Every subclass receives a {@link CommandContext} via the constructor,
- * giving it access to exactly the game state it needs without coupling to
- * {@code GameEngine}.</p>
- */
+// Template Method Pattern:
+// execute() is the locked-down skeleton (final) — subclasses only override run().
+// This keeps the contract with InputHandler/GameEngine untouchable while still
+// letting each command define its own behaviour. Classic Open/Closed Principle.
+//
+// Every command gets a CommandContext injected through the constructor
+// so none of them ever need a direct reference to GameEngine.
 public abstract class BaseCommand implements ICommand {
 
-    /** Shared context containing all game state a command may need. */
+    // single source of truth for all game state a command may need
     protected final CommandContext ctx;
 
-    /**
-     * Constructs a command with the given context.
-     *
-     * @param ctx the shared command context built by InputHandler.
-     */
+
     protected BaseCommand(CommandContext ctx) {
         this.ctx = ctx;
     }
 
-    /**
-     * Template method: defines the overall execution flow.
-     * Delegates to the {@link #run()} hook method implemented by each subclass.
-     * 
-     * <p>This method is {@code final} to prevent subclasses from breaking the
-     * execution contract. All custom logic belongs in {@link #run()}.</p>
-     * 
-     * @return the result indicating how the GameEngine should proceed
-     * @throws SimulationException  if game rules prevent execution
-     * @throws SleepEventException  if the command triggers a sleep transition
-     */
+    // final = nobody can override the top-level flow. All custom logic goes in run().
     @Override
     public final CommandResult execute() throws SimulationException, SleepEventException {
         return run();
     }
 
-    /**
-     * Hook method for concrete subclasses to provide their specific command logic.
-     * This is the only method child classes need to override.
-     * 
-     * @return the result indicating how the GameEngine should proceed
-     * @throws SimulationException  if game rules prevent execution
-     * @throws SleepEventException  if the command triggers a sleep transition
-     */
+    // hook method — each concrete command puts its actual logic here
     protected abstract CommandResult run() throws SimulationException, SleepEventException;
 
-    /**
-     * Utility method: pauses execution and waits for the user to press ENTER.
-     * Available to all subclasses to avoid duplicating this common UI pattern.
-     */
+    // shared helper so every command can pause without duplicating code
     protected void pause() {
         UIManager.prompt("\nPress ENTER to return...");
         ctx.getScanner().nextLine();

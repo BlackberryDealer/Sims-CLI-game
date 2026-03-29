@@ -12,24 +12,14 @@ import java.util.Objects;
 import java.util.Scanner;
 import java.util.function.Consumer;
 
-/**
- * Immutable context object passed to every command in the Command Pattern.
- *
- * <p>Instead of each command having a bespoke constructor that cherry-picks
- * individual dependencies from {@code GameEngine}, every command receives a
- * single {@code CommandContext} and reads only what it needs. This:</p>
- * <ul>
- *     <li>Eliminates tight coupling between commands and {@code GameEngine}.</li>
- *     <li>Standardizes command construction — every command has the same
- *         constructor signature: {@code new XxxCommand(ctx)}.</li>
- *     <li>Makes commands trivially testable — just build a context with
- *         the fields the test cares about.</li>
- * </ul>
- *
- * <p>For state mutations that need to propagate back to the engine (e.g.
- * switching the active player), the context carries a callback
- * ({@link #switchActivePlayer}) rather than a reference to the engine itself.</p>
- */
+// Bundles all the game state a command might need into one object.
+// Built once per turn using the Builder pattern, then shared across all commands.
+//
+// Why not just pass GameEngine? Decoupling — commands never import GameEngine,
+// so they're easy to test and impossible to accidentally call engine internals.
+//
+// For mutations that need to reach back to the engine (e.g. switching the active
+// Sim), we pass a Consumer<Sim> callback instead of an engine reference.
 public class CommandContext {
 
     private final Sim activePlayer;
@@ -39,9 +29,10 @@ public class CommandContext {
     private final IWorldManager worldManager;
     private final Building currentLocation;
     private final List<Interactable> availableItems;
-    private final Consumer<Sim> setActivePlayer;
+    private final Consumer<Sim> setActivePlayer;   // callback → GameEngine.setActivePlayer
     private final SimulationLogger logger;
 
+    // private constructor forces everyone to use the Builder
     private CommandContext(Builder builder) {
         this.activePlayer    = builder.activePlayer;
         this.neighborhood    = builder.neighborhood;
@@ -78,18 +69,14 @@ public class CommandContext {
     /** Returns the simulation logger for buffering messages. */
     public SimulationLogger getLogger() { return logger; }
 
-    /**
-     * Switches the engine's active player via callback.
-     *
-     * @param sim the Sim to make active.
-     */
+    // delegates back to engine without knowing about engine (Dependency Inversion)
     public void switchActivePlayer(Sim sim) {
         if (setActivePlayer != null) {
             setActivePlayer.accept(sim);
         }
     }
 
-    /** Fluent builder for constructing a {@code CommandContext}. */
+    // Builder pattern — fluent API so InputHandler can construct the context cleanly
     public static class Builder {
         private Sim activePlayer;
         private List<Sim> neighborhood;
@@ -146,16 +133,7 @@ public class CommandContext {
             return this;
         }
 
-        /**
-         * Builds and validates the {@code CommandContext}.
-         *
-         * <p>Ensures all required fields are non-null. Optional fields
-         * ({@code availableItems}, {@code setActivePlayer}) are allowed
-         * to be null.</p>
-         *
-         * @return a fully-constructed {@code CommandContext}.
-         * @throws NullPointerException if any required field is null.
-         */
+        // validates required fields so we fail fast if something's missing
         public CommandContext build() {
             Objects.requireNonNull(activePlayer, "activePlayer is required");
             Objects.requireNonNull(neighborhood, "neighborhood is required");
