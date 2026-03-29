@@ -1,18 +1,17 @@
 package simcli.engine;
 
+import java.util.List;
+import java.util.Scanner;
 import simcli.entities.actors.Sim;
 import simcli.entities.managers.NPCManager;
 import simcli.entities.models.SimState;
+import simcli.persistence.SaveManager;
 import simcli.ui.IRenderer;
 import simcli.ui.TerminalRenderer;
-import simcli.persistence.SaveManager;
 import simcli.ui.UIManager;
 import simcli.utils.GameConstants;
 import simcli.world.Residential;
 import simcli.world.interactables.Interactable;
-
-import java.util.List;
-import java.util.Scanner;
 
 /**
  * Core coordinator of the simulation game.
@@ -363,8 +362,6 @@ public class GameEngine {
             aggregateStats();
             UIManager.printGameOverStats(this.timeManager.getCurrentTick(),
                     this.sessionTotalMoney, this.sessionTotalItems);
-            UIManager.printMessage("Saving final state...");
-            SaveManager.saveGame(this, this.worldName);
             UIManager.prompt("\nPress ENTER to end simulation...");
             scanner.nextLine();
             return false;
