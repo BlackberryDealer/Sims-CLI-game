@@ -30,6 +30,14 @@ public class TerminalRenderer implements IRenderer {
         UIManager.printHint();
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * <b>Implementation Note:</b> This method deliberately resets the player's 
+     * {@link simcli.entities.models.ActionState} to {@code IDLE} immediately after rendering, ensuring 
+     * action-specific ASCII art does not persist onto the next turn.
+     * </p>
+     */
     @Override
     public void renderHUD(Sim player, Building location, int day, String formattedTime,
             String timeOfDay, boolean inRoom, String roomName) {
