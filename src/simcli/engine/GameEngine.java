@@ -23,6 +23,7 @@ public class GameEngine {
     private TimeManager timeManager;
     private boolean isGameOver;
     private RandomEventManager randomEventManager;
+    private LifecycleManager lifecycleManager;
     private GameLoop gameLoop;
 
     // World Stats tracking (aggregated upon save/game over)
@@ -46,7 +47,8 @@ public class GameEngine {
         this.inputHandler = new InputHandler(this.worldManager, this.timeManager, this);
         this.renderer = new TerminalRenderer();
         this.randomEventManager = new RandomEventManager();
-        this.gameLoop = new GameLoop(this.timeManager, this.neighborhood, this.randomEventManager);
+        this.lifecycleManager = new LifecycleManager(GameConstants.DAYS_PER_AGE_TICK);
+        this.gameLoop = new GameLoop(this.timeManager, this.neighborhood, this.randomEventManager, this.lifecycleManager);
     }
 
     // CONSTRUCTOR: For Loading an Existing World
@@ -73,7 +75,8 @@ public class GameEngine {
         this.inputHandler = new InputHandler(this.worldManager, this.timeManager, this);
         this.renderer = new TerminalRenderer();
         this.randomEventManager = new RandomEventManager();
-        this.gameLoop = new GameLoop(this.timeManager, this.neighborhood, this.randomEventManager);
+        this.lifecycleManager = new LifecycleManager(GameConstants.DAYS_PER_AGE_TICK);
+        this.gameLoop = new GameLoop(this.timeManager, this.neighborhood, this.randomEventManager, this.lifecycleManager);
     }
 
     public Sim getActivePlayer() { return activePlayer; }
@@ -87,6 +90,10 @@ public class GameEngine {
 
     public NPCManager getNpcManager() {
         return npcManager;
+    }
+
+    public LifecycleManager getLifecycleManager() {
+        return lifecycleManager;
     }
 
     public void run(Scanner scanner) {
