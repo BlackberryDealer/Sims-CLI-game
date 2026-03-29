@@ -335,6 +335,16 @@ public class Sim implements ISimBehaviour {
     }
 
     /**
+     * Sets the total number of in-game days this Sim has been alive.
+     * Used exclusively for saving/loading the exact lifecycle state.
+     *
+     * @param daysAlive days-alive count.
+     */
+    public void setDaysAlive(int daysAlive) {
+        this.daysAlive = daysAlive;
+    }
+
+    /**
      * Increments the Sim's days-alive counter by one.
      * Called by {@link simcli.engine.LifecycleManager} on each day boundary.
      */

@@ -125,7 +125,8 @@ public class SaveManager {
                         sim.getHunger().getValue() + "," + sim.getEnergy().getValue() + ","
                         + sim.getHappiness().getValue() + "," + sim.getHygiene().getValue() + ","
                         + sim.getSocial().getValue() + "," + sim.getJobTier() + ","
-                        + sim.isChildSim() + "," + sim.getHealth() + "," + sim.getStarvingTicks());
+                        + sim.isChildSim() + "," + sim.getHealth() + "," + sim.getStarvingTicks() + ","
+                        + sim.getDaysAlive());
                 
                 // Save Inventory
                 for (Item item : sim.getInventory()) {
@@ -139,7 +140,8 @@ public class SaveManager {
                         npc.getGender().name() + "," + npc.getCareer().name() + "," +
                         npc.getHunger().getValue() + "," + npc.getEnergy().getValue() + "," +
                         npc.getHappiness().getValue() + "," + npc.getHygiene().getValue() + "," +
-                        npc.getSocial().getValue() + "," + npc.getHealth() + "," + npc.getStarvingTicks());
+                        npc.getSocial().getValue() + "," + npc.getHealth() + "," + npc.getStarvingTicks() + ","
+                        + npc.getDaysAlive());
             }
 
             // Save Relationships
@@ -230,6 +232,9 @@ public class SaveManager {
                         npc.setHealth(Integer.parseInt(data[9]));
                         npc.setStarvingTicks(Integer.parseInt(data[10]));
                     }
+                    if (data.length > 11) {
+                        npc.setDaysAlive(Integer.parseInt(data[11]));
+                    }
                     loadedNPCs.add(npc);
                 } else if (line.startsWith("Sim:")) {
                     String[] data = line.substring(4).split(",");
@@ -250,6 +255,9 @@ public class SaveManager {
                     if (data.length > 13) {
                         sim.setHealth(Integer.parseInt(data[13]));
                         sim.setStarvingTicks(Integer.parseInt(data[14]));
+                    }
+                    if (data.length > 15) {
+                        sim.setDaysAlive(Integer.parseInt(data[15]));
                     }
                     sim.updateState();
                     loadedNeighborhood.add(sim);

@@ -54,18 +54,21 @@ public class GameLoop {
      * @param activePlayer the currently controlled Sim (passed to the event
      *                     manager for targeted events).
      */
-    public void processTick(Sim activePlayer) {
+    public void processTick(Sim activePlayer, int ticksToAdvance) {
         int previousDay = timeManager.getCurrentDay();
 
         for (Sim sim : neighborhood) {
             sim.tick();
         }
 
-        timeManager.advanceTick();
+        timeManager.advanceTicks(ticksToAdvance);
         eventManager.trigger(activePlayer, timeManager);
 
-        if (timeManager.getCurrentDay() > previousDay) {
-            processDayBoundary();
+        int currentDay = timeManager.getCurrentDay();
+        int daysCrossed = currentDay - previousDay;
+        
+        for (int i = 0; i < daysCrossed; i++) {
+            processDayBoundary(previousDay + 1 + i);
         }
     }
 
@@ -77,10 +80,10 @@ public class GameLoop {
      * {@link LifecycleManager}. This keeps the GameLoop thin — it only
      * coordinates; the lifecycle rules live in their own class.</p>
      */
-    private void processDayBoundary() {
+    private void processDayBoundary(int dayNumber) {
         simcli.ui.UIManager.printMessage(
                 "\n*** A new day has begun! (Day "
-                + timeManager.getCurrentDay() + ") ***");
+                + dayNumber + ") ***");
 
         // Delegate aging/death/retirement to LifecycleManager (SRP).
         lifecycleManager.processDayForAll(neighborhood);

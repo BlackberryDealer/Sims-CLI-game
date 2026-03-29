@@ -253,15 +253,18 @@ public class GameEngine {
             String input = scanner.nextLine().toUpperCase();
             CommandResult result = inputHandler.handle(input, this.activePlayer, scanner);
 
+            int ticksToAdvance = 1;
+
             switch (result) {
                 case TICK_FORWARD:
                     tickForward = true;
+                    ticksToAdvance = 1;
                     break;
                 case NO_TICK:
                     tickForward = false;
                     break;
                 case SLEEP_EVENT:
-                    handleSleepEvent();
+                    ticksToAdvance = handleSleepEvent();
                     tickForward = true;
                     break;
                 case SAVE_AND_EXIT:
@@ -275,7 +278,7 @@ public class GameEngine {
             }
 
             if (running && tickForward) {
-                gameLoop.processTick(this.activePlayer);
+                gameLoop.processTick(this.activePlayer, ticksToAdvance);
                 maybeAutosave();
                 UIManager.prompt("\nPress ENTER to continue to the next turn...");
                 scanner.nextLine();
@@ -379,9 +382,11 @@ public class GameEngine {
      * Handles the sleep event: fast-forwards the clock to the next morning.
      *
      * <p>Re-renders the HUD so the player sees the updated time, then
-     * advances ticks to 08:00 (morning).</p>
+     * calculates ticks to 08:00 (morning).</p>
+     * 
+     * @return the number of ticks required to reach the target morning hour
      */
-    private void handleSleepEvent() {
+    private int handleSleepEvent() {
         Sim activePlayer = this.activePlayer;
         renderer.clear();
 
@@ -403,7 +408,7 @@ public class GameEngine {
                 + ticksToMorning + " hours.");
         UIManager.sleepAnimation();
 
-        timeManager.advanceTicks(ticksToMorning - 1);
+        return ticksToMorning;
     }
 
     /**
