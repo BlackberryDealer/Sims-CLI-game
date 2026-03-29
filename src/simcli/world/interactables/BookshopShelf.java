@@ -27,7 +27,7 @@ public class BookshopShelf extends AbstractShop {
         catalog.add(new Consumable("Novel", 15, 0, 0, 25));
         catalog.add(new Consumable("Comic Book", 8, 0, 0, 15));
         catalog.add(new Consumable("Cookbook", 20, 0, 0, 10));
-        // Study materials — more expensive but boost skills when used at Computer
+        // Study materials
         catalog.add(new Consumable("Textbook", 50, 0, 0, 5));
         // Furniture available at the bookshop
         catalog.add(new Furniture("Computer", 500, 20));

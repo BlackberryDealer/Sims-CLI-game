@@ -88,7 +88,7 @@ public class GameEngine {
         this.worldName = worldName;
         this.neighborhood = startingNeighborhood;
         this.npcManager = new NPCManager();
-        this.npcManager.replenishNPCs(3);
+        this.npcManager.replenishNPCs(simcli.utils.GameConstants.MAX_NPCS);
         this.activePlayer = startingNeighborhood.get(0);
 
         initCore(new TimeManager(1, GameConstants.TICKS_PER_DAY), renderer);

@@ -17,6 +17,8 @@ public final class GameConstants {
     public static final int AUTOSAVE_INTERVAL_TICKS = 10;
     /** The hour of the day (in 24h ticks) that a sleeping Sim wakes up. */
     public static final int MORNING_HOUR = 8;
+    /** The maximum number of NPCs that can be in the park pool at once. */
+    public static final int MAX_NPCS = 8;
 
     // --- Commands ---
     /** The bonus capacity added to inventory when upgraded. */
