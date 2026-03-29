@@ -9,21 +9,18 @@ import simcli.world.Residential;
 import simcli.world.Room;
 
 import java.util.List;
-import java.util.Scanner;
 
 public class UpgradeRoomCommand extends BaseCommand {
-    private final Sim activePlayer;
-    private final Scanner scanner;
-    private final Building currentLocation;
 
-    public UpgradeRoomCommand(Sim activePlayer, Scanner scanner, Building currentLocation) {
-        this.activePlayer = activePlayer;
-        this.scanner = scanner;
-        this.currentLocation = currentLocation;
+    public UpgradeRoomCommand(CommandContext ctx) {
+        super(ctx);
     }
 
     @Override
     protected CommandResult run() {
+        Sim activePlayer = ctx.getActivePlayer();
+        Building currentLocation = ctx.getCurrentLocation();
+
         if (currentLocation.isResidential()) {
             Residential res = (Residential) currentLocation;
             UIManager.printMessage("\n=== UPGRADE ROOM ===");
@@ -38,7 +35,7 @@ public class UpgradeRoomCommand extends BaseCommand {
             UIManager.printMessage("[0] Cancel");
             UIManager.prompt("Room> ");
             try {
-                int rChoice = Integer.parseInt(scanner.nextLine().trim());
+                int rChoice = Integer.parseInt(ctx.getScanner().nextLine().trim());
                 if (rChoice > 0 && rChoice <= rooms.size()) {
                     Room targetRoom = rooms.get(rChoice - 1);
                     targetRoom.upgradeCapacity(activePlayer, GameConstants.UPGRADE_CAPACITY_BONUS, GameConstants.UPGRADE_COST);
@@ -49,8 +46,7 @@ public class UpgradeRoomCommand extends BaseCommand {
         } else {
             UIManager.printMessage("You can only upgrade rooms at home!");
         }
-        pause(scanner);
+        pause();
         return CommandResult.NO_TICK;
     }
-
 }

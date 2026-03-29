@@ -3,7 +3,6 @@ package simcli.engine.commands;
 import simcli.engine.CommandResult;
 import simcli.engine.SimulationException;
 import simcli.engine.SleepEventException;
-import simcli.engine.TimeManager;
 import simcli.entities.actors.Sim;
 import simcli.entities.items.Furniture;
 import simcli.entities.items.Item;
@@ -14,24 +13,18 @@ import simcli.world.Room;
 import simcli.world.interactables.Interactable;
 
 import java.util.List;
-import java.util.Scanner;
 
 public class InventoryCommand extends BaseCommand {
 
-    private final Sim activePlayer;
-    private final Scanner scanner;
-    private final Building currentLocation;
-    private final TimeManager timeManager;
-
-    public InventoryCommand(Sim activePlayer, Scanner scanner, Building currentLocation, TimeManager timeManager) {
-        this.activePlayer = activePlayer;
-        this.scanner = scanner;
-        this.currentLocation = currentLocation;
-        this.timeManager = timeManager;
+    public InventoryCommand(CommandContext ctx) {
+        super(ctx);
     }
 
     @Override
     protected CommandResult run() throws SimulationException, SleepEventException {
+        Sim activePlayer = ctx.getActivePlayer();
+        Building currentLocation = ctx.getCurrentLocation();
+
         boolean managingInventory = true;
         int pageSize = 10;
         int currentPage = 0;
@@ -70,7 +63,7 @@ public class InventoryCommand extends BaseCommand {
             UIManager.printMessage("[0] Back");
             UIManager.prompt("Select item to Use/Place> ");
 
-            String invInput = scanner.nextLine().trim().toUpperCase();
+            String invInput = ctx.getScanner().nextLine().trim().toUpperCase();
 
             if (invInput.equals("0")) {
                 managingInventory = false;
@@ -101,7 +94,7 @@ public class InventoryCommand extends BaseCommand {
                             }
                             UIManager.printMessage("[0] Cancel");
                             UIManager.prompt("Room> ");
-                            int rChoice = Integer.parseInt(scanner.nextLine().trim());
+                            int rChoice = Integer.parseInt(ctx.getScanner().nextLine().trim());
                             if (rChoice > 0 && rChoice <= rooms.size()) {
                                 Room targetRoom = rooms.get(rChoice - 1);
                                 if (targetRoom != activePlayer.getCurrentRoom()) {
@@ -120,7 +113,7 @@ public class InventoryCommand extends BaseCommand {
                             }
                         } else {
                             // Call the interaction on the item natively (so Consume propagates appropriately)
-                            selectedItem.interact(activePlayer, scanner, timeManager);
+                            selectedItem.interact(activePlayer, ctx.getScanner(), ctx.getTimeManager());
                         }
                     } else {
                         UIManager.printMessage("Invalid selection.");
@@ -130,8 +123,7 @@ public class InventoryCommand extends BaseCommand {
                 }
             }
         }
-        pause(scanner);
+        pause();
         return CommandResult.NO_TICK;
     }
-
 }

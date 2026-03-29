@@ -6,21 +6,17 @@ import simcli.needs.Need;
 import simcli.ui.UIManager;
 import simcli.world.Building;
 
-import java.util.Scanner;
-
 public class CharacterStatusCommand extends BaseCommand {
-    private final Sim activePlayer;
-    private final Scanner scanner;
-    private final Building currentLocation;
 
-    public CharacterStatusCommand(Sim activePlayer, Scanner scanner, Building currentLocation) {
-        this.activePlayer = activePlayer;
-        this.scanner = scanner;
-        this.currentLocation = currentLocation;
+    public CharacterStatusCommand(CommandContext ctx) {
+        super(ctx);
     }
 
     @Override
     protected CommandResult run() {
+        Sim activePlayer = ctx.getActivePlayer();
+        Building currentLocation = ctx.getCurrentLocation();
+
         UIManager.printMessage("\n=== CHARACTER STATUS ===");
         UIManager.printMessage("Name: " + activePlayer.getName());
         UIManager.printMessage("Age: " + activePlayer.getAge());
@@ -53,8 +49,7 @@ public class CharacterStatusCommand extends BaseCommand {
         }
         UIManager.printMessage("==================");
         
-        pause(scanner);
+        pause();
         return CommandResult.NO_TICK;
     }
-
 }

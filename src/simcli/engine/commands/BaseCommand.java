@@ -1,6 +1,5 @@
 package simcli.engine.commands;
 
-import java.util.Scanner;
 import simcli.engine.CommandResult;
 import simcli.engine.SimulationException;
 import simcli.engine.SleepEventException;
@@ -15,8 +14,24 @@ import simcli.ui.UIManager;
  * 
  * <p>Making {@code execute()} final enforces the Open/Closed Principle —
  * the template is closed to modification but open to extension via {@code run()}.</p>
+ *
+ * <p>Every subclass receives a {@link CommandContext} via the constructor,
+ * giving it access to exactly the game state it needs without coupling to
+ * {@code GameEngine}.</p>
  */
 public abstract class BaseCommand implements ICommand {
+
+    /** Shared context containing all game state a command may need. */
+    protected final CommandContext ctx;
+
+    /**
+     * Constructs a command with the given context.
+     *
+     * @param ctx the shared command context built by InputHandler.
+     */
+    protected BaseCommand(CommandContext ctx) {
+        this.ctx = ctx;
+    }
 
     /**
      * Template method: defines the overall execution flow.
@@ -47,11 +62,9 @@ public abstract class BaseCommand implements ICommand {
     /**
      * Utility method: pauses execution and waits for the user to press ENTER.
      * Available to all subclasses to avoid duplicating this common UI pattern.
-     * 
-     * @param scanner the input scanner to read the ENTER keypress from
      */
-    protected void pause(Scanner scanner) {
+    protected void pause() {
         UIManager.prompt("\nPress ENTER to return...");
-        scanner.nextLine();
+        ctx.getScanner().nextLine();
     }
 }

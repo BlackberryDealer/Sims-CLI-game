@@ -7,19 +7,16 @@ import simcli.world.Residential;
 import simcli.world.Room;
 import simcli.world.interactables.Interactable;
 
-import java.util.Scanner;
-
 public class HouseInfoCommand extends BaseCommand {
-    private final Scanner scanner;
-    private final Building currentLocation;
 
-    public HouseInfoCommand(Scanner scanner, Building currentLocation) {
-        this.scanner = scanner;
-        this.currentLocation = currentLocation;
+    public HouseInfoCommand(CommandContext ctx) {
+        super(ctx);
     }
 
     @Override
     protected CommandResult run() {
+        Building currentLocation = ctx.getCurrentLocation();
+
         if (currentLocation.isResidential()) {
             Residential res = (Residential) currentLocation;
             UIManager.printMessage("\n=== HOUSE INFO: " + res.getName() + " ===");
@@ -34,8 +31,7 @@ public class HouseInfoCommand extends BaseCommand {
         } else {
             UIManager.printMessage("You can only inspect residential buildings.");
         }
-        pause(scanner);
+        pause();
         return CommandResult.NO_TICK;
     }
-
 }

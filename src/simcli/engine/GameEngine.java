@@ -44,7 +44,8 @@ public class GameEngine {
         ((WorldManager)this.worldManager).setEngine(this);
         this.worldManager.setupWorld();
         this.activePlayer = startingNeighborhood.get(0);
-        this.inputHandler = new InputHandler(this.worldManager, this.timeManager, this);
+        this.inputHandler = new InputHandler(this.worldManager, this.timeManager,
+                this.neighborhood, this::setActivePlayer);
         this.renderer = new TerminalRenderer();
         this.randomEventManager = new RandomEventManager();
         this.lifecycleManager = new LifecycleManager(GameConstants.DAYS_PER_AGE_TICK);
@@ -72,7 +73,8 @@ public class GameEngine {
         }
         this.activePlayer = firstAlive;
         
-        this.inputHandler = new InputHandler(this.worldManager, this.timeManager, this);
+        this.inputHandler = new InputHandler(this.worldManager, this.timeManager,
+                this.neighborhood, this::setActivePlayer);
         this.renderer = new TerminalRenderer();
         this.randomEventManager = new RandomEventManager();
         this.lifecycleManager = new LifecycleManager(GameConstants.DAYS_PER_AGE_TICK);
