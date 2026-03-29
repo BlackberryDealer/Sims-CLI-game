@@ -9,6 +9,9 @@ import simcli.world.interactables.InteractableFactory;
 
 import java.util.Scanner;
 
+/**
+ * Represents the Furniture entity or state in the simulation.
+ */
 public class Furniture extends Item {
     private int spaceScore;
 

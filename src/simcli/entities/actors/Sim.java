@@ -26,6 +26,9 @@ import simcli.utils.GameConstants;
 import simcli.utils.GameRandom;
 import simcli.world.Room;
 
+/**
+ * Represents the Sim entity or state in the simulation.
+ */
 public class Sim implements ISimBehaviour {
 
     private String name;

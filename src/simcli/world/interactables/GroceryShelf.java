@@ -10,6 +10,9 @@ import simcli.entities.items.Consumable;
 import simcli.entities.items.Furniture;
 import simcli.entities.models.Job;
 
+/**
+ * Represents a GroceryShelf location or interactable object.
+ */
 public class GroceryShelf extends AbstractShop {
 
     public GroceryShelf() {

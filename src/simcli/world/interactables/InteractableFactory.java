@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
+/**
+ * Represents a InteractableFactory location or interactable object.
+ */
 public class InteractableFactory {
     private static final Map<String, Supplier<Interactable>> FACTORY = new HashMap<>();
     static {

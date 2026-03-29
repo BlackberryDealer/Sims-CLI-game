@@ -14,6 +14,9 @@ import simcli.entities.models.SocialAction;
 import simcli.entities.models.Trait;
 import simcli.utils.GameConstants;
 
+/**
+ * Represents a ParkBench location or interactable object.
+ */
 public class ParkBench implements Interactable {
     private final GameEngine engine;
 

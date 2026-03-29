@@ -12,6 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * Represents a Fridge location or interactable object.
+ */
 public class Fridge implements Interactable, Container {
     private List<Item> storedFood = new ArrayList<>();
 

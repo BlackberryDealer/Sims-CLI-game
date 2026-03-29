@@ -2,6 +2,9 @@ package simcli.entities.models;
 
 import simcli.utils.GameConstants;
 
+/**
+ * Represents the Job entity or state in the simulation.
+ */
 public enum Job {
     UNEMPLOYED("Unemployed", 0, 0, 0, 0, 100, 1.0, 1),
     SOFTWARE_ENGINEER("Software Engineer", 150, 4, 30, GameConstants.ADULT_AGE, GameConstants.ELDER_AGE, 1.2, 5),

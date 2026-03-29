@@ -1,5 +1,8 @@
 package simcli.entities.models;
 
+/**
+ * Represents the WorkResult entity or state in the simulation.
+ */
 public class WorkResult {
     private final boolean success;
     private final String message;

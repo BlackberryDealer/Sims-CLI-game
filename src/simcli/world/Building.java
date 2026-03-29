@@ -5,6 +5,9 @@ import java.util.List;
 import simcli.entities.actors.Sim;
 import simcli.world.interactables.Interactable;
 
+/**
+ * Represents a Building location or interactable object.
+ */
 public abstract class Building {
     private String name;
     private List<Interactable> interactables;

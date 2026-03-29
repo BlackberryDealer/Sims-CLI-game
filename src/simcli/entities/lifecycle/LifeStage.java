@@ -1,6 +1,9 @@
 package simcli.entities.lifecycle;
 
 
+/**
+ * Represents the LifeStage entity or state in the simulation.
+ */
 public interface LifeStage {
 
 

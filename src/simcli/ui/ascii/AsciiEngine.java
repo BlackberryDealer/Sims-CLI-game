@@ -9,6 +9,9 @@ import simcli.ui.ascii.providers.*;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * UI component handing formatting or displaying of AsciiEngine.
+ */
 public class AsciiEngine {
 
     private Map<ActionState, IAsciiProvider> actionProviders;

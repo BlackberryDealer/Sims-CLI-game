@@ -7,6 +7,9 @@ import java.util.Map;
 import simcli.engine.SimulationLogger;
 import simcli.utils.GameConstants;
 
+/**
+ * Represents the SkillManager entity or state in the simulation.
+ */
 public class SkillManager {
     private Map<SkillType, Integer> skills;
 

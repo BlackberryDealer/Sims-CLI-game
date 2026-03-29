@@ -2,6 +2,9 @@ package simcli.entities.lifecycle;
 
 import simcli.utils.GameConstants;
 
+/**
+ * Represents the TeenStage entity or state in the simulation.
+ */
 public class TeenStage implements LifeStage {
 
     @Override

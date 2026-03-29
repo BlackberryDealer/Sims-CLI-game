@@ -7,6 +7,9 @@ import simcli.entities.actors.Sim;
 import simcli.ui.UIManager;
 import simcli.world.interactables.Interactable;
 
+/**
+ * Represents a Room location or interactable object.
+ */
 public class Room {
     private String name;
     private int maxCapacity;

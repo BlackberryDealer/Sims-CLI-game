@@ -7,6 +7,9 @@ import simcli.utils.GameRandom;
 import simcli.world.interactables.Interactable;
 import java.util.List;
 
+/**
+ * UI component handing formatting or displaying of UIManager.
+ */
 public class UIManager {
     private static final String[] HINTS = {
             "Hint: Buying food at the supermarket keeps you from starving!",

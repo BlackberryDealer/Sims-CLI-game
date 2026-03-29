@@ -3,6 +3,9 @@ package simcli.entities.lifecycle;
 
 import simcli.utils.GameConstants;
 
+/**
+ * Represents the AdultStage entity or state in the simulation.
+ */
 public class AdultStage implements LifeStage {
 
     @Override

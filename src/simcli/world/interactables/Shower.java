@@ -9,6 +9,9 @@ import simcli.ui.UIManager;
 
 import java.util.Scanner;
 
+/**
+ * Represents a Shower location or interactable object.
+ */
 public class Shower implements Interactable {
 
     @Override

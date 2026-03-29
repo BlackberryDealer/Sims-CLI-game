@@ -7,6 +7,9 @@ import simcli.utils.GameConstants;
 
 import java.util.Scanner;
 
+/**
+ * Represents a Bed location or interactable object.
+ */
 public class Bed implements Interactable {
     @Override
     public void interact(Sim sim, Scanner scanner, TimeManager timeManager) throws SleepEventException {

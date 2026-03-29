@@ -6,6 +6,9 @@ import simcli.world.interactables.Interactable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Represents a Residential location or interactable object.
+ */
 public class Residential extends Building {
     private List<Room> rooms;
     private int purchasePrice;

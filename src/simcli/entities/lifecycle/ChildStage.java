@@ -3,6 +3,9 @@ package simcli.entities.lifecycle;
 
 import simcli.utils.GameConstants;
 
+/**
+ * Represents the ChildStage entity or state in the simulation.
+ */
 public class ChildStage implements LifeStage {
 
     @Override

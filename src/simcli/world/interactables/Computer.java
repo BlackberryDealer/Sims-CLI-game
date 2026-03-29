@@ -11,6 +11,9 @@ import simcli.entities.models.Trait;
 
 import java.util.Scanner;
 
+/**
+ * Represents a Computer location or interactable object.
+ */
 public class Computer implements Interactable {
     private static final int ENERGY_COST = 15;
     private static final int HUNGER_COST = 10;

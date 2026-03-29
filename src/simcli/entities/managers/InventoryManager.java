@@ -5,6 +5,9 @@ import simcli.entities.items.Item;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Represents the InventoryManager entity or state in the simulation.
+ */
 public class InventoryManager {
     private List<Item> inventory;
     private int capacity;

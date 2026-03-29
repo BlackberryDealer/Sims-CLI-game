@@ -4,6 +4,9 @@ import simcli.entities.models.Job;
 
 import simcli.engine.SimulationLogger;
 
+/**
+ * Represents the CareerManager entity or state in the simulation.
+ */
 public class CareerManager {
     private Job career;
     private int jobTier;

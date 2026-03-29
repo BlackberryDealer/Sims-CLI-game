@@ -2,6 +2,9 @@ package simcli.persistence;
 
 import simcli.entities.items.*;
 
+/**
+ * Class representing Savable.
+ */
 public interface Savable {
     String toSaveString();
 

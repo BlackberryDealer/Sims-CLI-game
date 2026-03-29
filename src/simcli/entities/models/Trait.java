@@ -1,5 +1,8 @@
 package simcli.entities.models;
 
+/**
+ * Represents the Trait entity or state in the simulation.
+ */
 public enum Trait {
     ACTIVE(0.8),         // Uses less energy
     LAZY(1.5),           // Uses more energy

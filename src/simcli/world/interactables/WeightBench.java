@@ -9,6 +9,9 @@ import simcli.ui.UIManager;
 
 import java.util.Scanner;
 
+/**
+ * Represents a WeightBench location or interactable object.
+ */
 public class WeightBench implements Interactable {
     private static final int ENERGY_COST = 25;
     private static final int HUNGER_COST = 25;

@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * Represents a StorageChest location or interactable object.
+ */
 public class StorageChest implements Interactable, Container {
     private List<Item> storedItems = new ArrayList<>();
     

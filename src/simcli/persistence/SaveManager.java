@@ -17,6 +17,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Class representing SaveManager.
+ */
 public class SaveManager {
     private static final String SAVE_DIR = "saves/";
     private static final String FILE_FORMAT = ".txt";

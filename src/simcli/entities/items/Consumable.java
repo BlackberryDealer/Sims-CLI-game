@@ -9,6 +9,9 @@ import simcli.ui.UIManager;
 
 import java.util.Scanner;
 
+/**
+ * Represents the Consumable entity or state in the simulation.
+ */
 public class Consumable extends Item {
     private int satiationValue;
     private int energyValue;

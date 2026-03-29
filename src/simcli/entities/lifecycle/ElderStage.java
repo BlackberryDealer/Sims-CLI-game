@@ -1,5 +1,8 @@
 package simcli.entities.lifecycle;
 
+/**
+ * Represents the ElderStage entity or state in the simulation.
+ */
 public class ElderStage implements LifeStage {
 
     @Override
