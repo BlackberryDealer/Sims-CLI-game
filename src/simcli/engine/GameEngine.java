@@ -32,6 +32,12 @@ import java.util.Scanner;
  *     <li>{@link RandomEventManager} — random event generation</li>
  *     <li>{@link LifecycleManager} — aging, death, retirement</li>
  * </ul>
+ *
+ * <h2>Dependency Injection</h2>
+ * <p>All core dependencies ({@link IRenderer}, {@link SimulationLogger},
+ * {@link TimeManager}, etc.) are injected via constructors or the
+ * {@link #initCore(TimeManager, NPCManager, IRenderer)} helper, ensuring
+ * the engine is fully testable with mock implementations.</p>
  */
 public class GameEngine {
     private List<Sim> neighborhood;
@@ -44,12 +50,17 @@ public class GameEngine {
     private RandomEventManager randomEventManager;
     private LifecycleManager lifecycleManager;
     private GameLoop gameLoop;
+    private SimulationLogger logger;
 
     // World Stats tracking (aggregated upon save/game over)
-    private final NPCManager npcManager;
+    private NPCManager npcManager;
     private int sessionTotalMoney;
     private int sessionTotalItems;
     private Sim activePlayer;
+
+    // -------------------------------------------------------------------------
+    // Constructors
+    // -------------------------------------------------------------------------
 
     /**
      * Constructs a new {@code GameEngine} for a brand-new world.
@@ -60,24 +71,27 @@ public class GameEngine {
      * @param worldName            the display name for this save slot.
      * @param startingNeighborhood the initial list of Sims (at least one).
      */
-    // CONSTRUCTOR: For Creating a New World
     public GameEngine(String worldName, List<Sim> startingNeighborhood) {
+        this(worldName, startingNeighborhood, new TerminalRenderer());
+    }
+
+    /**
+     * Constructs a new {@code GameEngine} for a brand-new world with an
+     * explicit renderer (useful for testing or alternate UIs).
+     *
+     * @param worldName            the display name for this save slot.
+     * @param startingNeighborhood the initial list of Sims (at least one).
+     * @param renderer             the renderer to use for all UI output.
+     */
+    public GameEngine(String worldName, List<Sim> startingNeighborhood,
+                      IRenderer renderer) {
         this.worldName = worldName;
-        this.timeManager = new TimeManager(1, GameConstants.TICKS_PER_DAY); // 24 ticks per day
-        this.isGameOver = false;
         this.neighborhood = startingNeighborhood;
         this.npcManager = new NPCManager();
         this.npcManager.replenishNPCs(3);
-        this.worldManager = new WorldManager();
-        ((WorldManager)this.worldManager).setEngine(this);
-        this.worldManager.setupWorld();
         this.activePlayer = startingNeighborhood.get(0);
-        this.inputHandler = new InputHandler(this.worldManager, this.timeManager,
-                this.neighborhood, this::setActivePlayer);
-        this.renderer = new TerminalRenderer();
-        this.randomEventManager = new RandomEventManager();
-        this.lifecycleManager = new LifecycleManager(GameConstants.DAYS_PER_AGE_TICK);
-        this.gameLoop = new GameLoop(this.timeManager, this.neighborhood, this.randomEventManager, this.lifecycleManager);
+
+        initCore(new TimeManager(1, GameConstants.TICKS_PER_DAY), renderer);
     }
 
     /**
@@ -91,34 +105,82 @@ public class GameEngine {
      * @param loadedNeighborhood the previously saved list of Sims.
      * @param isGameOver         whether the game was already over when saved.
      */
-    // CONSTRUCTOR: For Loading an Existing World
-    public GameEngine(String worldName, int currentTick, List<Sim> loadedNeighborhood, boolean isGameOver) {
+    public GameEngine(String worldName, int currentTick,
+                      List<Sim> loadedNeighborhood, boolean isGameOver) {
+        this(worldName, currentTick, loadedNeighborhood, isGameOver,
+                new TerminalRenderer());
+    }
+
+    /**
+     * Constructs a {@code GameEngine} by restoring a previously saved world
+     * with an explicit renderer.
+     *
+     * @param worldName          the display name for this save slot.
+     * @param currentTick        the persisted tick counter to restore.
+     * @param loadedNeighborhood the previously saved list of Sims.
+     * @param isGameOver         whether the game was already over when saved.
+     * @param renderer           the renderer to use for all UI output.
+     */
+    public GameEngine(String worldName, int currentTick,
+                      List<Sim> loadedNeighborhood, boolean isGameOver,
+                      IRenderer renderer) {
         this.worldName = worldName;
-        this.timeManager = new TimeManager(currentTick, GameConstants.TICKS_PER_DAY);
         this.neighborhood = loadedNeighborhood;
         this.isGameOver = isGameOver;
         this.npcManager = new NPCManager();
-        this.worldManager = new WorldManager();
-        ((WorldManager)this.worldManager).setEngine(this);
-        this.worldManager.setupWorld();
-        
-        // Find first alive sim, or default to 0 if all dead
+
+        // Find first alive sim, or default to index 0 if all dead
         Sim firstAlive = loadedNeighborhood.get(0);
-        for(Sim s : loadedNeighborhood) {
-            if(s.getState() != SimState.DEAD) {
+        for (Sim s : loadedNeighborhood) {
+            if (s.getState() != SimState.DEAD) {
                 firstAlive = s;
                 break;
             }
         }
         this.activePlayer = firstAlive;
-        
-        this.inputHandler = new InputHandler(this.worldManager, this.timeManager,
-                this.neighborhood, this::setActivePlayer);
-        this.renderer = new TerminalRenderer();
-        this.randomEventManager = new RandomEventManager();
-        this.lifecycleManager = new LifecycleManager(GameConstants.DAYS_PER_AGE_TICK);
-        this.gameLoop = new GameLoop(this.timeManager, this.neighborhood, this.randomEventManager, this.lifecycleManager);
+
+        initCore(new TimeManager(currentTick, GameConstants.TICKS_PER_DAY), renderer);
     }
+
+    // -------------------------------------------------------------------------
+    // Core Initialization (DRY helper)
+    // -------------------------------------------------------------------------
+
+    /**
+     * Shared initialization logic used by all constructors.
+     *
+     * <p>Creates the world, input handler, logger, event manager, lifecycle
+     * manager, and game loop. This eliminates the duplicated subsystem setup
+     * that previously existed in each constructor independently.</p>
+     *
+     * @param timeManager the time manager (already configured with the correct start tick).
+     * @param renderer    the renderer to use for all UI output.
+     */
+    private void initCore(TimeManager timeManager, IRenderer renderer) {
+        this.timeManager = timeManager;
+        this.renderer = renderer;
+
+        // Logger — instance-based, registered globally for legacy callers
+        this.logger = new SimulationLogger();
+        SimulationLogger.setInstance(this.logger);
+
+        // World
+        this.worldManager = new WorldManager(this.npcManager, this.neighborhood);
+        this.worldManager.setupWorld();
+
+        // Input
+        this.inputHandler = new InputHandler(this.worldManager, this.timeManager,
+                this.neighborhood, this::setActivePlayer, this.logger);
+
+        // Simulation subsystems (created by GameLoop to respect ownership)
+        this.gameLoop = new GameLoop(this.timeManager, this.neighborhood, this.logger);
+        this.randomEventManager = this.gameLoop.getRandomEventManager();
+        this.lifecycleManager = this.gameLoop.getLifecycleManager();
+    }
+
+    // -------------------------------------------------------------------------
+    // Public API
+    // -------------------------------------------------------------------------
 
     /** Returns the currently active (controlled) Sim. */
     public Sim getActivePlayer() { return activePlayer; }
@@ -145,6 +207,10 @@ public class GameEngine {
         return lifecycleManager;
     }
 
+    // -------------------------------------------------------------------------
+    // Main Game Loop (Refactored — reads like a table of contents)
+    // -------------------------------------------------------------------------
+
     /**
      * Runs the main game loop until the player saves-and-exits or all Sims die.
      *
@@ -152,58 +218,26 @@ public class GameEngine {
      * {@link InputHandler}, advances the simulation clock via
      * {@link GameLoop}, and periodically auto-saves.</p>
      *
+     * <p>The method body is intentionally high-level; all detailed logic is
+     * delegated to private helper methods for readability and testability.</p>
+     *
      * @param scanner shared {@link Scanner} for reading player input.
      */
     public void run(Scanner scanner) {
         boolean running = true;
         boolean tickForward = true;
-        
-        for (Sim sim : this.neighborhood) {
-            if (sim.getCurrentRoom() == null && sim.getState() != SimState.DEAD) {
-                this.worldManager.getCurrentLocation().enter(sim);
-            }
-        }
+
+        placeSimsInWorld();
 
         while (running) {
-            Sim activePlayer = this.activePlayer;
-            renderer.clear();
-            renderer.printHint();
-
-            boolean inRoom = this.worldManager.getCurrentLocation() instanceof Residential
-                    && activePlayer.getCurrentRoom() != null;
-            String roomName = inRoom ? activePlayer.getCurrentRoom().getName() : "";
-
-            renderer.renderHUD(activePlayer, this.worldManager.getCurrentLocation(),
-                    timeManager.getCurrentDay(), timeManager.getFormattedTime(),
-                    timeManager.getTimeOfDay(), inRoom, roomName);
-
-            renderer.renderHouseholdDashboard(this.neighborhood, activePlayer);
+            renderFrame();
 
             if (tickForward) {
+                Sim activePlayer = this.activePlayer;
                 if (activePlayer.getState() == SimState.DEAD) {
-                    Sim deadSim = activePlayer;
-                    renderer.renderDeathStats(deadSim);
-
-                    this.activePlayer = getNextAliveSim();
-                    activePlayer = this.activePlayer;
-                    if (this.activePlayer == null) {
-                        this.isGameOver = true;
-                        aggregateStats();
-                        UIManager.printGameOverStats(this.timeManager.getCurrentTick(),
-                                this.sessionTotalMoney, this.sessionTotalItems);
-                        UIManager.printMessage("Saving final state...");
-                        SaveManager.saveGame(this, this.worldName);
-                        running = false;
-                        UIManager.prompt("\nPress ENTER to end simulation...");
-                        scanner.nextLine();
-                        break;
-                    } else {
-                        UIManager.printMessage("Switching control to " + activePlayer.getName() + ".");
-                        this.worldManager.getCurrentLocation().enter(activePlayer);
-                        UIManager.prompt("\nPress ENTER to continue...");
-                        scanner.nextLine();
-                        continue;
-                    }
+                    running = handleDeadActivePlayer(scanner);
+                    tickForward = true;
+                    continue;
                 } else if (activePlayer.getState() == SimState.HUNGRY) {
                     UIManager.printMessage("\n[WARNING] " + activePlayer.getName() + " is HUNGRY! Feed them!");
                 }
@@ -211,23 +245,13 @@ public class GameEngine {
 
             tickForward = true;
 
-            renderer.renderActiveSimStats(activePlayer, this.neighborhood);
+            renderActionMenu();
 
-            UIManager.printMessage("Inventory Logs: " + activePlayer.getInventory().size() + " items");
-            List<Interactable> items;
-            if (inRoom) {
-                items = activePlayer.getCurrentRoom().getInteractables();
-            } else {
-                items = this.worldManager.getCurrentLocation().getInteractables();
-            }
-
-            renderer.renderActions(activePlayer, items, this.worldManager.getCurrentLocation() instanceof Residential);
-            SimulationLogger.flushAndPrint();
+            this.logger.flushAndPrint();
             UIManager.prompt("\nCOMMAND> ");
 
             String input = scanner.nextLine().toUpperCase();
-
-            CommandResult result = inputHandler.handle(input, activePlayer, scanner);
+            CommandResult result = inputHandler.handle(input, this.activePlayer, scanner);
 
             switch (result) {
                 case TICK_FORWARD:
@@ -237,21 +261,7 @@ public class GameEngine {
                     tickForward = false;
                     break;
                 case SLEEP_EVENT:
-                    renderer.clear();
-                    renderer.renderHUD(activePlayer, this.worldManager.getCurrentLocation(),
-                            timeManager.getCurrentDay(), timeManager.getFormattedTime(),
-                            timeManager.getTimeOfDay(), inRoom, roomName);
-
-                    int currentInDay = timeManager.getCurrentTick() % GameConstants.TICKS_PER_DAY;
-                    int ticksToMorning = (GameConstants.TICKS_PER_DAY - currentInDay + 8) % GameConstants.TICKS_PER_DAY;
-                    if (ticksToMorning == 0)
-                        ticksToMorning = GameConstants.TICKS_PER_DAY;
-
-                    UIManager.printMessage("\n" + activePlayer.getName() + " sleeps deeply in the bed for "
-                            + ticksToMorning + " hours.");
-                    UIManager.sleepAnimation();
-
-                    timeManager.advanceTicks(ticksToMorning - 1);
+                    handleSleepEvent();
                     tickForward = true;
                     break;
                 case SAVE_AND_EXIT:
@@ -261,22 +271,156 @@ public class GameEngine {
                     UIManager.printMessage("Game Saved! Returning to Main Menu...\n");
                     UIManager.prompt("Press ENTER to exit...");
                     scanner.nextLine();
-                    continue; // Will break out of loop since running is false
+                    continue;
             }
 
             if (running && tickForward) {
-                gameLoop.processTick(activePlayer);
-
-                if (timeManager.getCurrentTick() % 10 == 0) {
-                    UIManager.printMessage("[System] Autosaving...");
-                    SaveManager.saveGame(this, this.worldName);
-                }
-
+                gameLoop.processTick(this.activePlayer);
+                maybeAutosave();
                 UIManager.prompt("\nPress ENTER to continue to the next turn...");
                 scanner.nextLine();
             }
         }
     }
+
+    // -------------------------------------------------------------------------
+    // Private Helpers (extracted from the God Method)
+    // -------------------------------------------------------------------------
+
+    /**
+     * Places every non-dead Sim inside the current (default) location.
+     * Called once at the start of {@link #run(Scanner)}.
+     */
+    private void placeSimsInWorld() {
+        for (Sim sim : this.neighborhood) {
+            if (sim.getCurrentRoom() == null && sim.getState() != SimState.DEAD) {
+                this.worldManager.getCurrentLocation().enter(sim);
+            }
+        }
+    }
+
+    /**
+     * Renders the full game frame: clear screen, hint, HUD, and household dashboard.
+     */
+    private void renderFrame() {
+        Sim activePlayer = this.activePlayer;
+        renderer.clear();
+        renderer.printHint();
+
+        boolean inRoom = this.worldManager.getCurrentLocation() instanceof Residential
+                && activePlayer.getCurrentRoom() != null;
+        String roomName = inRoom ? activePlayer.getCurrentRoom().getName() : "";
+
+        renderer.renderHUD(activePlayer, this.worldManager.getCurrentLocation(),
+                timeManager.getCurrentDay(), timeManager.getFormattedTime(),
+                timeManager.getTimeOfDay(), inRoom, roomName);
+
+        renderer.renderHouseholdDashboard(this.neighborhood, activePlayer);
+    }
+
+    /**
+     * Renders the active Sim's detailed stats and the action menu.
+     */
+    private void renderActionMenu() {
+        Sim activePlayer = this.activePlayer;
+        boolean inRoom = this.worldManager.getCurrentLocation() instanceof Residential
+                && activePlayer.getCurrentRoom() != null;
+
+        renderer.renderActiveSimStats(activePlayer, this.neighborhood);
+
+        UIManager.printMessage("Inventory Logs: " + activePlayer.getInventory().size() + " items");
+        List<Interactable> items;
+        if (inRoom) {
+            items = activePlayer.getCurrentRoom().getInteractables();
+        } else {
+            items = this.worldManager.getCurrentLocation().getInteractables();
+        }
+
+        renderer.renderActions(activePlayer, items,
+                this.worldManager.getCurrentLocation() instanceof Residential);
+    }
+
+    /**
+     * Handles the case when the currently active player has died.
+     *
+     * <p>Displays death stats, switches to the next alive Sim, or triggers
+     * game-over if all Sims are dead.</p>
+     *
+     * @param scanner shared input scanner.
+     * @return {@code true} to continue the game loop, {@code false} to exit.
+     */
+    private boolean handleDeadActivePlayer(Scanner scanner) {
+        Sim deadSim = this.activePlayer;
+        renderer.renderDeathStats(deadSim);
+
+        this.activePlayer = getNextAliveSim();
+        if (this.activePlayer == null) {
+            // All Sims are dead — game over
+            this.isGameOver = true;
+            aggregateStats();
+            UIManager.printGameOverStats(this.timeManager.getCurrentTick(),
+                    this.sessionTotalMoney, this.sessionTotalItems);
+            UIManager.printMessage("Saving final state...");
+            SaveManager.saveGame(this, this.worldName);
+            UIManager.prompt("\nPress ENTER to end simulation...");
+            scanner.nextLine();
+            return false;
+        }
+
+        Sim activePlayer = this.activePlayer;
+        UIManager.printMessage("Switching control to " + activePlayer.getName() + ".");
+        this.worldManager.getCurrentLocation().enter(activePlayer);
+        UIManager.prompt("\nPress ENTER to continue...");
+        scanner.nextLine();
+        return true;
+    }
+
+    /**
+     * Handles the sleep event: fast-forwards the clock to the next morning.
+     *
+     * <p>Re-renders the HUD so the player sees the updated time, then
+     * advances ticks to 08:00 (morning).</p>
+     */
+    private void handleSleepEvent() {
+        Sim activePlayer = this.activePlayer;
+        renderer.clear();
+
+        boolean inRoom = this.worldManager.getCurrentLocation() instanceof Residential
+                && activePlayer.getCurrentRoom() != null;
+        String roomName = inRoom ? activePlayer.getCurrentRoom().getName() : "";
+
+        renderer.renderHUD(activePlayer, this.worldManager.getCurrentLocation(),
+                timeManager.getCurrentDay(), timeManager.getFormattedTime(),
+                timeManager.getTimeOfDay(), inRoom, roomName);
+
+        int currentInDay = timeManager.getCurrentTick() % GameConstants.TICKS_PER_DAY;
+        int ticksToMorning = (GameConstants.TICKS_PER_DAY - currentInDay + GameConstants.MORNING_HOUR) % GameConstants.TICKS_PER_DAY;
+        if (ticksToMorning == 0) {
+            ticksToMorning = GameConstants.TICKS_PER_DAY;
+        }
+
+        UIManager.printMessage("\n" + activePlayer.getName() + " sleeps deeply in the bed for "
+                + ticksToMorning + " hours.");
+        UIManager.sleepAnimation();
+
+        timeManager.advanceTicks(ticksToMorning - 1);
+    }
+
+    /**
+     * Periodically auto-saves the game state at the configured interval.
+     *
+     * <p>The interval is defined by {@link GameConstants#AUTOSAVE_INTERVAL_TICKS}.</p>
+     */
+    private void maybeAutosave() {
+        if (timeManager.getCurrentTick() % GameConstants.AUTOSAVE_INTERVAL_TICKS == 0) {
+            UIManager.printMessage("[System] Autosaving...");
+            SaveManager.saveGame(this, this.worldName);
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Utility Methods
+    // -------------------------------------------------------------------------
 
     /**
      * Finds the next alive Sim in the neighborhood.
@@ -304,6 +448,10 @@ public class GameEngine {
             this.sessionTotalItems += sim.getTotalItemsBought();
         }
     }
+
+    // -------------------------------------------------------------------------
+    // Getters
+    // -------------------------------------------------------------------------
 
     /** Returns the display name of this save slot. */
     public String getWorldName() {

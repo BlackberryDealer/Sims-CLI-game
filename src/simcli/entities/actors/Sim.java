@@ -221,12 +221,12 @@ public class Sim implements ISimBehaviour {
     public void ageUp() {
         this.age++;
         if (this.currentStage == null) {
-            SimulationLogger.log("[" + this.name + "] Birthday! Age: " + this.age + " (no life stage assigned yet).");
+            SimulationLogger.getInstance().log("[" + this.name + "] Birthday! Age: " + this.age + " (no life stage assigned yet).");
             return;
         }
         LifeStage nextStage = this.currentStage.getNextStage(this.age);
         if (nextStage != this.currentStage) {
-            SimulationLogger.log(
+            SimulationLogger.getInstance().log(
                     "\n*** LIFE STAGE TRANSITION ***"
                             + "\n    Sim   : " + this.name
                             + "\n    Age   : " + this.age
@@ -235,7 +235,7 @@ public class Sim implements ISimBehaviour {
                             + "\n*****************************");
             this.currentStage = nextStage;
         } else {
-            SimulationLogger.log("\n*** BIRTHDAY! " + this.name + " has aged up to " + this.age + " years old! ***");
+            SimulationLogger.getInstance().log("\n*** BIRTHDAY! " + this.name + " has aged up to " + this.age + " years old! ***");
         }
     }
 

@@ -23,6 +23,7 @@ public class InputHandler implements IInputHandler {
     private final TimeManager timeManager;
     private final List<Sim> neighborhood;
     private final Consumer<Sim> setActivePlayer;
+    private final SimulationLogger logger;
 
     /**
      * Creates a new InputHandler.
@@ -31,13 +32,16 @@ public class InputHandler implements IInputHandler {
      * @param timeManager     provides time/day information.
      * @param neighborhood    the full list of Sims in the household.
      * @param setActivePlayer callback to switch the active player on the engine.
+     * @param logger          the simulation logger for command messages.
      */
     public InputHandler(IWorldManager worldManager, TimeManager timeManager,
-                        List<Sim> neighborhood, Consumer<Sim> setActivePlayer) {
+                        List<Sim> neighborhood, Consumer<Sim> setActivePlayer,
+                        SimulationLogger logger) {
         this.worldManager    = worldManager;
         this.timeManager     = timeManager;
         this.neighborhood    = neighborhood;
         this.setActivePlayer = setActivePlayer;
+        this.logger          = logger;
     }
 
     @Override
@@ -61,6 +65,7 @@ public class InputHandler implements IInputHandler {
                 .currentLocation(currentLocation)
                 .availableItems(items)
                 .setActivePlayer(setActivePlayer)
+                .logger(logger)
                 .build();
 
         try {

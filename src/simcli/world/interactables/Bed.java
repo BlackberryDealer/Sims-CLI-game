@@ -14,9 +14,8 @@ public class Bed implements Interactable {
     @Override
     public void interact(Sim sim, Scanner scanner, TimeManager timeManager) throws SleepEventException {
         int currentInDay = timeManager.getCurrentTick() % GameConstants.TICKS_PER_DAY;
-        // 8 AM is tick 8 relative to a 24-hour day (0-23)
-        // ticks to reach 8 from currentInDay:
-        int ticksToMorning = (GameConstants.TICKS_PER_DAY - currentInDay + 8) % GameConstants.TICKS_PER_DAY;
+        // Tick 8 AM relative to a 24-hour day (0-23)
+        int ticksToMorning = (GameConstants.TICKS_PER_DAY - currentInDay + GameConstants.MORNING_HOUR) % GameConstants.TICKS_PER_DAY;
         if (ticksToMorning == 0)
             ticksToMorning = GameConstants.TICKS_PER_DAY;
 
