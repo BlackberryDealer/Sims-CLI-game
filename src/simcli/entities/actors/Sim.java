@@ -183,6 +183,10 @@ public class Sim implements ISimBehaviour {
         return needsTracker.getStarvingTicks();
     }
 
+    public void setStarvingTicks(int starvingTicks) {
+        needsTracker.setStarvingTicks(starvingTicks);
+    }
+
     public void setHealth(int health) {
         needsTracker.setHealth(health);
     }

@@ -125,7 +125,7 @@ public class SaveManager {
                         sim.getHunger().getValue() + "," + sim.getEnergy().getValue() + ","
                         + sim.getHappiness().getValue() + "," + sim.getHygiene().getValue() + ","
                         + sim.getSocial().getValue() + "," + sim.getJobTier() + ","
-                        + sim.isChildSim());
+                        + sim.isChildSim() + "," + sim.getHealth() + "," + sim.getStarvingTicks());
                 
                 // Save Inventory
                 for (Item item : sim.getInventory()) {
@@ -139,7 +139,7 @@ public class SaveManager {
                         npc.getGender().name() + "," + npc.getCareer().name() + "," +
                         npc.getHunger().getValue() + "," + npc.getEnergy().getValue() + "," +
                         npc.getHappiness().getValue() + "," + npc.getHygiene().getValue() + "," +
-                        npc.getSocial().getValue());
+                        npc.getSocial().getValue() + "," + npc.getHealth() + "," + npc.getStarvingTicks());
             }
 
             // Save Relationships
@@ -226,6 +226,10 @@ public class SaveManager {
                     npc.getHappiness().setValue(Integer.parseInt(data[6]));
                     npc.getHygiene().setValue(Integer.parseInt(data[7]));
                     npc.getSocial().setValue(Integer.parseInt(data[8]));
+                    if (data.length > 9) {
+                        npc.setHealth(Integer.parseInt(data[9]));
+                        npc.setStarvingTicks(Integer.parseInt(data[10]));
+                    }
                     loadedNPCs.add(npc);
                 } else if (line.startsWith("Sim:")) {
                     String[] data = line.substring(4).split(",");
@@ -242,6 +246,10 @@ public class SaveManager {
                     sim.setJobTier(Integer.parseInt(data[11]));
                     if (data.length > 12) {
                         sim.setChildSim(Boolean.parseBoolean(data[12]));
+                    }
+                    if (data.length > 13) {
+                        sim.setHealth(Integer.parseInt(data[13]));
+                        sim.setStarvingTicks(Integer.parseInt(data[14]));
                     }
                     sim.updateState();
                     loadedNeighborhood.add(sim);
