@@ -11,8 +11,7 @@ public enum SocialAction {
     JOKE("Joke", 10, 15, -10, 70),
     /** An argument that negatively impacts relationship and happiness. */
     ARGUE("Argue", -15, -10, -15, 20),
-    /** A romantic gesture that significantly improves relationship but requires more energy. */
-    FLIRT("Flirt", 25, 20, -10, 50);
+
 
     /** The human-readable name of the social action. */
     private final String displayName;
