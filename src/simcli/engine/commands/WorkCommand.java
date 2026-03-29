@@ -17,10 +17,23 @@ import simcli.ui.UIManager;
  */
 public class WorkCommand extends BaseCommand {
 
+    /**
+     * Constructs a {@code WorkCommand} with the given context.
+     *
+     * @param ctx shared command context.
+     */
     public WorkCommand(CommandContext ctx) {
         super(ctx);
     }
 
+    /**
+     * Validates work preconditions (employment, age, hunger, weekday) and
+     * executes a work shift. Advances the clock by the job's working hours.
+     *
+     * @return {@link CommandResult#TICK_FORWARD} on success,
+     *         {@link CommandResult#NO_TICK} if any precondition fails.
+     * @throws SimulationException if an unexpected simulation rule is violated.
+     */
     @Override
     protected CommandResult run() throws SimulationException {
         Sim activePlayer = ctx.getActivePlayer();

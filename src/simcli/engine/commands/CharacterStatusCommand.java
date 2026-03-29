@@ -6,12 +6,28 @@ import simcli.needs.Need;
 import simcli.ui.UIManager;
 import simcli.world.Building;
 
+/**
+ * Command that displays a detailed status report of the active Sim.
+ *
+ * <p>Shows name, age, traits, money, job, health, all need values,
+ * inventory capacity, current location, spouse, and children.</p>
+ */
 public class CharacterStatusCommand extends BaseCommand {
 
+    /**
+     * Constructs a {@code CharacterStatusCommand} with the given context.
+     *
+     * @param ctx shared command context providing access to the active player.
+     */
     public CharacterStatusCommand(CommandContext ctx) {
         super(ctx);
     }
 
+    /**
+     * Prints the full character status and waits for the user to press ENTER.
+     *
+     * @return {@link CommandResult#NO_TICK} — viewing status does not advance time.
+     */
     @Override
     protected CommandResult run() {
         Sim activePlayer = ctx.getActivePlayer();

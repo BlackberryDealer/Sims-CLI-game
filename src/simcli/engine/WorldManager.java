@@ -10,19 +10,41 @@ import simcli.world.interactables.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Concrete implementation of {@link IWorldManager}.
+ *
+ * <p>Builds the city map from hardcoded building definitions (dorm, bungalow,
+ * supermarket, bookshop, park) and tracks which building the player is
+ * currently inside. The world is rebuilt from scratch each time
+ * {@link #setupWorld()} is called (e.g. on new game or load).</p>
+ *
+ * <p>Holds a back-reference to {@link GameEngine} so it can access the
+ * {@link simcli.entities.managers.NPCManager} when creating the park.</p>
+ */
 public class WorldManager implements IWorldManager {
     private List<Building> cityMap;
     private Building currentLocation;
     private GameEngine engine;
 
+    /** Creates an empty {@code WorldManager}. Call {@link #setupWorld()} to build the map. */
     public WorldManager() {
         this.cityMap = new ArrayList<>();
     }
 
+    /**
+     * Injects the parent {@link GameEngine} reference.
+     * Required because the park needs access to the NPC manager.
+     *
+     * @param engine the owning game engine.
+     */
     public void setEngine(GameEngine engine) {
         this.engine = engine;
     }
 
+    /**
+     * Constructs all buildings, rooms, furniture, and NPCs for the game world.
+     * Clears any previous map before rebuilding.
+     */
     @Override
     public void setupWorld() {
         this.cityMap.clear();
@@ -84,16 +106,19 @@ public class WorldManager implements IWorldManager {
         this.currentLocation = home;
     }
 
+    /** {@inheritDoc} */
     @Override
     public Building getCurrentLocation() {
         return this.currentLocation;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void setCurrentLocation(Building b) {
         this.currentLocation = b;
     }
 
+    /** {@inheritDoc} */
     @Override
     public List<Building> getCityMap() {
         return this.cityMap;

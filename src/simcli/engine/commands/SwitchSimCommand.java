@@ -18,10 +18,21 @@ import simcli.entities.models.SimState;
  */
 public class SwitchSimCommand extends BaseCommand {
 
+    /**
+     * Constructs a {@code SwitchSimCommand} with the given context.
+     *
+     * @param ctx shared command context.
+     */
     public SwitchSimCommand(CommandContext ctx) {
         super(ctx);
     }
 
+    /**
+     * Displays the household roster and switches control to the selected Sim.
+     * Dead and non-playable Sims cannot be selected.
+     *
+     * @return {@link CommandResult#NO_TICK} — switching Sims does not advance time.
+     */
     @Override
     protected CommandResult run() {
         List<Sim> neighborhood = ctx.getNeighborhood();

@@ -9,12 +9,31 @@ import simcli.world.Residential;
 
 import java.util.List;
 
+/**
+ * Command that travels between buildings on the city map.
+ *
+ * <p>Displays all locations (with for-sale tags on unowned residential
+ * properties), allows the player to purchase a property on arrival, and
+ * triggers the travel animation upon successful movement.</p>
+ */
 public class TravelCommand extends BaseCommand {
 
+    /**
+     * Constructs a {@code TravelCommand} with the given context.
+     *
+     * @param ctx shared command context.
+     */
     public TravelCommand(CommandContext ctx) {
         super(ctx);
     }
 
+    /**
+     * Presents the destination menu, handles optional property purchase,
+     * and moves the player to the selected building.
+     *
+     * @return {@link CommandResult#TICK_FORWARD} after successful travel,
+     *         {@link CommandResult#NO_TICK} if cancelled or already at destination.
+     */
     @Override
     protected CommandResult run() {
         Sim activePlayer = ctx.getActivePlayer();

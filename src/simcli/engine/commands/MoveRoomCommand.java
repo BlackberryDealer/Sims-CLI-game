@@ -9,12 +9,28 @@ import simcli.world.Room;
 
 import java.util.List;
 
+/**
+ * Command that moves the active Sim between rooms inside a residential building.
+ *
+ * <p>Only available when the current location is residential. Displays all
+ * rooms with a current-room marker and lets the player select a destination.</p>
+ */
 public class MoveRoomCommand extends BaseCommand {
 
+    /**
+     * Constructs a {@code MoveRoomCommand} with the given context.
+     *
+     * @param ctx shared command context.
+     */
     public MoveRoomCommand(CommandContext ctx) {
         super(ctx);
     }
 
+    /**
+     * Presents the room selection menu and moves the Sim if valid.
+     *
+     * @return {@link CommandResult#NO_TICK} — moving between rooms does not advance time.
+     */
     @Override
     protected CommandResult run() {
         Sim activePlayer = ctx.getActivePlayer();

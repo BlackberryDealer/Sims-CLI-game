@@ -14,12 +14,32 @@ import simcli.world.interactables.Interactable;
 
 import java.util.List;
 
+/**
+ * Command that opens the active Sim's inventory management menu.
+ *
+ * <p>Supports paginated browsing, using consumable items directly, and
+ * placing {@link Furniture} into the current room of a residential building.
+ * The menu loops until the player chooses to go back.</p>
+ */
 public class InventoryCommand extends BaseCommand {
 
+    /**
+     * Constructs an {@code InventoryCommand} with the given context.
+     *
+     * @param ctx shared command context.
+     */
     public InventoryCommand(CommandContext ctx) {
         super(ctx);
     }
 
+    /**
+     * Runs the interactive inventory management loop.
+     *
+     * @return {@link CommandResult#NO_TICK} — inventory management does not
+     *         advance time, though individual item uses may have effects.
+     * @throws SimulationException  propagated from item interactions.
+     * @throws SleepEventException  propagated from item interactions.
+     */
     @Override
     protected CommandResult run() throws SimulationException, SleepEventException {
         Sim activePlayer = ctx.getActivePlayer();

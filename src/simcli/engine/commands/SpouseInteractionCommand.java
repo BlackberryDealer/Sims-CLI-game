@@ -18,10 +18,22 @@ import simcli.world.Residential;
  */
 public class SpouseInteractionCommand extends BaseCommand {
 
+    /**
+     * Constructs a {@code SpouseInteractionCommand} with the given context.
+     *
+     * @param ctx shared command context.
+     */
     public SpouseInteractionCommand(CommandContext ctx) {
         super(ctx);
     }
 
+    /**
+     * Presents the marriage interaction menu (date, have baby, feed babies).
+     *
+     * @return {@link CommandResult#TICK_FORWARD} after dating or feeding babies,
+     *         {@link CommandResult#NO_TICK} if the action is cancelled or unavailable.
+     * @throws SimulationException if pregnancy rules prevent having a baby.
+     */
     @Override
     protected CommandResult run() throws SimulationException {
         Sim activePlayer = ctx.getActivePlayer();
@@ -74,6 +86,7 @@ public class SpouseInteractionCommand extends BaseCommand {
         return CommandResult.NO_TICK;
     }
 
+    /** Checks whether any non-playable child (baby) exists in the household. */
     private boolean hasBabiesInHousehold() {
         for (Sim s : ctx.getNeighborhood()) {
             if (s.isChildSim() && !s.isPlayable()) {
@@ -83,6 +96,13 @@ public class SpouseInteractionCommand extends BaseCommand {
         return false;
     }
 
+    /**
+     * Handles a date interaction between the active Sim and their spouse.
+     * Increases happiness, social, and relationship values for both partners.
+     *
+     * @param sim    the active player Sim.
+     * @param spouse the spouse Sim.
+     */
     private void handleDate(Sim sim, Sim spouse) {
         SimulationLogger.log(sim.getName() + " and " + spouse.getName() + " spent a lovely time together on a date!");
         sim.getHappiness().increase(30);
@@ -94,6 +114,14 @@ public class SpouseInteractionCommand extends BaseCommand {
         spouse.getRelationshipManager().increaseRelationship(sim, 10);
     }
 
+    /**
+     * Handles the "Have a Baby" action — teleports both parents home and
+     * attempts pregnancy via the relationship manager.
+     *
+     * @param sim the active player Sim.
+     * @return {@link CommandResult#TICK_FORWARD} if a baby is born,
+     *         {@link CommandResult#NO_TICK} otherwise.
+     */
     private CommandResult handleHaveBaby(Sim sim) {
         // Teleport both to the first residential building (Home)
         Building home = null;
@@ -135,6 +163,12 @@ public class SpouseInteractionCommand extends BaseCommand {
         return CommandResult.NO_TICK;
     }
 
+    /**
+     * Feeds all babies (non-playable children) in the household, increasing
+     * their hunger. Also grants a small social and happiness boost to the parent.
+     *
+     * @param parent the Sim performing the feeding.
+     */
     private void handleFeedBabies(Sim parent) {
         int count = 0;
         for (Sim s : ctx.getNeighborhood()) {

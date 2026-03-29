@@ -5,12 +5,29 @@ import simcli.entities.models.Job;
 import simcli.entities.actors.Sim;
 import simcli.ui.UIManager;
 
+/**
+ * Command that opens the job market menu for the active Sim.
+ *
+ * <p>Displays all available jobs with salary and age-range information.
+ * The player can switch careers or retire (become unemployed). Children
+ * and teens cannot access the professional job market.</p>
+ */
 public class JobMarketCommand extends BaseCommand {
 
+    /**
+     * Constructs a {@code JobMarketCommand} with the given context.
+     *
+     * @param ctx shared command context.
+     */
     public JobMarketCommand(CommandContext ctx) {
         super(ctx);
     }
 
+    /**
+     * Presents the job selection menu and processes the player's choice.
+     *
+     * @return {@link CommandResult#NO_TICK} — changing jobs does not advance time.
+     */
     @Override
     protected CommandResult run() {
         Sim activePlayer = ctx.getActivePlayer();

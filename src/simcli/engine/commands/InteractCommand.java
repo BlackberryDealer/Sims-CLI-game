@@ -8,6 +8,14 @@ import simcli.world.interactables.Interactable;
 
 import java.util.List;
 
+/**
+ * Command that interacts with a specific item at the current location or room.
+ *
+ * <p>Delegates to the chosen {@link Interactable}'s own
+ * {@link Interactable#interact} method, which may throw
+ * {@link SleepEventException} (e.g. using a bed) or
+ * {@link SimulationException} (e.g. action not allowed).</p>
+ */
 public class InteractCommand extends BaseCommand {
     private final int choiceIndex;
 
@@ -23,6 +31,14 @@ public class InteractCommand extends BaseCommand {
         this.choiceIndex = choiceIndex;
     }
 
+    /**
+     * Executes the interaction by calling the selected item's interact method.
+     *
+     * @return {@link CommandResult#TICK_FORWARD} on success,
+     *         {@link CommandResult#NO_TICK} if the index is out of range.
+     * @throws SimulationException  propagated from the interactable.
+     * @throws SleepEventException  propagated if the interaction causes sleep.
+     */
     @Override
     protected CommandResult run() throws SimulationException, SleepEventException {
         List<Interactable> items = ctx.getAvailableItems();
