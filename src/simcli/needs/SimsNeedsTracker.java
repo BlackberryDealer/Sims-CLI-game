@@ -166,7 +166,12 @@ public class SimsNeedsTracker {
         return starvingTicks;
     }
 
+    public void setStarvingTicks(int starvingTicks) {
+        this.starvingTicks = starvingTicks;
+    }
+
     public void setHealth(int health) {
         this.health = health;
     }
 }
+
