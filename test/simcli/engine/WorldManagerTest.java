@@ -11,7 +11,6 @@ import simcli.entities.models.Job;
 import simcli.world.*;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;

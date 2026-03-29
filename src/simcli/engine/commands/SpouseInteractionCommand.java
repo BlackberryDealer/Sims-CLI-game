@@ -2,7 +2,6 @@ package simcli.engine.commands;
 
 import simcli.engine.CommandResult;
 import simcli.engine.SimulationException;
-import simcli.engine.SimulationLogger;
 import simcli.entities.actors.Sim;
 import simcli.entities.models.Gender;
 import simcli.ui.UIManager;

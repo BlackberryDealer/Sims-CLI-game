@@ -10,10 +10,7 @@ import simcli.entities.managers.RelationshipManager;
 import simcli.entities.items.Item;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import simcli.engine.SimulationException;
 import simcli.engine.SimulationLogger;
 import simcli.entities.lifecycle.AdultStage;
 import simcli.entities.lifecycle.ChildStage;

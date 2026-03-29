@@ -7,10 +7,7 @@ import org.junit.jupiter.api.Test;
 import simcli.entities.actors.Sim;
 import simcli.entities.models.Gender;
 import simcli.entities.models.Job;
-import simcli.entities.models.SimState;
-import simcli.utils.GameConstants;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
