@@ -10,7 +10,6 @@ import simcli.entities.actors.NPCSim;
 import simcli.entities.actors.Sim;
 import simcli.entities.managers.NPCManager;
 import simcli.entities.models.ActionState;
-import simcli.entities.models.SkillType;
 import simcli.entities.models.SocialAction;
 import simcli.entities.models.Trait;
 import simcli.utils.GameConstants;
@@ -28,7 +27,7 @@ import simcli.utils.GameConstants;
  * <h2>Responsibilities</h2>
  * <ul>
  *     <li>Display the NPC socialization menu.</li>
- *     <li>Apply relationship / need / skill changes for social actions.</li>
+ *     <li>Apply relationship and need changes for social actions.</li>
  *     <li>Handle marriage proposals — removes NPC from pool, adds to household.</li>
  * </ul>
  */
@@ -99,7 +98,6 @@ public class ParkBench implements Interactable {
                     int happyGain = (int) (selectedAction.getHappinessChange() * multiplier);
                     int energyLoss = (int) (selectedAction.getEnergyChange() * multiplier);
                     int socialGain = (int) (selectedAction.getSocialChange() * multiplier);
-                    int xpGain = (int) (selectedAction.getSkillXP() * multiplier);
 
                     SimulationLogger.getInstance().log(sim.getName() + " performs " + selectedAction.getDisplayName().toLowerCase() + " with " + target.getName() + ".");
                     
@@ -107,9 +105,6 @@ public class ParkBench implements Interactable {
                     sim.getHappiness().increase(happyGain);
                     sim.getEnergy().decrease(-energyLoss);
                     sim.getSocial().increase(socialGain);
-                    if (xpGain > 0) {
-                        sim.getSkillManager().addSkillExperience(SkillType.CHARISMA, xpGain, sim.getName(), false);
-                    }
                 } else if (actionChoice == proposeChoice && canPropose) {
                     handleProposal(sim, target);
                 } else {
@@ -135,7 +130,7 @@ public class ParkBench implements Interactable {
         boolean married = sim.getRelationshipManager().marry(target);
         if (married) {
             npcManager.removeNPC(target);
-            npcManager.replenishNPCs(3);
+            npcManager.replenishNPCs(GameConstants.MAX_NPCS);
 
             if (!neighborhood.contains(target)) {
                 neighborhood.add(target);

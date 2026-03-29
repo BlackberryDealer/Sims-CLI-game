@@ -2,17 +2,17 @@ package simcli.entities.models;
 
 /**
  * Represents the various social actions that a Sim can perform with another Sim.
- * Each action has predefined effects on relationship, happiness, energy, social stats, and skill XP.
+ * Each action has predefined effects on relationship, happiness, energy, and social stats.
  */
 public enum SocialAction {
     /** A friendly chat that moderately increases relationship and social stats. */
-    CHAT("Chat", 5, 10, -5, 30, 5),
+    CHAT("Chat", 5, 10, -5, 30),
     /** A joke that has a high chance of success, boosting relationship and social stats. */
-    JOKE("Joke", 10, 15, -10, 70, 10),
+    JOKE("Joke", 10, 15, -10, 70),
     /** An argument that negatively impacts relationship and happiness. */
-    ARGUE("Argue", -15, -10, -15, 20, 0),
+    ARGUE("Argue", -15, -10, -15, 20),
     /** A romantic gesture that significantly improves relationship but requires more energy. */
-    FLIRT("Flirt", 25, 20, -10, 50, 15);
+    FLIRT("Flirt", 25, 20, -10, 50);
 
     /** The human-readable name of the social action. */
     private final String displayName;
@@ -24,8 +24,6 @@ public enum SocialAction {
     private final int energyChange;
     /** The amount the Sim's social need is restored by this action. */
     private final int socialChange;
-    /** The amount of Charisma or Social skill XP gained from this action. */
-    private final int skillXP;
 
     /**
      * Constructs a new SocialAction with the specified attribute changes.
@@ -35,15 +33,13 @@ public enum SocialAction {
      * @param happinessChange the impact on the Sim's personal happiness
      * @param energyChange the energy cost or gain
      * @param socialChange the impact on the social need meter
-     * @param skillXP the experience points gained for social skills
      */
-    SocialAction(String displayName, int relationshipChange, int happinessChange, int energyChange, int socialChange, int skillXP) {
+    SocialAction(String displayName, int relationshipChange, int happinessChange, int energyChange, int socialChange) {
         this.displayName = displayName;
         this.relationshipChange = relationshipChange;
         this.happinessChange = happinessChange;
         this.energyChange = energyChange;
         this.socialChange = socialChange;
-        this.skillXP = skillXP;
     }
 
     /** @return the display name of this social action */
@@ -56,6 +52,4 @@ public enum SocialAction {
     public int getEnergyChange() { return energyChange; }
     /** @return the social need restoration amount */
     public int getSocialChange() { return socialChange; }
-    /** @return the skill experience points gained */
-    public int getSkillXP() { return skillXP; }
 }

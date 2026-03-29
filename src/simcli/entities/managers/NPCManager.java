@@ -21,8 +21,6 @@ public class NPCManager implements NPCProvider {
     private static final String[] FEMALE_NAMES = {
         "Alice", "Diana", "Fiona", "Hannah", "Julia", "Laura", "Nina", "Paula", "Rose", "Tina", "Wendy", "Yara"
     };
-
-    private static final int MAX_NPCS = 8;
     
     public NPCManager() {
         this.activeNPCs = new ArrayList<>();
@@ -56,7 +54,7 @@ public class NPCManager implements NPCProvider {
      * Ensures the park has a minimum number of NPCs, without exceeding the global cap.
      */
     public void replenishNPCs(int targetCount) {
-        int actualTarget = Math.min(targetCount, MAX_NPCS);
+        int actualTarget = Math.min(targetCount, simcli.utils.GameConstants.MAX_NPCS);
         while (activeNPCs.size() < actualTarget) {
             activeNPCs.add(generateRandomNPC());
         }

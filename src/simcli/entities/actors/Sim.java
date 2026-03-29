@@ -7,7 +7,6 @@ import simcli.needs.SimsNeedsTracker;
 import simcli.entities.managers.CareerManager;
 import simcli.entities.managers.InventoryManager;
 import simcli.entities.managers.RelationshipManager;
-import simcli.entities.managers.SkillManager;
 import simcli.entities.items.Item;
 
 import java.util.ArrayList;
@@ -54,7 +53,6 @@ public class Sim implements ISimBehaviour {
     private SimsNeedsTracker needsTracker;
     private CareerManager careerManager;
     private InventoryManager inventoryManager;
-    private SkillManager skillManager;
     private List<Trait> traits;
 
     private RelationshipManager relationshipManager;
@@ -83,7 +81,6 @@ public class Sim implements ISimBehaviour {
         this.needsTracker = new SimsNeedsTracker();
         this.careerManager = new CareerManager();
         this.inventoryManager = new InventoryManager(GameConstants.STARTING_INVENTORY_CAPACITY);
-        this.skillManager = new SkillManager();
         this.traits = new ArrayList<>();
         Trait[] allTraits = Trait.values();
         this.traits.add(allTraits[GameRandom.RANDOM.nextInt(allTraits.length)]);
@@ -139,10 +136,6 @@ public class Sim implements ISimBehaviour {
 
     public void setMoney(int money) {
         this.money = money;
-    }
-
-    public SkillManager getSkillManager() {
-        return skillManager;
     }
 
     public List<Trait> getTraits() {

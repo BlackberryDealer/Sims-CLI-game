@@ -14,7 +14,7 @@ import java.util.Scanner;
 
 /**
  * A kitchen interactable that restores hunger when used.
- * Sims with the Cooking skill can prepare better meals here.
+ * Sims can prepare meals here.
  */
 public class Fridge implements Interactable, Container {
     private List<Item> storedFood = new ArrayList<>();

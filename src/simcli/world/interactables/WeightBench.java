@@ -11,7 +11,7 @@ import java.util.Scanner;
 
 /**
  * A piece of exercise equipment. When used, it reduces energy and hygiene
- * while occasionally increasing the Sim's fitness or specific skills.
+ * while occasionally increasing the Sim's fitness.
  */
 public class WeightBench implements Interactable {
     private static final int ENERGY_COST = 25;

@@ -6,20 +6,17 @@ import simcli.engine.TimeManager;
 import simcli.entities.actors.Sim;
 import simcli.entities.models.ActionState;
 import simcli.entities.models.SimState;
-import simcli.entities.models.SkillType;
-import simcli.entities.models.Trait;
 
 import java.util.Scanner;
 
 /**
  * A utility interactable that allows a Sim to browse the web for fun,
- * increasing happiness, or study to gain logic skill points.
+ * increasing happiness, or study for personal enjoyment.
  */
 public class Computer implements Interactable {
     private static final int ENERGY_COST = 15;
     private static final int HUNGER_COST = 10;
     private static final int HAPPINESS_GAIN = 5;
-    private static final int LOGIC_GAIN = 15;
 
     @Override
     public void interact(Sim sim, Scanner scanner, TimeManager timeManager) throws SimulationException {
@@ -35,8 +32,6 @@ public class Computer implements Interactable {
         sim.getEnergy().decrease(ENERGY_COST);
         sim.getHunger().decrease(HUNGER_COST);
         sim.getHappiness().increase(HAPPINESS_GAIN);
-        
-        sim.getSkillManager().addSkillExperience(SkillType.LOGIC, LOGIC_GAIN, sim.getName(), sim.hasTrait(Trait.FAST_LEARNER));
     }
 
     @Override
