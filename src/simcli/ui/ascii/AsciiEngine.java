@@ -34,21 +34,21 @@ public class AsciiEngine {
     }
 
     public String render(Sim player, Building location) {
-        ActionState action = player.getCurrentAction();
+        ActionState action = player.getCurrentAction(); // gets player's current action
 
         // Render Action if one is active
-        if (action != null && action != ActionState.IDLE && actionProviders.containsKey(action)) {
+        if (action != null && action != ActionState.IDLE && actionProviders.containsKey(action)) {     // checks if player has an action and there is a provider
             return actionProviders.get(action).getAsciiArt(player, location);
         }
 
         // Render Location if IDLE
         if (location != null) {
-            if (location.isResidential()) {
+            if (location.isResidential()) {     // if it is a residence
                 return houseProvider.getAsciiArt(player, location);
             }
 
             String locName = location.getName().toLowerCase();
-            if (locName.contains("dorm") || locName.contains("home")) {
+            if (locName.contains("dorm") || locName.contains("home")) {  // may need to make this dynamic
                 return houseProvider.getAsciiArt(player, location);
             } else if (locName.contains("supermarket") || locName.contains("market")) {
                 return storeProvider.getAsciiArt(player, location);

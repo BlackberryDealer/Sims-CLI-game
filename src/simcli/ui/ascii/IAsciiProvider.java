@@ -7,5 +7,5 @@ import simcli.world.Building;
  * UI component handing formatting or displaying of IAsciiProvider.
  */
 public interface IAsciiProvider {
-    String getAsciiArt(Sim player, Building location);
+    String getAsciiArt(Sim player, Building location);  // all ascii art must have playername and location to fit scenario
 }
