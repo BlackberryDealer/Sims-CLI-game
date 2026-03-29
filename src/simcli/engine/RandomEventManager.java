@@ -4,7 +4,31 @@ import simcli.entities.actors.Sim;
 import simcli.entities.models.SimState;
 import simcli.utils.GameRandom;
 
+/**
+ * Fires random events each tick with a small probability.
+ *
+ * <p>Every tick, {@link #trigger(Sim, TimeManager)} is called by
+ * {@link GameLoop}. There is a base 5&nbsp;% chance that an event fires;
+ * the specific event is then chosen from a weighted distribution:</p>
+ * <ul>
+ *     <li><b>Found money</b> (20&nbsp;%) — +$50</li>
+ *     <li><b>Stubbed toe</b> (15&nbsp;%) — happiness −15</li>
+ *     <li><b>Stroke of inspiration</b> (15&nbsp;%) — energy +20</li>
+ *     <li><b>Mild cold</b> (15&nbsp;%) — all needs −10</li>
+ *     <li><b>Stove fire</b> (15&nbsp;%) — hunger −20, energy −25, health −10</li>
+ *     <li><b>Lottery win</b> (20&nbsp;%) — +$100–500, happiness +30</li>
+ * </ul>
+ *
+ * <p>Dead Sims are exempt from random events.</p>
+ */
 public class RandomEventManager {
+
+    /**
+     * Rolls for a random event and applies its effects to the active player.
+     *
+     * @param activePlayer the currently controlled Sim (may be null-safe for dead Sims).
+     * @param timeManager  the simulation clock (available for future time-based events).
+     */
     public void trigger(Sim activePlayer, TimeManager timeManager) {
         if (activePlayer.getState() == SimState.DEAD) return;
 

@@ -1,22 +1,37 @@
 package simcli.engine.commands;
 
-import java.util.Scanner;
 import simcli.engine.CommandResult;
 import simcli.entities.models.Job;
 import simcli.entities.actors.Sim;
 import simcli.ui.UIManager;
 
+/**
+ * Command that opens the job market menu for the active Sim.
+ *
+ * <p>Displays all available jobs with salary and age-range information.
+ * The player can switch careers or retire (become unemployed). Children
+ * and teens cannot access the professional job market.</p>
+ */
 public class JobMarketCommand extends BaseCommand {
-    private final Sim activePlayer;
-    private final Scanner scanner;
 
-    public JobMarketCommand(Sim activePlayer, Scanner scanner) {
-        this.activePlayer = activePlayer;
-        this.scanner = scanner;
+    /**
+     * Constructs a {@code JobMarketCommand} with the given context.
+     *
+     * @param ctx shared command context.
+     */
+    public JobMarketCommand(CommandContext ctx) {
+        super(ctx);
     }
 
+    /**
+     * Presents the job selection menu and processes the player's choice.
+     *
+     * @return {@link CommandResult#NO_TICK} — changing jobs does not advance time.
+     */
     @Override
     protected CommandResult run() {
+        Sim activePlayer = ctx.getActivePlayer();
+
         if (activePlayer.canWork()) {
             UIManager.printMessage("\n=== JOB MARKET ===");
             UIManager.printMessage("Active Sim: " + activePlayer.getName() + " (Age: " + activePlayer.getAge() + ")");
@@ -34,7 +49,7 @@ public class JobMarketCommand extends BaseCommand {
             UIManager.prompt("Select Option> ");
 
             try {
-                int jChoice = Integer.parseInt(scanner.nextLine().trim());
+                int jChoice = Integer.parseInt(ctx.getScanner().nextLine().trim());
                 if (jChoice == -1) return CommandResult.NO_TICK;
 
                 if (jChoice == 0) {
@@ -44,7 +59,7 @@ public class JobMarketCommand extends BaseCommand {
                         activePlayer.getCareerManager().changeJob(Job.UNEMPLOYED, activePlayer.getName());
                         UIManager.printMessage("You have successfully retired.");
                     }
-                    pause(scanner);
+                    pause();
                 } else if (jChoice > 0 && jChoice < allJobs.length) {
                     Job targetJob = allJobs[jChoice];
 
@@ -58,15 +73,15 @@ public class JobMarketCommand extends BaseCommand {
                         activePlayer.getCareerManager().changeJob(targetJob, activePlayer.getName());
                         UIManager.printMessage("Congratulations on your new career as a " + targetJob.getTitle() + "!");
                     }
-                    pause(scanner);
+                    pause();
                 }
             } catch (NumberFormatException e) {
                 UIManager.printMessage("Invalid selection.");
-                pause(scanner);
+                pause();
             }
         } else {
             UIManager.printMessage("Children and Teens cannot access the professional job market.");
-            pause(scanner);
+            pause();
         }
         return CommandResult.NO_TICK;
     }

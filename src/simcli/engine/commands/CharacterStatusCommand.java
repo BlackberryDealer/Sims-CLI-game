@@ -6,21 +6,33 @@ import simcli.needs.Need;
 import simcli.ui.UIManager;
 import simcli.world.Building;
 
-import java.util.Scanner;
-
+/**
+ * Command that displays a detailed status report of the active Sim.
+ *
+ * <p>Shows name, age, traits, money, job, health, all need values,
+ * inventory capacity, current location, spouse, and children.</p>
+ */
 public class CharacterStatusCommand extends BaseCommand {
-    private final Sim activePlayer;
-    private final Scanner scanner;
-    private final Building currentLocation;
 
-    public CharacterStatusCommand(Sim activePlayer, Scanner scanner, Building currentLocation) {
-        this.activePlayer = activePlayer;
-        this.scanner = scanner;
-        this.currentLocation = currentLocation;
+    /**
+     * Constructs a {@code CharacterStatusCommand} with the given context.
+     *
+     * @param ctx shared command context providing access to the active player.
+     */
+    public CharacterStatusCommand(CommandContext ctx) {
+        super(ctx);
     }
 
+    /**
+     * Prints the full character status and waits for the user to press ENTER.
+     *
+     * @return {@link CommandResult#NO_TICK} — viewing status does not advance time.
+     */
     @Override
     protected CommandResult run() {
+        Sim activePlayer = ctx.getActivePlayer();
+        Building currentLocation = ctx.getCurrentLocation();
+
         UIManager.printMessage("\n=== CHARACTER STATUS ===");
         UIManager.printMessage("Name: " + activePlayer.getName());
         UIManager.printMessage("Age: " + activePlayer.getAge());
@@ -53,8 +65,7 @@ public class CharacterStatusCommand extends BaseCommand {
         }
         UIManager.printMessage("==================");
         
-        pause(scanner);
+        pause();
         return CommandResult.NO_TICK;
     }
-
 }

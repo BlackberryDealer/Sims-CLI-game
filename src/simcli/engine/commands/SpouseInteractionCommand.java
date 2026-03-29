@@ -1,8 +1,6 @@
 package simcli.engine.commands;
 
-import java.util.Scanner;
 import simcli.engine.CommandResult;
-import simcli.engine.GameEngine;
 import simcli.engine.SimulationException;
 import simcli.engine.SimulationLogger;
 import simcli.entities.actors.Sim;
@@ -14,31 +12,43 @@ import simcli.world.Residential;
 /**
  * Command to interact with a spouse from anywhere if they are in the household.
  * Supports dating, having babies, and feeding babies.
+ *
+ * <p>Previously coupled to {@code GameEngine} directly. Now uses
+ * {@link CommandContext} for all data access and mutations.</p>
  */
 public class SpouseInteractionCommand extends BaseCommand {
-    private final GameEngine engine;
-    private final Scanner scanner;
 
-    public SpouseInteractionCommand(GameEngine engine, Scanner scanner) {
-        this.engine = engine;
-        this.scanner = scanner;
+    /**
+     * Constructs a {@code SpouseInteractionCommand} with the given context.
+     *
+     * @param ctx shared command context.
+     */
+    public SpouseInteractionCommand(CommandContext ctx) {
+        super(ctx);
     }
 
+    /**
+     * Presents the marriage interaction menu (date, have baby, feed babies).
+     *
+     * @return {@link CommandResult#TICK_FORWARD} after dating or feeding babies,
+     *         {@link CommandResult#NO_TICK} if the action is cancelled or unavailable.
+     * @throws SimulationException if pregnancy rules prevent having a baby.
+     */
     @Override
     protected CommandResult run() throws SimulationException {
-        Sim activePlayer = engine.getActivePlayer();
+        Sim activePlayer = ctx.getActivePlayer();
         Sim spouse = activePlayer.getRelationshipManager().getSpouse();
         
         if (spouse == null) {
             UIManager.printMessage("You are not married. Find someone special at the park first!");
-            pause(scanner);
+            pause();
             return CommandResult.NO_TICK;
         }
 
         // Check if spouse is in the household
-        if (!engine.getNeighborhood().contains(spouse)) {
+        if (!ctx.getNeighborhood().contains(spouse)) {
             UIManager.printMessage(spouse.getName() + " is currently busy and not at home.");
-            pause(scanner);
+            pause();
             return CommandResult.NO_TICK;
         }
 
@@ -56,7 +66,7 @@ public class SpouseInteractionCommand extends BaseCommand {
         UIManager.prompt("Select action> ");
 
         try {
-            String input = scanner.nextLine().trim();
+            String input = ctx.getScanner().nextLine().trim();
             if (input.equals("0")) return CommandResult.NO_TICK;
 
             int choice = Integer.parseInt(input);
@@ -76,8 +86,9 @@ public class SpouseInteractionCommand extends BaseCommand {
         return CommandResult.NO_TICK;
     }
 
+    /** Checks whether any non-playable child (baby) exists in the household. */
     private boolean hasBabiesInHousehold() {
-        for (Sim s : engine.getNeighborhood()) {
+        for (Sim s : ctx.getNeighborhood()) {
             if (s.isChildSim() && !s.isPlayable()) {
                 return true;
             }
@@ -85,6 +96,13 @@ public class SpouseInteractionCommand extends BaseCommand {
         return false;
     }
 
+    /**
+     * Handles a date interaction between the active Sim and their spouse.
+     * Increases happiness, social, and relationship values for both partners.
+     *
+     * @param sim    the active player Sim.
+     * @param spouse the spouse Sim.
+     */
     private void handleDate(Sim sim, Sim spouse) {
         SimulationLogger.log(sim.getName() + " and " + spouse.getName() + " spent a lovely time together on a date!");
         sim.getHappiness().increase(30);
@@ -96,10 +114,18 @@ public class SpouseInteractionCommand extends BaseCommand {
         spouse.getRelationshipManager().increaseRelationship(sim, 10);
     }
 
+    /**
+     * Handles the "Have a Baby" action — teleports both parents home and
+     * attempts pregnancy via the relationship manager.
+     *
+     * @param sim the active player Sim.
+     * @return {@link CommandResult#TICK_FORWARD} if a baby is born,
+     *         {@link CommandResult#NO_TICK} otherwise.
+     */
     private CommandResult handleHaveBaby(Sim sim) {
         // Teleport both to the first residential building (Home)
         Building home = null;
-        for (Building b : engine.getWorldManager().getCityMap()) {
+        for (Building b : ctx.getWorldManager().getCityMap()) {
             if (b instanceof Residential) {
                 home = b;
                 break;
@@ -107,7 +133,7 @@ public class SpouseInteractionCommand extends BaseCommand {
         }
 
         if (home != null) {
-            engine.getWorldManager().setCurrentLocation(home);
+            ctx.getWorldManager().setCurrentLocation(home);
             sim.setCurrentRoom(((Residential) home).getRooms().get(0));
             
             Sim spouse = sim.getRelationshipManager().getSpouse();
@@ -121,12 +147,12 @@ public class SpouseInteractionCommand extends BaseCommand {
                 Gender babyGender = sim.getRelationshipManager().attemptPregnancy(); 
                 if (babyGender != null) {
                     UIManager.prompt("Enter a name for the new " + babyGender + " baby: ");
-                    String babyName = scanner.nextLine().trim();
+                    String babyName = ctx.getScanner().nextLine().trim();
                     if (babyName.isEmpty()) babyName = "Baby " + sim.getName();
                     
                     Sim child = sim.getRelationshipManager().finalizeBaby(babyName, babyGender);
 
-                    engine.getNeighborhood().add(child);
+                    ctx.getNeighborhood().add(child);
                     SimulationLogger.log(child.getName() + " has been added to your household!");
                     return CommandResult.TICK_FORWARD;
                 }
@@ -137,9 +163,15 @@ public class SpouseInteractionCommand extends BaseCommand {
         return CommandResult.NO_TICK;
     }
 
+    /**
+     * Feeds all babies (non-playable children) in the household, increasing
+     * their hunger. Also grants a small social and happiness boost to the parent.
+     *
+     * @param parent the Sim performing the feeding.
+     */
     private void handleFeedBabies(Sim parent) {
         int count = 0;
-        for (Sim s : engine.getNeighborhood()) {
+        for (Sim s : ctx.getNeighborhood()) {
             if (s.isChildSim() && !s.isPlayable()) {
                 s.getHunger().increase(50);
                 count++;

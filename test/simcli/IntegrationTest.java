@@ -5,21 +5,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import simcli.engine.*;
+import simcli.engine.commands.*;
 import simcli.entities.actors.*;
 import simcli.entities.models.*;
-import simcli.entities.managers.*;
-import simcli.entities.models.*;
-import simcli.entities.items.*;
-import simcli.needs.*;
-import simcli.entities.actors.*;
-import simcli.entities.models.*;
-import simcli.entities.managers.*;
-import simcli.entities.models.*;
-import simcli.entities.items.*;
-import simcli.needs.*;
 import simcli.world.Building;
-import simcli.world.Commercial;
-import simcli.world.Residential;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -52,11 +41,14 @@ public class IntegrationTest {
         activePlayer = new Sim("TestDummy", 25, Gender.MALE, Job.UNEMPLOYED);
         
         // Instantiate a functional GameEngine to avoid NullPointerExceptions when Park checks for NPCManager
-        GameEngine testEngine = new GameEngine("TestIntegrationWorld", 1, java.util.Collections.singletonList(activePlayer), true);
+        java.util.List<Sim> neighborhood = new java.util.ArrayList<>();
+        neighborhood.add(activePlayer);
+        GameEngine testEngine = new GameEngine("TestIntegrationWorld", 1, neighborhood, true);
         
         worldManager = testEngine.getWorldManager();
         timeManager = new TimeManager(1, 24); // Monday, Tick 1
-        inputHandler = new InputHandler(worldManager, timeManager, testEngine);
+        inputHandler = new InputHandler(worldManager, timeManager,
+                testEngine.getNeighborhood(), testEngine::setActivePlayer);
     }
 
     @AfterEach
@@ -73,6 +65,17 @@ public class IntegrationTest {
         ByteArrayInputStream in = new ByteArrayInputStream((input + "\n\n").getBytes());
         Scanner mockScanner = new Scanner(in);
         return inputHandler.handle(input, activePlayer, mockScanner);
+    }
+
+    /** Helper to build a CommandContext for direct command tests. */
+    private CommandContext buildCtx(Sim sim, Scanner scanner) {
+        return new CommandContext.Builder()
+                .activePlayer(sim)
+                .scanner(scanner)
+                .timeManager(timeManager)
+                .worldManager(worldManager)
+                .currentLocation(worldManager.getCurrentLocation())
+                .build();
     }
 
 
@@ -112,7 +115,13 @@ public class IntegrationTest {
         // Simulate choosing Room [1]
         ByteArrayInputStream in = new ByteArrayInputStream("1\n\n".getBytes());
         Scanner mockScanner = new Scanner(in);
-        simcli.engine.commands.UpgradeRoomCommand command = new simcli.engine.commands.UpgradeRoomCommand(activePlayer, mockScanner, home);
+        
+        CommandContext ctx = new CommandContext.Builder()
+                .activePlayer(activePlayer)
+                .scanner(mockScanner)
+                .currentLocation(home)
+                .build();
+        UpgradeRoomCommand command = new UpgradeRoomCommand(ctx);
         
         CommandResult result = command.execute();
 
@@ -131,7 +140,13 @@ public class IntegrationTest {
         // Simulate pressing 'W', and then 'N' to the "Are you sure?" prompt
         ByteArrayInputStream in = new ByteArrayInputStream("N\n\n".getBytes());
         Scanner mockScanner = new Scanner(in);
-        simcli.engine.commands.WorkCommand command = new simcli.engine.commands.WorkCommand(activePlayer, mockScanner, timeManager);
+        
+        CommandContext ctx = new CommandContext.Builder()
+                .activePlayer(activePlayer)
+                .scanner(mockScanner)
+                .timeManager(timeManager)
+                .build();
+        WorkCommand command = new WorkCommand(ctx);
         
         try {
             CommandResult result = command.execute();
@@ -152,7 +167,11 @@ public class IntegrationTest {
         ByteArrayInputStream in = new ByteArrayInputStream("3\n\n".getBytes());
         Scanner mockScanner = new Scanner(in);
         
-        simcli.engine.commands.JobMarketCommand jobMarket = new simcli.engine.commands.JobMarketCommand(teen, mockScanner);
+        CommandContext ctx = new CommandContext.Builder()
+                .activePlayer(teen)
+                .scanner(mockScanner)
+                .build();
+        JobMarketCommand jobMarket = new JobMarketCommand(ctx);
         CommandResult result = jobMarket.execute();
 
         assertEquals(CommandResult.NO_TICK, result);
@@ -170,7 +189,14 @@ public class IntegrationTest {
         // Simulate Travel 'T', then picking the Dorm '1'
         ByteArrayInputStream in = new ByteArrayInputStream("1\n\n".getBytes());
         Scanner mockScanner = new Scanner(in);
-        simcli.engine.commands.TravelCommand command = new simcli.engine.commands.TravelCommand(activePlayer, mockScanner, home, worldManager);
+        
+        CommandContext ctx = new CommandContext.Builder()
+                .activePlayer(activePlayer)
+                .scanner(mockScanner)
+                .worldManager(worldManager)
+                .currentLocation(home)
+                .build();
+        TravelCommand command = new TravelCommand(ctx);
         
         CommandResult result = command.execute();
 

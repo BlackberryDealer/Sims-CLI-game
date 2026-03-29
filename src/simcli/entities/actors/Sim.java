@@ -158,30 +158,44 @@ public class Sim implements ISimBehaviour {
         }
     }
 
+    /**
+     * @deprecated Use {@link simcli.engine.LifecycleManager#processDay(Sim)}
+     *             instead. Retained only for backward compatibility.
+     */
+    @Deprecated
     public void growOlderDaily() {
+        // Lifecycle logic is now centralized in LifecycleManager.
+        // This method is kept for interface compliance (ISimBehaviour).
+        // If called directly, it only increments the day counter and resets
+        // career — the aging/death/retirement rules are in LifecycleManager.
         this.daysAlive++;
         careerManager.resetDaily(true);
+    }
 
-        if (this.daysAlive % GameConstants.DAYS_PER_AGE_TICK == 0) {
-            this.ageUp();
-            
-            if (this.age >= GameConstants.DEATH_AGE) {
-                this.needsTracker.setState(SimState.DEAD); 
-                SimulationLogger.log("\n*** " + this.name + " has passed away of old age. ***");
-            } 
-            
-            if (this.age >= GameConstants.ELDER_AGE && this.getCareer() == Job.UNEMPLOYED) {
-                int pensionIncome = GameConstants.RETIREMENT_PENSION_INCOME_AMOUNT;
-                this.money += pensionIncome;
-                SimulationLogger.log(this.name + " collected a retirement pension of $" + pensionIncome);
-            }
+    /**
+     * Returns the total number of in-game days this Sim has been alive.
+     *
+     * @return days-alive count.
+     */
+    public int getDaysAlive() {
+        return this.daysAlive;
+    }
 
-            Job currentJob = this.getCareer();
-            if (currentJob != Job.UNEMPLOYED && this.age > currentJob.getMaxAge()) {
-                SimulationLogger.log("\n[RETIREMENT] " + this.name + " is too old for " + currentJob.getTitle() + " and must retire.");
-                this.getCareerManager().changeJob(Job.UNEMPLOYED, this.name);
-            }
-        }
+    /**
+     * Increments the Sim's days-alive counter by one.
+     * Called by {@link simcli.engine.LifecycleManager} on each day boundary.
+     */
+    public void incrementDaysAlive() {
+        this.daysAlive++;
+    }
+
+    /**
+     * Marks this Sim as dead (state = DEAD).
+     * Called by {@link simcli.engine.LifecycleManager} when the Sim reaches
+     * the death age threshold.
+     */
+    public void markAsDead() {
+        this.needsTracker.setState(SimState.DEAD);
     }
 
     protected void setLifeStage(LifeStage stage) { this.currentStage = stage; }

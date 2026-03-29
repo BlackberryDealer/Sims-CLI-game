@@ -14,6 +14,25 @@ import simcli.world.interactables.Interactable;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * Core coordinator of the simulation game.
+ *
+ * <p>{@code GameEngine} owns the main game loop, maintains references to all
+ * subsystems (time, world, rendering, input), and orchestrates the flow
+ * between player commands and simulation processing. It follows the
+ * <b>Facade</b> pattern — higher-level code only talks to the engine,
+ * while the engine delegates to specialised managers internally.</p>
+ *
+ * <h2>Key Collaborators</h2>
+ * <ul>
+ *     <li>{@link TimeManager} — tick/day/time-of-day tracking</li>
+ *     <li>{@link WorldManager} — building layout and current location</li>
+ *     <li>{@link InputHandler} — translates raw input into commands</li>
+ *     <li>{@link GameLoop} — per-tick need decay, events, lifecycle</li>
+ *     <li>{@link RandomEventManager} — random event generation</li>
+ *     <li>{@link LifecycleManager} — aging, death, retirement</li>
+ * </ul>
+ */
 public class GameEngine {
     private List<Sim> neighborhood;
     private IWorldManager worldManager;
@@ -23,6 +42,7 @@ public class GameEngine {
     private TimeManager timeManager;
     private boolean isGameOver;
     private RandomEventManager randomEventManager;
+    private LifecycleManager lifecycleManager;
     private GameLoop gameLoop;
 
     // World Stats tracking (aggregated upon save/game over)
@@ -31,6 +51,15 @@ public class GameEngine {
     private int sessionTotalItems;
     private Sim activePlayer;
 
+    /**
+     * Constructs a new {@code GameEngine} for a brand-new world.
+     *
+     * <p>Initialises all subsystems, places every Sim inside the default
+     * residential building, and selects the first Sim as the active player.</p>
+     *
+     * @param worldName            the display name for this save slot.
+     * @param startingNeighborhood the initial list of Sims (at least one).
+     */
     // CONSTRUCTOR: For Creating a New World
     public GameEngine(String worldName, List<Sim> startingNeighborhood) {
         this.worldName = worldName;
@@ -43,12 +72,25 @@ public class GameEngine {
         ((WorldManager)this.worldManager).setEngine(this);
         this.worldManager.setupWorld();
         this.activePlayer = startingNeighborhood.get(0);
-        this.inputHandler = new InputHandler(this.worldManager, this.timeManager, this);
+        this.inputHandler = new InputHandler(this.worldManager, this.timeManager,
+                this.neighborhood, this::setActivePlayer);
         this.renderer = new TerminalRenderer();
         this.randomEventManager = new RandomEventManager();
-        this.gameLoop = new GameLoop(this.timeManager, this.neighborhood, this.randomEventManager);
+        this.lifecycleManager = new LifecycleManager(GameConstants.DAYS_PER_AGE_TICK);
+        this.gameLoop = new GameLoop(this.timeManager, this.neighborhood, this.randomEventManager, this.lifecycleManager);
     }
 
+    /**
+     * Constructs a {@code GameEngine} by restoring a previously saved world.
+     *
+     * <p>Rebuilds all subsystems from persisted state. The first non-dead
+     * Sim in {@code loadedNeighborhood} is selected as the active player.</p>
+     *
+     * @param worldName          the display name for this save slot.
+     * @param currentTick        the persisted tick counter to restore.
+     * @param loadedNeighborhood the previously saved list of Sims.
+     * @param isGameOver         whether the game was already over when saved.
+     */
     // CONSTRUCTOR: For Loading an Existing World
     public GameEngine(String worldName, int currentTick, List<Sim> loadedNeighborhood, boolean isGameOver) {
         this.worldName = worldName;
@@ -70,25 +112,48 @@ public class GameEngine {
         }
         this.activePlayer = firstAlive;
         
-        this.inputHandler = new InputHandler(this.worldManager, this.timeManager, this);
+        this.inputHandler = new InputHandler(this.worldManager, this.timeManager,
+                this.neighborhood, this::setActivePlayer);
         this.renderer = new TerminalRenderer();
         this.randomEventManager = new RandomEventManager();
-        this.gameLoop = new GameLoop(this.timeManager, this.neighborhood, this.randomEventManager);
+        this.lifecycleManager = new LifecycleManager(GameConstants.DAYS_PER_AGE_TICK);
+        this.gameLoop = new GameLoop(this.timeManager, this.neighborhood, this.randomEventManager, this.lifecycleManager);
     }
 
+    /** Returns the currently active (controlled) Sim. */
     public Sim getActivePlayer() { return activePlayer; }
+
+    /**
+     * Switches the active player to the given Sim.
+     *
+     * @param sim the Sim to make active.
+     */
     public void setActivePlayer(Sim sim) { this.activePlayer = sim; }
 
-
-
+    /** Returns the world/location manager used by this engine. */
     public IWorldManager getWorldManager() {
         return worldManager;
     }
 
+    /** Returns the NPC manager responsible for park NPCs. */
     public NPCManager getNpcManager() {
         return npcManager;
     }
 
+    /** Returns the lifecycle manager handling aging and death. */
+    public LifecycleManager getLifecycleManager() {
+        return lifecycleManager;
+    }
+
+    /**
+     * Runs the main game loop until the player saves-and-exits or all Sims die.
+     *
+     * <p>Each iteration: renders the HUD, processes player input via
+     * {@link InputHandler}, advances the simulation clock via
+     * {@link GameLoop}, and periodically auto-saves.</p>
+     *
+     * @param scanner shared {@link Scanner} for reading player input.
+     */
     public void run(Scanner scanner) {
         boolean running = true;
         boolean tickForward = true;
@@ -213,6 +278,11 @@ public class GameEngine {
         }
     }
 
+    /**
+     * Finds the next alive Sim in the neighborhood.
+     *
+     * @return the first non-dead Sim, or {@code null} if all Sims are dead.
+     */
     private Sim getNextAliveSim() {
         for (Sim sim : neighborhood) {
             if (sim.getState() != SimState.DEAD) {
@@ -222,6 +292,10 @@ public class GameEngine {
         return null;
     }
 
+    /**
+     * Aggregates lifetime money and item statistics across all Sims.
+     * Called when the game ends to produce the final summary.
+     */
     private void aggregateStats() {
         this.sessionTotalMoney = 0;
         this.sessionTotalItems = 0;
@@ -231,26 +305,32 @@ public class GameEngine {
         }
     }
 
+    /** Returns the display name of this save slot. */
     public String getWorldName() {
         return worldName;
     }
 
+    /** Returns the current simulation tick counter. */
     public int getCurrentTick() {
         return timeManager.getCurrentTick();
     }
 
+    /** Returns the full list of Sims in this neighborhood. */
     public List<Sim> getNeighborhood() {
         return neighborhood;
     }
 
+    /** Returns {@code true} if the game-over condition has been reached. */
     public boolean isGameOver() {
         return isGameOver;
     }
 
+    /** Returns the total money earned across all Sims this session. */
     public int getSessionTotalMoney() {
         return sessionTotalMoney;
     }
 
+    /** Returns the total items bought across all Sims this session. */
     public int getSessionTotalItems() {
         return sessionTotalItems;
     }

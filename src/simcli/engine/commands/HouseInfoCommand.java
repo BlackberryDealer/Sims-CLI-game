@@ -7,19 +7,33 @@ import simcli.world.Residential;
 import simcli.world.Room;
 import simcli.world.interactables.Interactable;
 
-import java.util.Scanner;
-
+/**
+ * Command that displays information about the current residential building.
+ *
+ * <p>Lists every room with its capacity usage and the furniture placed inside.
+ * Only works when the player is inside a residential building; displays a
+ * warning otherwise.</p>
+ */
 public class HouseInfoCommand extends BaseCommand {
-    private final Scanner scanner;
-    private final Building currentLocation;
 
-    public HouseInfoCommand(Scanner scanner, Building currentLocation) {
-        this.scanner = scanner;
-        this.currentLocation = currentLocation;
+    /**
+     * Constructs a {@code HouseInfoCommand} with the given context.
+     *
+     * @param ctx shared command context providing access to the current location.
+     */
+    public HouseInfoCommand(CommandContext ctx) {
+        super(ctx);
     }
 
+    /**
+     * Prints the room layout and furniture of the current residential building.
+     *
+     * @return {@link CommandResult#NO_TICK} — viewing house info does not advance time.
+     */
     @Override
     protected CommandResult run() {
+        Building currentLocation = ctx.getCurrentLocation();
+
         if (currentLocation.isResidential()) {
             Residential res = (Residential) currentLocation;
             UIManager.printMessage("\n=== HOUSE INFO: " + res.getName() + " ===");
@@ -34,8 +48,7 @@ public class HouseInfoCommand extends BaseCommand {
         } else {
             UIManager.printMessage("You can only inspect residential buildings.");
         }
-        pause(scanner);
+        pause();
         return CommandResult.NO_TICK;
     }
-
 }

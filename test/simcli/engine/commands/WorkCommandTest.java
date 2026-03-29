@@ -3,7 +3,6 @@ package simcli.engine.commands;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import simcli.engine.commands.WorkCommand;
 import simcli.entities.models.Gender;
 import simcli.entities.models.Job;
 import simcli.engine.TimeManager;
@@ -25,13 +24,22 @@ public class WorkCommandTest {
         adultSim = new Sim("Bob", 25, Gender.MALE, Job.SOFTWARE_ENGINEER);
     }
 
+    /** Helper to build a CommandContext for WorkCommand tests. */
+    private CommandContext buildCtx(Sim sim, Scanner scanner, TimeManager tm) {
+        return new CommandContext.Builder()
+                .activePlayer(sim)
+                .scanner(scanner)
+                .timeManager(tm)
+                .build();
+    }
+
     @Test
     @DisplayName("Working on Monday advances ticks")
     void testWorkOnMonday() throws Exception {
         // Day 1 is Monday.
         TimeManager tm = new TimeManager(1, 24);
         Scanner scanner = new Scanner(System.in);
-        WorkCommand command = new WorkCommand(adultSim, scanner, tm);
+        WorkCommand command = new WorkCommand(buildCtx(adultSim, scanner, tm));
 
         assertEquals("Monday", tm.getDayOfWeek());
 
@@ -51,7 +59,7 @@ public class WorkCommandTest {
         ByteArrayInputStream in = new ByteArrayInputStream("\n".getBytes());
         Scanner mockScanner = new Scanner(in);
 
-        WorkCommand command = new WorkCommand(adultSim, mockScanner, tm);
+        WorkCommand command = new WorkCommand(buildCtx(adultSim, mockScanner, tm));
 
         assertEquals("Saturday", tm.getDayOfWeek());
 
@@ -70,7 +78,7 @@ public class WorkCommandTest {
         ByteArrayInputStream in = new ByteArrayInputStream("\n".getBytes());
         Scanner mockScanner = new Scanner(in);
 
-        WorkCommand command = new WorkCommand(adultSim, mockScanner, tm);
+        WorkCommand command = new WorkCommand(buildCtx(adultSim, mockScanner, tm));
 
         assertEquals("Sunday", tm.getDayOfWeek());
 

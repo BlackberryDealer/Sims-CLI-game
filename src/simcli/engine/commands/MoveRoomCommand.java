@@ -8,21 +8,34 @@ import simcli.world.Residential;
 import simcli.world.Room;
 
 import java.util.List;
-import java.util.Scanner;
 
+/**
+ * Command that moves the active Sim between rooms inside a residential building.
+ *
+ * <p>Only available when the current location is residential. Displays all
+ * rooms with a current-room marker and lets the player select a destination.</p>
+ */
 public class MoveRoomCommand extends BaseCommand {
-    private final Sim activePlayer;
-    private final Scanner scanner;
-    private final Building currentLocation;
 
-    public MoveRoomCommand(Sim activePlayer, Scanner scanner, Building currentLocation) {
-        this.activePlayer = activePlayer;
-        this.scanner = scanner;
-        this.currentLocation = currentLocation;
+    /**
+     * Constructs a {@code MoveRoomCommand} with the given context.
+     *
+     * @param ctx shared command context.
+     */
+    public MoveRoomCommand(CommandContext ctx) {
+        super(ctx);
     }
 
+    /**
+     * Presents the room selection menu and moves the Sim if valid.
+     *
+     * @return {@link CommandResult#NO_TICK} — moving between rooms does not advance time.
+     */
     @Override
     protected CommandResult run() {
+        Sim activePlayer = ctx.getActivePlayer();
+        Building currentLocation = ctx.getCurrentLocation();
+
         if (currentLocation.isResidential()) {
             Residential res = (Residential) currentLocation;
             UIManager.printMessage("\n=== MOVE ROOM ===");
@@ -35,7 +48,7 @@ public class MoveRoomCommand extends BaseCommand {
             UIManager.printMessage("[0] Cancel");
             UIManager.prompt("Select Room> ");
             try {
-                int rChoice = Integer.parseInt(scanner.nextLine().trim());
+                int rChoice = Integer.parseInt(ctx.getScanner().nextLine().trim());
                 if (rChoice > 0 && rChoice <= rooms.size()) {
                     Room selectedRoom = rooms.get(rChoice - 1);
                     if (selectedRoom == activePlayer.getCurrentRoom()) {
@@ -51,8 +64,7 @@ public class MoveRoomCommand extends BaseCommand {
         } else {
             UIManager.printMessage("You can only move between rooms at home!");
         }
-        pause(scanner);
+        pause();
         return CommandResult.NO_TICK;
     }
-
 }
