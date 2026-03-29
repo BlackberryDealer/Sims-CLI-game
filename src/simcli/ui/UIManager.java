@@ -94,8 +94,6 @@ public class UIManager {
         System.out.println(message);
     }
 
-
-
     public static void printWarning(String message) {
         System.out.println("\n[WARNING] " + message);
     }
