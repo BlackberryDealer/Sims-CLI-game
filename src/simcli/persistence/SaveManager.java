@@ -17,20 +17,39 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Manages the persistence of game state, including saving worlds, loading worlds,
+ * and deleting existing game saves.
+ */
 public class SaveManager {
+    /** Directory where save files are stored. */
     private static final String SAVE_DIR = "saves/";
+    /** File extension for save files. */
     private static final String FILE_FORMAT = ".txt";
 
+    /**
+     * Checks if the save directory exists and creates it if it does not.
+     */
     public static void checkDirectory() {
         File dir = new File(SAVE_DIR);
         if (!dir.exists())
             dir.mkdirs();
     }
 
+    /**
+     * Checks if a save file exists for a given world name.
+     * @param worldName the name of the world to check.
+     * @return true if the save file exists, false otherwise.
+     */
     public static boolean saveExists(String worldName) {
         return new File(SAVE_DIR + worldName + FILE_FORMAT).exists();
     }
 
+    /**
+     * Deletes the save file associated with a given world name.
+     * @param worldName the name of the world whose save should be deleted.
+     * @return true if the file was deleted successfully, false otherwise.
+     */
     public static boolean deleteSave(String worldName) {
         File file = new File(SAVE_DIR + worldName + FILE_FORMAT);
         if (file.exists()) {
@@ -39,6 +58,10 @@ public class SaveManager {
         return false;
     }
 
+    /**
+     * Retrieves a list of all existing save names (without file extensions).
+     * @return a list of strings representing the names of the existing worlds.
+     */
     public static List<String> getExistingSaves() {
         checkDirectory();
         List<String> saves = new ArrayList<>();
@@ -53,6 +76,12 @@ public class SaveManager {
         return saves;
     }
 
+    /**
+     * Saves the current game state to a file.
+     * This includes world stats, actor states, inventory items, relationships, and more.
+     * @param engine the current GameEngine instance containing the world and sims.
+     * @param worldName the name of the world/file to save under.
+     */
     public static void saveGame(GameEngine engine, String worldName) {
         checkDirectory();
         try (PrintWriter writer = new PrintWriter(new FileWriter(SAVE_DIR + worldName + FILE_FORMAT))) {
@@ -136,6 +165,12 @@ public class SaveManager {
         }
     }
 
+    /**
+     * Loads a game state from a save file.
+     * This method parses the save file format and reconstructs the GameEngine, world, and actors.
+     * @param worldName the name of the world/file to load.
+     * @return a new GameEngine instance with the loaded world state, or null if loading fails.
+     */
     public static GameEngine loadGame(String worldName) {
         try (BufferedReader reader = new BufferedReader(new FileReader(SAVE_DIR + worldName + FILE_FORMAT))) {
             String line;
@@ -300,6 +335,12 @@ public class SaveManager {
         }
     }
 
+    /**
+     * Utility method to find a Sim by their name within a list.
+     * @param list the list of Sims to search through.
+     * @param name the name of the Sim to find.
+     * @return the Sim object if found, or null otherwise.
+     */
     private static Sim findSimByName(List<Sim> list, String name) {
         for (Sim s : list) {
             if (s.getName().equals(name)) return s;
