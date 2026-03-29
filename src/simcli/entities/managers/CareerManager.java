@@ -31,14 +31,14 @@ public class CareerManager {
         if (this.career == Job.UNEMPLOYED) return;
         this.consecutiveDaysMissed++;
         if (this.consecutiveDaysMissed > 3) {
-            SimulationLogger.logWarning("Oh no! " + simName + " missed too many days of work and was fired from "
+            SimulationLogger.getInstance().logWarning("Oh no! " + simName + " missed too many days of work and was fired from "
                     + this.career.getTitle() + ".");
             this.career = Job.UNEMPLOYED;
             this.jobTier = 1;
             this.consecutiveDaysMissed = 0;
             this.shiftsWorkedToday = 0;
         } else if (this.consecutiveDaysMissed > 0) {
-            SimulationLogger.logWarning(simName + " missed work! Consecutive days missed: " + this.consecutiveDaysMissed);
+            SimulationLogger.getInstance().logWarning(simName + " missed work! Consecutive days missed: " + this.consecutiveDaysMissed);
         }
     }
 
@@ -46,7 +46,7 @@ public class CareerManager {
         if (this.career == Job.UNEMPLOYED) return;
         if (this.jobTier < this.career.getMaxTier()) {
             this.jobTier++;
-            SimulationLogger.log("\n*** PROMOTION! " + simName + " has been promoted to tier "
+            SimulationLogger.getInstance().log("\n*** PROMOTION! " + simName + " has been promoted to tier "
                     + this.jobTier + " in " + this.career.getTitle() + "! ***");
         }
     }
@@ -56,7 +56,7 @@ public class CareerManager {
         this.jobTier = 1;
         this.consecutiveDaysMissed = 0;
         this.shiftsWorkedToday = 0;
-        SimulationLogger.log(simName + " has started a new job as a " + newJob.getTitle() + ".");
+        SimulationLogger.getInstance().log(simName + " has started a new job as a " + newJob.getTitle() + ".");
     }
 
     public void resetDaily(boolean zeroShifts) {

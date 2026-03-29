@@ -47,8 +47,9 @@ public class IntegrationTest {
         
         worldManager = testEngine.getWorldManager();
         timeManager = new TimeManager(1, 24); // Monday, Tick 1
+        SimulationLogger logger = new SimulationLogger();
         inputHandler = new InputHandler(worldManager, timeManager,
-                testEngine.getNeighborhood(), testEngine::setActivePlayer);
+                testEngine.getNeighborhood(), testEngine::setActivePlayer, logger);
     }
 
     @AfterEach
@@ -71,10 +72,12 @@ public class IntegrationTest {
     private CommandContext buildCtx(Sim sim, Scanner scanner) {
         return new CommandContext.Builder()
                 .activePlayer(sim)
+                .neighborhood(java.util.Collections.singletonList(sim))
                 .scanner(scanner)
                 .timeManager(timeManager)
                 .worldManager(worldManager)
                 .currentLocation(worldManager.getCurrentLocation())
+                .logger(new SimulationLogger())
                 .build();
     }
 
@@ -118,8 +121,12 @@ public class IntegrationTest {
         
         CommandContext ctx = new CommandContext.Builder()
                 .activePlayer(activePlayer)
+                .neighborhood(java.util.Collections.singletonList(activePlayer))
                 .scanner(mockScanner)
+                .timeManager(timeManager)
+                .worldManager(worldManager)
                 .currentLocation(home)
+                .logger(new SimulationLogger())
                 .build();
         UpgradeRoomCommand command = new UpgradeRoomCommand(ctx);
         
@@ -143,8 +150,12 @@ public class IntegrationTest {
         
         CommandContext ctx = new CommandContext.Builder()
                 .activePlayer(activePlayer)
+                .neighborhood(java.util.Collections.singletonList(activePlayer))
                 .scanner(mockScanner)
                 .timeManager(timeManager)
+                .worldManager(worldManager)
+                .currentLocation(worldManager.getCurrentLocation())
+                .logger(new SimulationLogger())
                 .build();
         WorkCommand command = new WorkCommand(ctx);
         
@@ -169,7 +180,12 @@ public class IntegrationTest {
         
         CommandContext ctx = new CommandContext.Builder()
                 .activePlayer(teen)
+                .neighborhood(java.util.Collections.singletonList(teen))
                 .scanner(mockScanner)
+                .timeManager(timeManager)
+                .worldManager(worldManager)
+                .currentLocation(worldManager.getCurrentLocation())
+                .logger(new SimulationLogger())
                 .build();
         JobMarketCommand jobMarket = new JobMarketCommand(ctx);
         CommandResult result = jobMarket.execute();
@@ -192,9 +208,12 @@ public class IntegrationTest {
         
         CommandContext ctx = new CommandContext.Builder()
                 .activePlayer(activePlayer)
+                .neighborhood(java.util.Collections.singletonList(activePlayer))
                 .scanner(mockScanner)
+                .timeManager(timeManager)
                 .worldManager(worldManager)
                 .currentLocation(home)
+                .logger(new SimulationLogger())
                 .build();
         TravelCommand command = new TravelCommand(ctx);
         

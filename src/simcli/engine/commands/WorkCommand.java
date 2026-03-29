@@ -56,8 +56,8 @@ public class WorkCommand extends BaseCommand {
 
         // Check for overwork warning
         if (activePlayer.getShiftsWorkedToday() >= 1 && !activePlayer.hasWarnedAboutOverwork()) {
-            SimulationLogger.logWarning("Working multiple shifts in a single day drains stats significantly faster!");
-            SimulationLogger.prompt("Are you sure you want to overwork? (Y/N)> ");
+            ctx.getLogger().logWarning("Working multiple shifts in a single day drains stats significantly faster!");
+            ctx.getLogger().prompt("Are you sure you want to overwork? (Y/N)> ");
             String conf = ctx.getScanner().nextLine().trim();
             activePlayer.setWarnedAboutOverwork(true);
             if (!conf.equalsIgnoreCase("Y")) {

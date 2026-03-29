@@ -1,12 +1,14 @@
 package simcli.engine.commands;
 
 import simcli.engine.IWorldManager;
+import simcli.engine.SimulationLogger;
 import simcli.engine.TimeManager;
 import simcli.entities.actors.Sim;
 import simcli.world.Building;
 import simcli.world.interactables.Interactable;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Scanner;
 import java.util.function.Consumer;
 
@@ -26,13 +28,9 @@ import java.util.function.Consumer;
  *
  * <p>For state mutations that need to propagate back to the engine (e.g.
  * switching the active player), the context carries a callback
- * ({@link #setActivePlayer}) rather than a reference to the engine itself.</p>
+ * ({@link #switchActivePlayer}) rather than a reference to the engine itself.</p>
  */
 public class CommandContext {
-
-    // -------------------------------------------------------------------------
-    // Fields
-    // -------------------------------------------------------------------------
 
     private final Sim activePlayer;
     private final List<Sim> neighborhood;
@@ -42,10 +40,7 @@ public class CommandContext {
     private final Building currentLocation;
     private final List<Interactable> availableItems;
     private final Consumer<Sim> setActivePlayer;
-
-    // -------------------------------------------------------------------------
-    // Constructor (Builder-style via static factory)
-    // -------------------------------------------------------------------------
+    private final SimulationLogger logger;
 
     private CommandContext(Builder builder) {
         this.activePlayer    = builder.activePlayer;
@@ -56,11 +51,8 @@ public class CommandContext {
         this.currentLocation = builder.currentLocation;
         this.availableItems  = builder.availableItems;
         this.setActivePlayer = builder.setActivePlayer;
+        this.logger          = builder.logger;
     }
-
-    // -------------------------------------------------------------------------
-    // Getters
-    // -------------------------------------------------------------------------
 
     /** Returns the currently controlled Sim. */
     public Sim getActivePlayer() { return activePlayer; }
@@ -83,10 +75,11 @@ public class CommandContext {
     /** Returns the interactable items available at the current location/room. */
     public List<Interactable> getAvailableItems() { return availableItems; }
 
+    /** Returns the simulation logger for buffering messages. */
+    public SimulationLogger getLogger() { return logger; }
+
     /**
-     * Switches the engine's active player. This is a callback that propagates
-     * the mutation back to {@code GameEngine} without the command needing a
-     * direct reference to the engine.
+     * Switches the engine's active player via callback.
      *
      * @param sim the Sim to make active.
      */
@@ -96,15 +89,7 @@ public class CommandContext {
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Builder
-    // -------------------------------------------------------------------------
-
-    /**
-     * Fluent builder for constructing a {@code CommandContext}.
-     * Used by {@code InputHandler} to assemble the context once per command
-     * invocation.
-     */
+    /** Fluent builder for constructing a {@code CommandContext}. */
     public static class Builder {
         private Sim activePlayer;
         private List<Sim> neighborhood;
@@ -114,6 +99,7 @@ public class CommandContext {
         private Building currentLocation;
         private List<Interactable> availableItems;
         private Consumer<Sim> setActivePlayer;
+        private SimulationLogger logger;
 
         public Builder activePlayer(Sim activePlayer) {
             this.activePlayer = activePlayer;
@@ -155,7 +141,29 @@ public class CommandContext {
             return this;
         }
 
+        public Builder logger(SimulationLogger logger) {
+            this.logger = logger;
+            return this;
+        }
+
+        /**
+         * Builds and validates the {@code CommandContext}.
+         *
+         * <p>Ensures all required fields are non-null. Optional fields
+         * ({@code availableItems}, {@code setActivePlayer}) are allowed
+         * to be null.</p>
+         *
+         * @return a fully-constructed {@code CommandContext}.
+         * @throws NullPointerException if any required field is null.
+         */
         public CommandContext build() {
+            Objects.requireNonNull(activePlayer, "activePlayer is required");
+            Objects.requireNonNull(neighborhood, "neighborhood is required");
+            Objects.requireNonNull(scanner, "scanner is required");
+            Objects.requireNonNull(timeManager, "timeManager is required");
+            Objects.requireNonNull(worldManager, "worldManager is required");
+            Objects.requireNonNull(currentLocation, "currentLocation is required");
+            Objects.requireNonNull(logger, "logger is required");
             return new CommandContext(this);
         }
     }

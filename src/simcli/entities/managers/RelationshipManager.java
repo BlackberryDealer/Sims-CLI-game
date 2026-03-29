@@ -115,7 +115,7 @@ public class RelationshipManager {
 
         owner.setCurrentAction(ActionState.SOCIALIZING);
 
-        SimulationLogger.log(owner.getName() + " socializes with " + otherSim.getName() + ".");
+        SimulationLogger.getInstance().log(owner.getName() + " socializes with " + otherSim.getName() + ".");
         owner.increaseSocial(socialBonus);
         owner.decreaseEnergy(10);
         owner.increaseHappiness(happinessBonus);
@@ -136,7 +136,7 @@ public class RelationshipManager {
                 && otherSim.getRelationshipManager().getSpouse() == null) {
             this.spouse = otherSim;
             otherSim.getRelationshipManager().setSpouse(owner);
-            SimulationLogger.log(
+            SimulationLogger.getInstance().log(
                     "\n*** WEDDING BELLS! " + owner.getName() + " and " + otherSim.getName() + " are now married! ***");
             return true;
         }
@@ -167,11 +167,11 @@ public class RelationshipManager {
         // 50% success rate
         if (GameRandom.RANDOM.nextInt(100) < GameConstants.REPRODUCE_SUCCESS_CHANCE) {
             // Log the immediate success message before creating the baby
-            SimulationLogger
+            SimulationLogger.getInstance()
                     .log("\nSuccess! " + owner.getName() + " and " + this.spouse.getName() + " are expecting a baby!");
             return GameRandom.RANDOM.nextBoolean() ? Gender.MALE : Gender.FEMALE;
         } else {
-            SimulationLogger.log("\n" + owner.getName() + " and " + this.spouse.getName()
+            SimulationLogger.getInstance().log("\n" + owner.getName() + " and " + this.spouse.getName()
                     + " tried to have a baby, but were unsuccessful this time.");
             return null;
         }
@@ -188,7 +188,7 @@ public class RelationshipManager {
         spouse.getRelationshipManager().addChild(child);
 
         // Updated to match the requested final format
-        SimulationLogger.log("\n*** NEW LIFE! " + child.getName() + " has been born! ***");
+        SimulationLogger.getInstance().log("\n*** NEW LIFE! " + child.getName() + " has been born! ***");
         return child;
     }
 }

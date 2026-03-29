@@ -99,7 +99,7 @@ public class UIManager {
     }
 
     public static void prompt(String message) {
-        SimulationLogger.flushAndPrint();
+        SimulationLogger.getInstance().flushAndPrint();
         System.out.print(message);
     }
 

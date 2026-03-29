@@ -28,8 +28,8 @@ public class Computer implements Interactable {
         }
         
         sim.setCurrentAction(ActionState.STUDYING);
-        SimulationLogger.logAnimation(sim);
-        SimulationLogger.log(sim.getName() + " fires up the PC to study data structures and network protocols!");
+        SimulationLogger.getInstance().logAnimation(sim);
+        SimulationLogger.getInstance().log(sim.getName() + " fires up the PC to study data structures and network protocols!");
         
         sim.getEnergy().decrease(ENERGY_COST);
         sim.getHunger().decrease(HUNGER_COST);

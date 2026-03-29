@@ -15,6 +15,8 @@ public final class GameConstants {
     public static final int TICKS_PER_DAY = 24;
     /** The interval (in ticks) at which the game state is automatically saved. */
     public static final int AUTOSAVE_INTERVAL_TICKS = 10;
+    /** The hour of the day (in 24h ticks) that a sleeping Sim wakes up. */
+    public static final int MORNING_HOUR = 8;
 
     // --- Commands ---
     /** The bonus capacity added to inventory when upgraded. */

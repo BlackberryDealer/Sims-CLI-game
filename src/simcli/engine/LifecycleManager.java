@@ -42,6 +42,11 @@ public class LifecycleManager {
      */
     private final int daysPerAgeTick;
 
+    /**
+     * Logger for lifecycle event messages (death, pension, retirement).
+     */
+    private final SimulationLogger logger;
+
     // -------------------------------------------------------------------------
     // Constructor
     // -------------------------------------------------------------------------
@@ -51,14 +56,16 @@ public class LifecycleManager {
      *
      * @param daysPerAgeTick number of in-game days that constitute one
      *                       age-up cycle. Must be &gt;= 1.
+     * @param logger        the simulation logger for lifecycle messages.
      * @throws IllegalArgumentException if {@code daysPerAgeTick} is less than 1.
      */
-    public LifecycleManager(int daysPerAgeTick) {
+    public LifecycleManager(int daysPerAgeTick, SimulationLogger logger) {
         if (daysPerAgeTick < 1) {
             throw new IllegalArgumentException(
                     "daysPerAgeTick must be >= 1, but was: " + daysPerAgeTick);
         }
         this.daysPerAgeTick = daysPerAgeTick;
+        this.logger = logger;
     }
 
     // -------------------------------------------------------------------------
@@ -117,7 +124,7 @@ public class LifecycleManager {
             // Death by old age.
             if (sim.getAge() >= GameConstants.DEATH_AGE) {
                 sim.markAsDead();
-                SimulationLogger.log(
+                logger.log(
                         "\n*** " + sim.getName()
                         + " has passed away of old age. ***");
             }
@@ -127,7 +134,7 @@ public class LifecycleManager {
                     && sim.getCareer() == Job.UNEMPLOYED) {
                 int pension = GameConstants.RETIREMENT_PENSION_INCOME_AMOUNT;
                 sim.setMoney(sim.getMoney() + pension);
-                SimulationLogger.log(
+                logger.log(
                         sim.getName() + " collected a retirement pension of $"
                         + pension);
             }
@@ -136,7 +143,7 @@ public class LifecycleManager {
             Job currentJob = sim.getCareer();
             if (currentJob != Job.UNEMPLOYED
                     && sim.getAge() > currentJob.getMaxAge()) {
-                SimulationLogger.log(
+                logger.log(
                         "\n[RETIREMENT] " + sim.getName()
                         + " is too old for " + currentJob.getTitle()
                         + " and must retire.");

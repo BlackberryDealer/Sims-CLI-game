@@ -34,7 +34,7 @@ public class SkillManager {
         
         // Every 10 points is a new level
         if (current / 10 < newExp / 10) {
-            SimulationLogger.log("\n*** SKILL UP! " + simName + " reached level " + (newExp / 10) + " in " + type + "! ***");
+            SimulationLogger.getInstance().log("\n*** SKILL UP! " + simName + " reached level " + (newExp / 10) + " in " + type + "! ***");
         }
     }
 }

@@ -10,6 +10,7 @@ import simcli.engine.CommandResult;
 import simcli.entities.actors.Sim;
 
 import java.io.ByteArrayInputStream;
+import java.util.Collections;
 import java.util.Scanner;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -26,10 +27,20 @@ public class WorkCommandTest {
 
     /** Helper to build a CommandContext for WorkCommand tests. */
     private CommandContext buildCtx(Sim sim, Scanner scanner, TimeManager tm) {
+        // Set up a minimal world so CommandContext validation passes
+        simcli.entities.managers.NPCManager npcMgr = new simcli.entities.managers.NPCManager();
+        simcli.engine.IWorldManager wm = new simcli.engine.WorldManager(
+                npcMgr, Collections.singletonList(sim));
+        wm.setupWorld();
+
         return new CommandContext.Builder()
                 .activePlayer(sim)
+                .neighborhood(Collections.singletonList(sim))
                 .scanner(scanner)
                 .timeManager(tm)
+                .worldManager(wm)
+                .currentLocation(wm.getCurrentLocation())
+                .logger(new simcli.engine.SimulationLogger())
                 .build();
     }
 

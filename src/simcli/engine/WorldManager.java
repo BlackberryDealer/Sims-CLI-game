@@ -1,5 +1,6 @@
 package simcli.engine;
 
+import simcli.entities.managers.NPCManager;
 import simcli.world.Building;
 import simcli.world.Commercial;
 import simcli.world.Park;
@@ -18,27 +19,29 @@ import java.util.List;
  * currently inside. The world is rebuilt from scratch each time
  * {@link #setupWorld()} is called (e.g. on new game or load).</p>
  *
- * <p>Holds a back-reference to {@link GameEngine} so it can access the
- * {@link simcli.entities.managers.NPCManager} when creating the park.</p>
+ * <p>Receives its {@link NPCManager} dependency via the constructor rather
+ * than reaching back into {@code GameEngine}, eliminating the previous
+ * circular dependency. The neighborhood list is also injected so that
+ * {@code ParkBench} can add married NPCs to the household without
+ * referencing the engine.</p>
  */
 public class WorldManager implements IWorldManager {
     private List<Building> cityMap;
     private Building currentLocation;
-    private GameEngine engine;
-
-    /** Creates an empty {@code WorldManager}. Call {@link #setupWorld()} to build the map. */
-    public WorldManager() {
-        this.cityMap = new ArrayList<>();
-    }
+    private final NPCManager npcManager;
+    private final List<simcli.entities.actors.Sim> neighborhood;
 
     /**
-     * Injects the parent {@link GameEngine} reference.
-     * Required because the park needs access to the NPC manager.
+     * Creates a {@code WorldManager} with the given NPC manager.
+     * Call {@link #setupWorld()} to build the map.
      *
-     * @param engine the owning game engine.
+     * @param npcManager   provides NPCs for park buildings.
+     * @param neighborhood the mutable household list (for ParkBench marriage).
      */
-    public void setEngine(GameEngine engine) {
-        this.engine = engine;
+    public WorldManager(NPCManager npcManager, List<simcli.entities.actors.Sim> neighborhood) {
+        this.cityMap = new ArrayList<>();
+        this.npcManager = npcManager;
+        this.neighborhood = neighborhood;
     }
 
     /**
@@ -98,8 +101,9 @@ public class WorldManager implements IWorldManager {
         bookshop.addInteractable(new BookshopShelf());
         this.cityMap.add(bookshop);
 
-        Park park = new Park("City Park", this.engine.getNpcManager());
-        park.addInteractable(new ParkBench(this.engine));
+        // Build Park — ParkBench now receives NPCManager + neighborhood directly
+        Park park = new Park("City Park", this.npcManager);
+        park.addInteractable(new ParkBench(this.npcManager, this.neighborhood));
         this.cityMap.add(park);
 
         // Default spawn location

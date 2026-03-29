@@ -1,6 +1,7 @@
 package simcli.engine;
 
 import simcli.entities.actors.Sim;
+import simcli.utils.GameConstants;
 
 import java.util.List;
 
@@ -11,6 +12,11 @@ import java.util.List;
  * decaying needs for all Sims, advancing the clock, triggering random events,
  * and — when a new day begins — delegating lifecycle processing to the
  * {@link LifecycleManager}.</p>
+ *
+ * <h2>Ownership</h2>
+ * <p>This class owns the creation of {@link RandomEventManager} and
+ * {@link LifecycleManager}, keeping subsystem factories close to their
+ * consumers and reducing the construction burden on {@link GameEngine}.</p>
  */
 public class GameLoop {
     private final TimeManager timeManager;
@@ -19,21 +25,19 @@ public class GameLoop {
     private final LifecycleManager lifecycleManager;
 
     /**
-     * Creates a new GameLoop with all required collaborators.
+     * Creates a new GameLoop, instantiating its own event and lifecycle managers.
      *
-     * @param timeManager      tracks tick/day/time-of-day progression.
-     * @param neighborhood     every Sim in the current game world.
-     * @param eventManager     fires random events each tick.
-     * @param lifecycleManager handles aging, death, and retirement on day
-     *                         boundaries.
+     * @param timeManager  tracks tick/day/time-of-day progression.
+     * @param neighborhood every Sim in the current game world.
+     * @param logger       the simulation logger for event and lifecycle messages.
      */
     public GameLoop(TimeManager timeManager, List<Sim> neighborhood,
-                    RandomEventManager eventManager,
-                    LifecycleManager lifecycleManager) {
+                    SimulationLogger logger) {
         this.timeManager = timeManager;
         this.neighborhood = neighborhood;
-        this.eventManager = eventManager;
-        this.lifecycleManager = lifecycleManager;
+        this.eventManager = new RandomEventManager(logger);
+        this.lifecycleManager = new LifecycleManager(
+                GameConstants.DAYS_PER_AGE_TICK, logger);
     }
 
     /**
@@ -86,5 +90,15 @@ public class GameLoop {
         for (Sim s : neighborhood) {
             s.getCareerManager().checkTruancy(s.getName());
         }
+    }
+
+    /** Returns the event manager owned by this loop. */
+    public RandomEventManager getRandomEventManager() {
+        return eventManager;
+    }
+
+    /** Returns the lifecycle manager owned by this loop. */
+    public LifecycleManager getLifecycleManager() {
+        return lifecycleManager;
     }
 }

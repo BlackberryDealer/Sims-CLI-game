@@ -104,7 +104,7 @@ public class SpouseInteractionCommand extends BaseCommand {
      * @param spouse the spouse Sim.
      */
     private void handleDate(Sim sim, Sim spouse) {
-        SimulationLogger.log(sim.getName() + " and " + spouse.getName() + " spent a lovely time together on a date!");
+        ctx.getLogger().log(sim.getName() + " and " + spouse.getName() + " spent a lovely time together on a date!");
         sim.getHappiness().increase(30);
         sim.getSocial().increase(50);
         spouse.getHappiness().increase(30);
@@ -141,7 +141,7 @@ public class SpouseInteractionCommand extends BaseCommand {
                 spouse.setCurrentRoom(sim.getCurrentRoom());
             }
             
-            SimulationLogger.log("Teleported home to " + home.getName() + " to try for a baby...");
+            ctx.getLogger().log("Teleported home to " + home.getName() + " to try for a baby...");
             
             try {
                 Gender babyGender = sim.getRelationshipManager().attemptPregnancy(); 
@@ -153,11 +153,11 @@ public class SpouseInteractionCommand extends BaseCommand {
                     Sim child = sim.getRelationshipManager().finalizeBaby(babyName, babyGender);
 
                     ctx.getNeighborhood().add(child);
-                    SimulationLogger.log(child.getName() + " has been added to your household!");
+                    ctx.getLogger().log(child.getName() + " has been added to your household!");
                     return CommandResult.TICK_FORWARD;
                 }
             } catch (SimulationException e) {
-                SimulationLogger.logWarning(e.getMessage());
+                ctx.getLogger().logWarning(e.getMessage());
             }
         }
         return CommandResult.NO_TICK;
@@ -178,7 +178,7 @@ public class SpouseInteractionCommand extends BaseCommand {
             }
         }
         if (count > 0) {
-            SimulationLogger.log(parent.getName() + " feeds all " + count + " babies in the household.");
+            ctx.getLogger().log(parent.getName() + " feeds all " + count + " babies in the household.");
             parent.getSocial().increase(10);
             parent.getHappiness().increase(5);
         }
