@@ -1,7 +1,0 @@
-WORLD:Test 1
-TICK:1
-GAME_OVER:false
-ResState:0,true,100,50,60,30
-ResState:1,false,120,80,40
-LOCATION:0,0
-Sim:Dylan,18,FEMALE,UNEMPLOYED,500,10,85,94,94,85,85,1,false

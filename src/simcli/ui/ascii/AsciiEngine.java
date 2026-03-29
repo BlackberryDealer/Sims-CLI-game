@@ -10,7 +10,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * UI component handing formatting or displaying of AsciiEngine.
+ * The rendering engine responsible for selecting the correct ASCII art.
+ * It uses the Strategy Pattern to dynamically map a Sim's current ActionState
+ * to a specific IAsciiProvider. If the Sim is IDLE, it defaults to rendering
+ * the Building they are currently inside.
  */
 public class AsciiEngine {
 

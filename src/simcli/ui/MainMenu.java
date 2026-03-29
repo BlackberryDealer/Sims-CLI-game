@@ -23,6 +23,9 @@ public class MainMenu {
         this.scanner = scanner;
     }
 
+    /**
+     * Displays and processes the main menu selection loop until a game is launched or exited.
+     */
     public void display() {
         boolean inMenu = true;
 
@@ -63,6 +66,9 @@ public class MainMenu {
         }
     }
 
+    /**
+     * Prompts the user to generate a new household, validates inputs, and launches a fresh GameEngine.
+     */
     private void createNewWorld() {
         SimulationLogger.getInstance().reset();
         String newName = "";
@@ -147,6 +153,9 @@ public class MainMenu {
         newGame.run(scanner);
     }
 
+    /**
+     * Displays a list of existing save files and attempts to reconstruct a GameEngine from the chosen file.
+     */
     private void loadWorld() {
         SimulationLogger.getInstance().reset();
         List<String> saves = SaveManager.getExistingSaves();
@@ -187,6 +196,9 @@ public class MainMenu {
         }
     }
 
+    /**
+     * Prompts the user to permanently delete a saved world file.
+     */
     private void deleteWorld() {
         List<String> saves = SaveManager.getExistingSaves();
         if (saves.isEmpty()) {
