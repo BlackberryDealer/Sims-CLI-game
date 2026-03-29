@@ -6,7 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Represents the InventoryManager entity or state in the simulation.
+ * Manages a Sim's item inventory with a configurable capacity limit.
+ * Items can be added, listed, and the capacity upgraded at runtime.
  */
 public class InventoryManager {
     private List<Item> inventory;

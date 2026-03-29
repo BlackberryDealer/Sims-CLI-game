@@ -10,9 +10,13 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.function.Consumer;
 
-// Factory + dispatcher: maps raw user input to the right Command object.
-// Builds one shared CommandContext per turn, then instantiates the matching command.
-// Never holds a reference to GameEngine — only the specific dependencies it needs.
+/**
+ * Factory and dispatcher: maps raw user input to the right Command object.
+ *
+ * <p>Builds one shared {@link CommandContext} per turn, then instantiates
+ * the matching command. Never holds a reference to {@code GameEngine} —
+ * only the specific dependencies it needs (Dependency Inversion).</p>
+ */
 public class InputHandler implements IInputHandler {
     private final IWorldManager worldManager;
     private final TimeManager timeManager;
@@ -30,13 +34,13 @@ public class InputHandler implements IInputHandler {
      * @param logger          the simulation logger for command messages.
      */
     public InputHandler(IWorldManager worldManager, TimeManager timeManager,
-                        List<Sim> neighborhood, Consumer<Sim> setActivePlayer,
-                        SimulationLogger logger) {
-        this.worldManager    = worldManager;
-        this.timeManager     = timeManager;
-        this.neighborhood    = neighborhood;
+            List<Sim> neighborhood, Consumer<Sim> setActivePlayer,
+            SimulationLogger logger) {
+        this.worldManager = worldManager;
+        this.timeManager = timeManager;
+        this.neighborhood = neighborhood;
         this.setActivePlayer = setActivePlayer;
-        this.logger          = logger;
+        this.logger = logger;
     }
 
     @Override
@@ -108,7 +112,7 @@ public class InputHandler implements IInputHandler {
             // polymorphic dispatch — every command handles execute() the same way
             return command.execute();
 
-        // exceptions become results — keeps the game loop clean
+            // exceptions become results — keeps the game loop clean
         } catch (SleepEventException e) {
             return CommandResult.SLEEP_EVENT;
         } catch (SimulationException e) {

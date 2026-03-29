@@ -10,7 +10,8 @@ import simcli.ui.UIManager;
 import java.util.Scanner;
 
 /**
- * Represents a WeightBench location or interactable object.
+ * A piece of exercise equipment. When used, it reduces energy and hygiene
+ * while occasionally increasing the Sim's fitness or specific skills.
  */
 public class WeightBench implements Interactable {
     private static final int ENERGY_COST = 25;

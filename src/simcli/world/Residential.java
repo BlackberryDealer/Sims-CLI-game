@@ -7,7 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Represents a Residential location or interactable object.
+ * A home building comprising multiple {@link Room}s, each containing
+ * furniture interactables. Some residences are free (the starting dorm);
+ * others must be purchased with in-game money before the Sim can enter.
  */
 public class Residential extends Building {
     private List<Room> rooms;
@@ -36,9 +38,17 @@ public class Residential extends Building {
         return rooms;
     }
 
-    public int getPurchasePrice() { return purchasePrice; }
-    public boolean isOwned() { return isOwned; }
-    public void setOwned(boolean owned) { this.isOwned = owned; }
+    public int getPurchasePrice() {
+        return purchasePrice;
+    }
+
+    public boolean isOwned() {
+        return isOwned;
+    }
+
+    public void setOwned(boolean owned) {
+        this.isOwned = owned;
+    }
 
     public boolean purchase(Sim sim) {
         if (sim.getMoney() >= purchasePrice) {

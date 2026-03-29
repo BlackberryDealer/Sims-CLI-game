@@ -1,10 +1,11 @@
 package simcli.entities.lifecycle;
 
-
 import simcli.utils.GameConstants;
 
 /**
- * Represents the ChildStage entity or state in the simulation.
+ * Life stage for Sims aged 0–12. Children cannot work and have
+ * faster energy decay ({@code 1.5x}). Transitions to {@link TeenStage}
+ * when the Sim reaches age {@value simcli.utils.GameConstants#TEEN_AGE}.
  */
 public class ChildStage implements LifeStage {
 
@@ -13,7 +14,6 @@ public class ChildStage implements LifeStage {
         return false;
     }
 
- 
     @Override
     public double getEnergyDecayModifier() {
         return simcli.utils.GameConstants.BONUS_TIMES;

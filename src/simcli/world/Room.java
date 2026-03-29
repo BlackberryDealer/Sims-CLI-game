@@ -8,7 +8,10 @@ import simcli.ui.UIManager;
 import simcli.world.interactables.Interactable;
 
 /**
- * Represents a Room location or interactable object.
+ * A subdivided area within a {@link Residential} building that holds
+ * furniture interactables (e.g. Bed, Fridge, Shower). Each room has a
+ * maximum capacity that limits how much furniture can be placed inside;
+ * capacity can be upgraded at a cost.
  */
 public class Room {
     private String name;
@@ -23,11 +26,25 @@ public class Room {
         this.interactablesList = new ArrayList<>();
     }
 
-    public String getName() { return name; }
-    public int getMaxCapacity() { return maxCapacity; }
-    public void setMaxCapacity(int capacity) { this.maxCapacity = capacity; }
-    public int getUsedCapacity() { return currentCapacityUsed; }
-    public List<Interactable> getInteractables() { return interactablesList; }
+    public String getName() {
+        return name;
+    }
+
+    public int getMaxCapacity() {
+        return maxCapacity;
+    }
+
+    public void setMaxCapacity(int capacity) {
+        this.maxCapacity = capacity;
+    }
+
+    public int getUsedCapacity() {
+        return currentCapacityUsed;
+    }
+
+    public List<Interactable> getInteractables() {
+        return interactablesList;
+    }
 
     public boolean canFit(Furniture f) {
         return currentCapacityUsed + f.getSpaceScore() <= maxCapacity;
@@ -37,7 +54,7 @@ public class Room {
         interactablesList.add(interactableInstance);
         currentCapacityUsed += spaceScore;
     }
-    
+
     public void upgradeCapacity(Sim sim, int extraSpace, int cost) {
         if (sim.getMoney() >= cost) {
             sim.setMoney(sim.getMoney() - cost);

@@ -13,7 +13,8 @@ import java.util.List;
 import java.util.Scanner;
 
 /**
- * Represents a Fridge location or interactable object.
+ * A kitchen interactable that restores hunger when used.
+ * Sims with the Cooking skill can prepare better meals here.
  */
 public class Fridge implements Interactable, Container {
     private List<Item> storedFood = new ArrayList<>();

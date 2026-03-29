@@ -10,7 +10,9 @@ import simcli.ui.UIManager;
 import java.util.Scanner;
 
 /**
- * Represents the Consumable entity or state in the simulation.
+ * An item that can be eaten by a Sim, restoring hunger (satiation),
+ * energy, and happiness. Consumed items are removed from the inventory
+ * after use.
  */
 public class Consumable extends Item {
     private int satiationValue;
@@ -24,9 +26,17 @@ public class Consumable extends Item {
         this.happinessValue = happinessValue;
     }
 
-    public int getSatiationValue() { return satiationValue; }
-    public int getEnergyValue() { return energyValue; }
-    public int getHappinessValue() { return happinessValue; }
+    public int getSatiationValue() {
+        return satiationValue;
+    }
+
+    public int getEnergyValue() {
+        return energyValue;
+    }
+
+    public int getHappinessValue() {
+        return happinessValue;
+    }
 
     @Override
     public void interact(Sim sim, Scanner scanner, TimeManager timeManager) throws SimulationException {
@@ -35,7 +45,7 @@ public class Consumable extends Item {
         UIManager.printMessage(sim.getName() + " consumes the " + getObjectName() + ".");
         sim.eat(this);
     }
-    
+
     @Override
     public Item copyItem() {
         return new Consumable(getObjectName(), getPrice(), this.satiationValue, this.energyValue, this.happinessValue);
@@ -43,6 +53,7 @@ public class Consumable extends Item {
 
     @Override
     public String toSaveString() {
-        return String.format("Consumable,%s,%d,%d,%d,%d", getObjectName(), getPrice(), getSatiationValue(), getEnergyValue(), getHappinessValue());
+        return String.format("Consumable,%s,%d,%d,%d,%d", getObjectName(), getPrice(), getSatiationValue(),
+                getEnergyValue(), getHappinessValue());
     }
 }

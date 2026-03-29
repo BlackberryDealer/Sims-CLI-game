@@ -10,7 +10,8 @@ import simcli.ui.UIManager;
 import java.util.Scanner;
 
 /**
- * Represents a Shower location or interactable object.
+ * A bathroom interactable that fully restores a Sim's hygiene need
+ * at the cost of a small amount of time.
  */
 public class Shower implements Interactable {
 

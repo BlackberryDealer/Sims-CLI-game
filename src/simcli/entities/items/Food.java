@@ -1,13 +1,14 @@
 package simcli.entities.items;
 
 /**
- * Represents the Food entity or state in the simulation.
+ * A consumable food item that restores hunger and energy but provides
+ * no happiness bonus. Purchased from the grocery shelf.
  */
 public class Food extends Consumable {
     public Food(String name, int price, int satiationValue, int energyValue) {
         super(name, price, satiationValue, energyValue, 0); // Food does not provide fun
     }
-    
+
     @Override
     public Item copyItem() {
         return new Food(getObjectName(), getPrice(), getSatiationValue(), getEnergyValue());

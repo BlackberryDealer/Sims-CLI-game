@@ -11,7 +11,8 @@ import simcli.entities.items.Furniture;
 import simcli.entities.models.Job;
 
 /**
- * Represents a GroceryShelf location or interactable object.
+ * A commercial interactable that sells {@link simcli.entities.items.Consumable}
+ * items for Sims to purchase and place in their inventory.
  */
 public class GroceryShelf extends AbstractShop {
 

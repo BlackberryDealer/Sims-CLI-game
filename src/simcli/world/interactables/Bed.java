@@ -8,14 +8,17 @@ import simcli.utils.GameConstants;
 import java.util.Scanner;
 
 /**
- * Represents a Bed location or interactable object.
+ * A bedroom interactable that puts the Sim to sleep, restoring energy
+ * and fast-forwarding the game clock to the next morning (08:00).
+ * Triggers a {@link SleepEventException} to signal the engine.
  */
 public class Bed implements Interactable {
     @Override
     public void interact(Sim sim, Scanner scanner, TimeManager timeManager) throws SleepEventException {
         int currentInDay = timeManager.getCurrentTick() % GameConstants.TICKS_PER_DAY;
         // Tick 8 AM relative to a 24-hour day (0-23)
-        int ticksToMorning = (GameConstants.TICKS_PER_DAY - currentInDay + GameConstants.MORNING_HOUR) % GameConstants.TICKS_PER_DAY;
+        int ticksToMorning = (GameConstants.TICKS_PER_DAY - currentInDay + GameConstants.MORNING_HOUR)
+                % GameConstants.TICKS_PER_DAY;
         if (ticksToMorning == 0)
             ticksToMorning = GameConstants.TICKS_PER_DAY;
 

@@ -1,8 +1,12 @@
 package simcli.engine;
 
-// Specialised signal: "the Sim is going to sleep."
-// Extends SimulationException so it travels through the same catch chain,
-// but InputHandler checks for it first and maps it to SLEEP_EVENT.
+/**
+ * Specialised signal indicating that the Sim is going to sleep.
+ *
+ * <p>Extends {@link SimulationException} so it travels through the same
+ * catch chain, but {@link InputHandler} checks for it first and maps it
+ * to {@link CommandResult#SLEEP_EVENT}.</p>
+ */
 public class SleepEventException extends SimulationException {
 
     /**

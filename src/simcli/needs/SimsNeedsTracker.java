@@ -6,7 +6,12 @@ import simcli.engine.SimulationLogger;
 import simcli.utils.GameConstants;
 
 /**
- * Encapsulates management of Sim Needs properties and translates boundaries into SimState evaluations.
+ * Centralised tracker for all five Sim needs (Hunger, Energy, Hygiene,
+ * Happiness, Social), health, and the resulting {@link SimState}.
+ *
+ * <p>Each tick, all needs decay based on the Sim's current activity,
+ * cross-penalties are applied (e.g. low hygiene reduces social), and
+ * health is drained or regenerated depending on hunger level.</p>
  */
 public class SimsNeedsTracker {
     private Need hunger;
@@ -29,8 +34,18 @@ public class SimsNeedsTracker {
         this.starvingTicks = 0;
     }
 
+    /**
+     * Processes one simulation tick: decays all needs, applies cross-penalties
+     * between needs, drains or regenerates health, and updates the SimState.
+     *
+     * @param sim                the Sim whose needs are being tracked.
+     * @param ageMultiplier      age-based decay modifier (older Sims decay faster).
+     * @param stageEnergyModifier life-stage energy decay modifier.
+     * @param simName            display name for warning log messages.
+     */
     public void tick(Sim sim, double ageMultiplier, double stageEnergyModifier, String simName) {
-        if (this.state == SimState.DEAD) return;
+        if (this.state == SimState.DEAD)
+            return;
 
         this.hunger.calculateDecay(sim, ageMultiplier);
         this.energy.calculateDecay(sim, ageMultiplier * stageEnergyModifier);
@@ -58,14 +73,17 @@ public class SimsNeedsTracker {
     /**
      * Drains health when hunger is critically low instead of causing instant death.
      * The longer the Sim stays starving, the faster health drains.
+     * 
      * @param simName The name of the Sim (for logging warnings).
      */
     private void applyHealthDrain(String simName) {
         if (this.hunger.getValue() <= 0) {
             this.starvingTicks++;
-            int healthLoss = GameConstants.HEALTH_BASE_DAMAGE + (this.starvingTicks * GameConstants.HEALTH_ACCELERATED_DAMAGE_MULTIPLIER); // Accelerating damage
+            int healthLoss = GameConstants.HEALTH_BASE_DAMAGE
+                    + (this.starvingTicks * GameConstants.HEALTH_ACCELERATED_DAMAGE_MULTIPLIER); // Accelerating damage
             this.health = Math.max(0, this.health - healthLoss);
-            SimulationLogger.getInstance().logWarning(simName + " is STARVING! Health dropping rapidly! (-" + healthLoss + " HP)");
+            SimulationLogger.getInstance()
+                    .logWarning(simName + " is STARVING! Health dropping rapidly! (-" + healthLoss + " HP)");
         } else if (this.hunger.getValue() <= GameConstants.HUNGER_WARNING_LEVEL) {
             // Slow health drain when hungry but not starving
             this.health = Math.max(0, this.health - GameConstants.HEALTH_ADDED_DAMAGE);
@@ -99,22 +117,56 @@ public class SimsNeedsTracker {
         this.social.increase(amount);
     }
 
+    /**
+     * Decreases the Sim's energy by the given amount.
+     *
+     * @param amount the energy points to drain.
+     */
     public void decreaseEnergy(int amount) {
-        this.energy.increase(amount);
+        this.energy.decrease(amount);
     }
 
     public void increaseHappiness(int amount) {
         this.happiness.increase(amount);
     }
 
-    public Need getHunger() { return hunger; }
-    public Need getEnergy() { return energy; }
-    public Need getHygiene() { return hygiene; }
-    public Need getHappiness() { return happiness; }
-    public Need getSocial() { return social; }
-    public SimState getState() { return state; }
-    public void setState(SimState state) { this.state = state; }
-    public int getHealth() { return health; }
-    public int getStarvingTicks() { return starvingTicks; }
-    public void setHealth(int health) { this.health = health; }
+    public Need getHunger() {
+        return hunger;
+    }
+
+    public Need getEnergy() {
+        return energy;
+    }
+
+    public Need getHygiene() {
+        return hygiene;
+    }
+
+    public Need getHappiness() {
+        return happiness;
+    }
+
+    public Need getSocial() {
+        return social;
+    }
+
+    public SimState getState() {
+        return state;
+    }
+
+    public void setState(SimState state) {
+        this.state = state;
+    }
+
+    public int getHealth() {
+        return health;
+    }
+
+    public int getStarvingTicks() {
+        return starvingTicks;
+    }
+
+    public void setHealth(int health) {
+        this.health = health;
+    }
 }

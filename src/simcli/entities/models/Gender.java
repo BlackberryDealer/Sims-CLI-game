@@ -1,7 +1,8 @@
 package simcli.entities.models;
 
 /**
- * Represents the Gender entity or state in the simulation.
+ * Represents the biological gender of a Sim, affecting marriage and
+ * reproduction mechanics.
  */
 public enum Gender {
     MALE,

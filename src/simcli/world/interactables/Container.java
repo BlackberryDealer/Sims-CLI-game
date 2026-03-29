@@ -4,7 +4,8 @@ import simcli.entities.items.Item;
 import java.util.List;
 
 /**
- * Represents a Container location or interactable object.
+ * Abstract component for any item that can hold other items.
+ * Can be interacted with to deposit or retrieve inventory.
  */
 public interface Container {
     List<Item> getStoredItems();

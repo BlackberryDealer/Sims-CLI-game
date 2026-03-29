@@ -3,7 +3,9 @@ package simcli.entities.lifecycle;
 import simcli.utils.GameConstants;
 
 /**
- * Represents the TeenStage entity or state in the simulation.
+ * Life stage for Sims aged 13–17. Teens cannot work and have
+ * slightly elevated energy decay ({@code 1.2x}). Transitions to
+ * {@link AdultStage} at age {@value simcli.utils.GameConstants#ADULT_AGE}.
  */
 public class TeenStage implements LifeStage {
 

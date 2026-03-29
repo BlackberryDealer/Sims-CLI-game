@@ -1,7 +1,9 @@
 package simcli.entities.models;
 
 /**
- * Represents the WorkResult entity or state in the simulation.
+ * Immutable value object returned by {@link simcli.entities.actors.Sim#performWork()}
+ * containing the outcome of a work shift: success status, earnings, promotion
+ * flag, and overwork indicator. Uses static factory methods for creation.
  */
 public class WorkResult {
     private final boolean success;
@@ -26,9 +28,23 @@ public class WorkResult {
         return new WorkResult(false, message, 0, false, false);
     }
 
-    public boolean isSuccess() { return success; }
-    public String getMessage() { return message; }
-    public int getEarnings() { return earnings; }
-    public boolean isPromoted() { return promoted; }
-    public boolean isOverworked() { return overworked; }
+    public boolean isSuccess() {
+        return success;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public int getEarnings() {
+        return earnings;
+    }
+
+    public boolean isPromoted() {
+        return promoted;
+    }
+
+    public boolean isOverworked() {
+        return overworked;
+    }
 }

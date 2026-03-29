@@ -1,8 +1,12 @@
 package simcli.engine;
 
-// Control-flow signal between commands and the engine.
-// Commands return one of these to say "what should happen next"
-// without ever calling GameEngine methods directly.
+/**
+ * Control-flow signal between commands and the engine.
+ *
+ * <p>Commands return one of these values to say "what should happen next"
+ * without ever calling {@code GameEngine} methods directly. This enum
+ * decouples the command layer from the engine's tick-advancement logic.</p>
+ */
 public enum CommandResult {
 
     /** A normal action was performed — the game clock should advance. */

@@ -4,7 +4,9 @@ import java.util.List;
 import simcli.entities.actors.NPCSim;
 
 /**
- * Represents the NPCProvider entity or state in the simulation.
+ * Abstraction for classes that provide a pool of NPC Sims.
+ * Used to decouple the {@link simcli.world.Park} from the concrete
+ * {@link NPCManager} implementation (Dependency Inversion).
  */
 public interface NPCProvider {
     List<NPCSim> getActiveNPCs();

@@ -11,7 +11,8 @@ import java.util.List;
 import java.util.Scanner;
 
 /**
- * Represents a StorageChest location or interactable object.
+ * A storage container placed in the world where a Sim can deposit Items
+ * from their personal inventory for later retrieval.
  */
 public class StorageChest implements Interactable, Container {
     private List<Item> storedItems = new ArrayList<>();

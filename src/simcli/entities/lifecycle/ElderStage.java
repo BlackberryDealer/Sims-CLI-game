@@ -1,7 +1,9 @@
 package simcli.entities.lifecycle;
 
 /**
- * Represents the ElderStage entity or state in the simulation.
+ * Terminal life stage for Sims aged 65+. Elders can still work
+ * (until forced retirement), have reduced energy decay ({@code 0.8x}),
+ * and collect a pension when unemployed. No further stage transitions.
  */
 public class ElderStage implements LifeStage {
 

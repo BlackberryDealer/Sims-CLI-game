@@ -8,7 +8,9 @@ import simcli.world.interactables.Interactable;
 import java.util.List;
 
 /**
- * UI component handing formatting or displaying of UIManager.
+ * Centralised static utility for all user-facing output: screen clearing,
+ * hints, animations, prompts, warnings, and game-over stats. All UI
+ * output in the application is routed through this class for consistency.
  */
 public class UIManager {
     private static final String[] HINTS = {
@@ -80,13 +82,13 @@ public class UIManager {
         if (isResidential) {
             System.out.println("[House]    [M] Move Room    [H] House Info   [U] Upgrade Room");
         }
-        
+
         String personalLine = "[Personal] [I] Character Status   [V] Inventory   [K] Switch Sim";
         if (player.getRelationshipManager().getSpouse() != null) {
             personalLine += "   [L] Interact with Spouse";
         }
         System.out.println(personalLine);
-        
+
         System.out.println("[General]  [S] Save & Exit");
     }
 

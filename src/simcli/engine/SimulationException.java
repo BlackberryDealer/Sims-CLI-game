@@ -1,7 +1,12 @@
 package simcli.engine;
-// Thrown when game rules block an action (e.g. too young to work, no money).
-// InputHandler catches this and shows a warning — the game never crashes.
-// Using a checked exception forces commands to declare what can go wrong.
+
+/**
+ * Thrown when game rules block an action (e.g. too young to work, no money).
+ *
+ * <p>{@link InputHandler} catches this and shows a warning — the game never
+ * crashes. Using a checked exception forces commands to declare what can
+ * go wrong, improving compile-time safety.</p>
+ */
 public class SimulationException extends Exception {
 
     /**

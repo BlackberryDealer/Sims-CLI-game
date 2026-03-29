@@ -12,7 +12,8 @@ import simcli.entities.models.Trait;
 import java.util.Scanner;
 
 /**
- * Represents a Computer location or interactable object.
+ * A utility interactable that allows a Sim to browse the web for fun,
+ * increasing happiness, or study to gain logic skill points.
  */
 public class Computer implements Interactable {
     private static final int ENERGY_COST = 15;

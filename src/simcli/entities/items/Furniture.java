@@ -10,7 +10,10 @@ import simcli.world.interactables.InteractableFactory;
 import java.util.Scanner;
 
 /**
- * Represents the Furniture entity or state in the simulation.
+ * A placeable item that occupies space in a {@link simcli.world.Room}.
+ * Furniture cannot be used directly from the inventory — it must be
+ * placed into a room first, at which point it creates a corresponding
+ * {@link Interactable} via {@link InteractableFactory}.
  */
 public class Furniture extends Item {
     private int spaceScore;
@@ -20,7 +23,9 @@ public class Furniture extends Item {
         this.spaceScore = spaceScore;
     }
 
-    public int getSpaceScore() { return spaceScore; }
+    public int getSpaceScore() {
+        return spaceScore;
+    }
 
     public Interactable createInteractable() {
         return InteractableFactory.create(getObjectName());
