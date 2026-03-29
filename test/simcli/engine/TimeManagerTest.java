@@ -151,30 +151,30 @@ public class TimeManagerTest {
     // -----------------------------------------------------------------------
 
     @Test
-    @DisplayName("getTimeOfDay() returns 'Morning' in first quarter of day")
+    @DisplayName("getTimeOfDay() returns 'Morning' when ratio is in [0.25, 0.50)")
     void testTimeOfDayMorning() {
-        TimeManager local = new TimeManager(2, 24); // tick 2 → ratio 2/24 < 0.25
+        TimeManager local = new TimeManager(8, 24); // tick 8 → ratio 8/24 ≈ 0.33
         assertEquals("Morning", local.getTimeOfDay());
     }
 
     @Test
-    @DisplayName("getTimeOfDay() returns 'Afternoon' in second quarter")
+    @DisplayName("getTimeOfDay() returns 'Afternoon' when ratio is in [0.50, 0.75)")
     void testTimeOfDayAfternoon() {
-        TimeManager local = new TimeManager(7, 24); // tick 7 → ratio 7/24 ≈ 0.29
+        TimeManager local = new TimeManager(14, 24); // tick 14 → ratio 14/24 ≈ 0.58
         assertEquals("Afternoon", local.getTimeOfDay());
     }
 
     @Test
-    @DisplayName("getTimeOfDay() returns 'Evening' in third quarter")
+    @DisplayName("getTimeOfDay() returns 'Evening' when ratio is in [0.75, 0.90)")
     void testTimeOfDayEvening() {
-        TimeManager local = new TimeManager(14, 24); // ratio 14/24 ≈ 0.58
+        TimeManager local = new TimeManager(19, 24); // tick 19 → ratio 19/24 ≈ 0.79
         assertEquals("Evening", local.getTimeOfDay());
     }
 
     @Test
-    @DisplayName("getTimeOfDay() returns 'Night' in final quarter")
+    @DisplayName("getTimeOfDay() returns 'Night' when ratio is in [0.90, 1.0) or [0.0, 0.25)")
     void testTimeOfDayNight() {
-        TimeManager local = new TimeManager(19, 24); // ratio 19/24 ≈ 0.79
+        TimeManager local = new TimeManager(2, 24); // tick 2 → ratio 2/24 ≈ 0.08
         assertEquals("Night", local.getTimeOfDay());
     }
 
