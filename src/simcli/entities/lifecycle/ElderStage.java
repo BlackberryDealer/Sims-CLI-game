@@ -7,21 +7,40 @@ package simcli.entities.lifecycle;
  */
 public class ElderStage implements LifeStage {
 
+    /**
+     * {@inheritDoc}
+     *
+     * @return {@code true} — elders can work until forced retirement.
+     */
     @Override
     public boolean canWork() {
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @return {@code 0.8} — reduced energy decay for elders.
+     */
     @Override
     public double getEnergyDecayModifier() {
         return 0.8;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @return {@code "Elder"}.
+     */
     @Override
     public String getStageName() {
         return "Elder";
     }
 
+    /**
+     * {@inheritDoc}
+     * Elder is the terminal stage — always returns {@code this}.
+     */
     @Override
     public LifeStage getNextStage(int currentAge) {
         return this;

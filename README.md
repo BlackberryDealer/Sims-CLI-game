@@ -115,6 +115,12 @@ run-tests.bat
 ```
 This compiles JUnit 5 tests from the `test/` directory and runs them using the standalone JUnit Platform Console launcher located in `lib/`.
 
+### Generate Javadoc
+```bash
+javadoc -d docs -sourcepath src -subpackages simcli
+```
+This generates the full API documentation into the `docs/` directory. Open `docs/index.html` in a browser to browse the Javadoc.
+
 ---
 
 ## How to Play
@@ -180,6 +186,7 @@ This compiles JUnit 5 tests from the `test/` directory and runs them using the s
 Sims-CLI-game/
 ├── run.bat                          # Compile and run the game
 ├── run-tests.bat                    # Compile and run JUnit 5 tests
+├── docs/                            # Generated Javadoc (javadoc -d docs ...)
 ├── lib/                             # JUnit 5 standalone JAR
 ├── saves/                           # Persistent save files (auto-created)
 ├── src/simcli/

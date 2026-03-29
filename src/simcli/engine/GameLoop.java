@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * GameLoop — orchestrates per-tick and per-day processing for the simulation.
  *
- * <p>Each call to {@link #processTick(Sim)} advances one simulation tick:
+ * <p>Each call to {@link #processTick(Sim, int)} advances one simulation tick:
  * decaying needs for all Sims, advancing the clock, triggering random events,
  * and — when a new day begins — delegating lifecycle processing to the
  * {@link LifecycleManager}.</p>
@@ -48,7 +48,7 @@ public class GameLoop {
      *     <li>Advances the simulation clock by one tick.</li>
      *     <li>Triggers any random events.</li>
      *     <li>If a new day has started, delegates to
-     *         {@link #processDayBoundary()}.</li>
+     *         {@link #processDayBoundary(int)}.</li>
      * </ol>
      *
      * @param activePlayer the currently controlled Sim (passed to the event

@@ -35,7 +35,7 @@ import simcli.world.interactables.Interactable;
  * <h2>Dependency Injection</h2>
  * <p>All core dependencies ({@link IRenderer}, {@link SimulationLogger},
  * {@link TimeManager}, etc.) are injected via constructors or the
- * {@link #initCore(TimeManager, NPCManager, IRenderer)} helper, ensuring
+ * {@link #initCore(TimeManager, IRenderer)} helper, ensuring
  * the engine is fully testable with mock implementations.</p>
  */
 public class GameEngine {

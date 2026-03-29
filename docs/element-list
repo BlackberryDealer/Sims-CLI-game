@@ -1,0 +1,16 @@
+simcli
+simcli.engine
+simcli.engine.commands
+simcli.entities.actors
+simcli.entities.items
+simcli.entities.lifecycle
+simcli.entities.managers
+simcli.entities.models
+simcli.needs
+simcli.persistence
+simcli.ui
+simcli.ui.ascii
+simcli.ui.ascii.providers
+simcli.utils
+simcli.world
+simcli.world.interactables
