@@ -10,8 +10,7 @@ public enum SocialAction {
     /** A joke that has a high chance of success, boosting relationship and social stats. */
     JOKE("Joke", 10, 15, -10, 70),
     /** An argument that negatively impacts relationship and happiness. */
-    ARGUE("Argue", -15, -10, -15, 20),
-
+    ARGUE("Argue", -15, -10, -15, 20);
 
     /** The human-readable name of the social action. */
     private final String displayName;
