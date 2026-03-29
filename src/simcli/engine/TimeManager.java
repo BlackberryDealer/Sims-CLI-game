@@ -74,11 +74,16 @@ public class TimeManager {
         int timeInDay = currentTick % ticksPerDay;
         double ratio = (double) timeInDay / ticksPerDay;
 
-        if (ratio < 0.25)
+        // ratio 0.0 is 00:00
+        // ratio 0.25 is 06:00
+        // ratio 0.50 is 12:00
+        // ratio 0.75 is 18:00
+        
+        if (ratio >= 0.25 && ratio < 0.5)
             return "Morning";
-        else if (ratio < 0.5)
+        else if (ratio >= 0.5 && ratio < 0.75)
             return "Afternoon";
-        else if (ratio < 0.75)
+        else if (ratio >= 0.75 && ratio < 0.9)
             return "Evening";
         else
             return "Night";
