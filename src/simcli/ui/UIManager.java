@@ -16,7 +16,8 @@ public class UIManager {
             "Hint: A good job requires energy and time management.",
             "Hint: Upgrading your home lets you buy more furniture.",
             "Hint: Visit the Park to meet new people.",
-            "Hint: Sleep restores energy but leaves you hungry."
+            "Hint: Sleep restores energy but leaves you hungry.",
+            "Hint: Always check your SIMs needs every few ticks."
     };
 
     public static void clearScreen() {
@@ -57,7 +58,7 @@ public class UIManager {
 
     public static void displayActionAnimation(Sim player) {
         clearScreen();
-        System.out.println(new AsciiEngine().render(player, null));
+        System.out.println(new AsciiEngine().render(player, null)); // fetches ascii based on current sim state
         System.out.println();
         try {
             Thread.sleep(600);
