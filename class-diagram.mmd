@@ -1,0 +1,844 @@
+classDiagram
+
+    %% ═══════════════════════════════════════════════════════════
+    %%  ENUMS
+    %% ═══════════════════════════════════════════════════════════
+
+    class CommandResult {
+        <<enumeration>>
+        TICK_FORWARD
+        NO_TICK
+        SLEEP_EVENT
+        SAVE_AND_EXIT
+    }
+
+    class Gender {
+        <<enumeration>>
+        MALE
+        FEMALE
+    }
+
+    class ActionState {
+        <<enumeration>>
+        IDLE
+        EATING
+        SLEEPING
+        WORKING
+        STUDYING
+        PLAYING
+        SOCIALIZING
+    }
+
+    class SimState {
+        <<enumeration>>
+        HEALTHY
+        HUNGRY
+        TIRED
+        DEAD
+        +canWork() boolean
+        +getDescription() String
+    }
+
+    class Trait {
+        <<enumeration>>
+        ACTIVE
+        LAZY
+        SOCIALITE
+        +getEnergyDecayModifier() double
+    }
+
+    class Job {
+        <<enumeration>>
+        UNEMPLOYED
+        SOFTWARE_ENGINEER
+        HARDWARE_TECHNICIAN
+        FREELANCE_PHOTOGRAPHER
+        PERSONAL_TRAINER
+        +getTitle() String
+        +getBaseSalary() int
+        +getWorkingHours() int
+        +getEnergyDrain() int
+    }
+
+    class RelationshipStatus {
+        <<enumeration>>
+        STRANGER
+        ACQUAINTANCE
+        FRIEND
+        ROMANTIC
+        MARRIED
+    }
+
+    class SocialAction {
+        <<enumeration>>
+        CHAT
+        JOKE
+        ARGUE
+        +getDisplayName() String
+        +getRelationshipChange() int
+    }
+
+    %% ═══════════════════════════════════════════════════════════
+    %%  ENGINE PACKAGE
+    %% ═══════════════════════════════════════════════════════════
+
+    class GameEngine {
+        -neighborhood : List~Sim~
+        -worldManager : IWorldManager
+        -inputHandler : IInputHandler
+        -renderer : IRenderer
+        -timeManager : TimeManager
+        -randomEventManager : RandomEventManager
+        -lifecycleManager : LifecycleManager
+        -gameLoop : GameLoop
+        -logger : SimulationLogger
+        -npcManager : NPCManager
+        -activePlayer : Sim
+        -isGameOver : boolean
+    }
+
+    class GameLoop {
+        -timeManager : TimeManager
+        -neighborhood : List~Sim~
+        -eventManager : RandomEventManager
+        -lifecycleManager : LifecycleManager
+        +processTick(Sim, int) void
+        +processDayBoundary(int) void
+    }
+
+    class TimeManager {
+        -currentTick : int
+        -ticksPerDay : int
+        +advanceTick() void
+        +getCurrentDay() int
+        +getTimeOfDay() String
+        +getFormattedTime() String
+    }
+
+    class SimulationLogger {
+        -instance$ : SimulationLogger$
+        -logs : List~String~
+        -simToAnimate : Sim
+        +getInstance()$ SimulationLogger
+        +log(String) void
+        +flushAndPrint() void
+        +reset() void
+    }
+
+    class RandomEventManager {
+        -logger : SimulationLogger
+        +trigger(Sim, TimeManager) void
+    }
+
+    class LifecycleManager {
+        -daysPerAgeTick : int
+        -logger : SimulationLogger
+        +processDayForAll(List~Sim~) void
+        +processDay(Sim) void
+    }
+
+    class SimulationException {
+        +SimulationException(String)
+    }
+
+    class SleepEventException {
+        +SleepEventException()
+    }
+
+    %% ═══════════════════════════════════════════════════════════
+    %%  ENGINE — INTERFACES
+    %% ═══════════════════════════════════════════════════════════
+
+    class IInputHandler {
+        <<interface>>
+        +handle(String, Sim, Scanner) CommandResult
+    }
+
+    class IWorldManager {
+        <<interface>>
+        +setupWorld() void
+        +getCurrentLocation() Building
+        +setCurrentLocation(Building) void
+        +getCityMap() List~Building~
+    }
+
+    class ICommand {
+        <<interface>>
+        +execute() CommandResult
+    }
+
+    %% ═══════════════════════════════════════════════════════════
+    %%  ENGINE — IMPLEMENTATIONS
+    %% ═══════════════════════════════════════════════════════════
+
+    class InputHandler {
+        -worldManager : IWorldManager
+        -timeManager : TimeManager
+        -neighborhood : List~Sim~
+        -setActivePlayer : Consumer~Sim~
+        -logger : SimulationLogger
+        +handle(String, Sim, Scanner) CommandResult
+    }
+
+    class WorldManager {
+        -cityMap : List~Building~
+        -currentLocation : Building
+        -npcManager : NPCManager
+        -neighborhood : List~Sim~
+        +setupWorld() void
+        +getCurrentLocation() Building
+        +getCityMap() List~Building~
+    }
+
+    %% ═══════════════════════════════════════════════════════════
+    %%  ENGINE — COMMANDS
+    %% ═══════════════════════════════════════════════════════════
+
+    class CommandContext {
+        -activePlayer : Sim
+        -neighborhood : List~Sim~
+        -scanner : Scanner
+        -timeManager : TimeManager
+        -worldManager : IWorldManager
+        -currentLocation : Building
+        -availableItems : List~Interactable~
+        -setActivePlayer : Consumer~Sim~
+        -logger : SimulationLogger
+        +getActivePlayer() Sim
+        +getWorldManager() IWorldManager
+        +switchActivePlayer(Sim) void
+    }
+
+    class BaseCommand {
+        <<abstract>>
+        #ctx : CommandContext
+        +execute() CommandResult
+        #run()* CommandResult
+        #pause() void
+    }
+
+    class WorkCommand {
+        +run() CommandResult
+    }
+    class JobMarketCommand {
+        +run() CommandResult
+    }
+    class TravelCommand {
+        +run() CommandResult
+    }
+    class MoveRoomCommand {
+        +run() CommandResult
+    }
+    class HouseInfoCommand {
+        +run() CommandResult
+    }
+    class CharacterStatusCommand {
+        +run() CommandResult
+    }
+    class InventoryCommand {
+        +run() CommandResult
+    }
+    class InteractCommand {
+        -choiceIndex : int
+        +run() CommandResult
+    }
+    class UpgradeRoomCommand {
+        +run() CommandResult
+    }
+    class SwitchSimCommand {
+        +run() CommandResult
+    }
+    class SpouseInteractionCommand {
+        +run() CommandResult
+        +hasBabiesInHousehold() boolean
+    }
+
+    %% ═══════════════════════════════════════════════════════════
+    %%  ENTITIES — ACTORS
+    %% ═══════════════════════════════════════════════════════════
+
+    class ISimBehaviour {
+        <<interface>>
+        +tick() void
+        +growOlderDaily() void
+        +getState() SimState
+        +getName() String
+    }
+
+    class Sim {
+        -name : String
+        -age : int
+        -gender : Gender
+        -money : int
+        -currentAction : ActionState
+        -currentRoom : Room
+        -daysAlive : int
+        -currentStage : LifeStage
+        -isChildSim : boolean
+        -needsTracker : SimsNeedsTracker
+        -careerManager : CareerManager
+        -inventoryManager : InventoryManager
+        -traits : List~Trait~
+        -relationshipManager : RelationshipManager
+        +tick() void
+        +growOlderDaily() void
+        +getState() SimState
+        +getName() String
+        +ageUp() void
+    }
+
+    class NPCSim {
+        +NPCSim(String, int)
+        +NPCSim(String, int, Gender, Job)
+    }
+
+    %% ═══════════════════════════════════════════════════════════
+    %%  ENTITIES — ITEMS
+    %% ═══════════════════════════════════════════════════════════
+
+    class Item {
+        <<abstract>>
+        #name : String
+        #price : int
+        +getPrice() int
+        +getObjectName() String
+        +copyItem()* Item
+    }
+
+    class Consumable {
+        -satiationValue : int
+        -energyValue : int
+        -happinessValue : int
+        +getSatiationValue() int
+        +interact(Sim, Scanner, TimeManager) void
+    }
+
+    class Food {
+        +copyItem() Item
+        +toSaveString() String
+    }
+
+    class Furniture {
+        -spaceScore : int
+        +getSpaceScore() int
+        +createInteractable() Interactable
+        +interact(Sim, Scanner, TimeManager) void
+    }
+
+    %% ═══════════════════════════════════════════════════════════
+    %%  ENTITIES — LIFECYCLE
+    %% ═══════════════════════════════════════════════════════════
+
+    class LifeStage {
+        <<interface>>
+        +canWork() boolean
+        +getEnergyDecayModifier() double
+        +getStageName() String
+        +getNextStage(int) LifeStage
+    }
+
+    class ChildStage {
+        +canWork() boolean
+        +getStageName() String
+    }
+    class TeenStage {
+        +canWork() boolean
+        +getStageName() String
+    }
+    class AdultStage {
+        +canWork() boolean
+        +getStageName() String
+    }
+    class ElderStage {
+        +canWork() boolean
+        +getStageName() String
+    }
+
+    %% ═══════════════════════════════════════════════════════════
+    %%  ENTITIES — MANAGERS
+    %% ═══════════════════════════════════════════════════════════
+
+    class CareerManager {
+        -career : Job
+        -jobTier : int
+        -consecutiveDaysMissed : int
+        -shiftsWorkedToday : int
+        +promote(String) void
+        +changeJob(Job, String) void
+        +resetDaily(boolean) void
+    }
+
+    class InventoryManager {
+        -inventory : List~Item~
+        -capacity : int
+        +addItem(Item) void
+        +getItems() List~Item~
+    }
+
+    class RelationshipManager {
+        -owner : Sim
+        -relationships : Map~Sim Integer~
+        -relationshipRegistry : List~Relationship~
+        -spouse : Sim
+        -children : List~Sim~
+        +getSpouse() Sim
+        +setSpouse(Sim) void
+        +getChildren() List~Sim~
+    }
+
+    class NPCProvider {
+        <<interface>>
+        +getActiveNPCs() List~NPCSim~
+    }
+
+    class NPCManager {
+        -activeNPCs : List~NPCSim~
+        +getActiveNPCs() List~NPCSim~
+        +generateRandomNPC() NPCSim
+        +replenishNPCs(int) void
+    }
+
+    %% ═══════════════════════════════════════════════════════════
+    %%  ENTITIES — MODELS
+    %% ═══════════════════════════════════════════════════════════
+
+    class Relationship {
+        -targetSim : Sim
+        -friendshipScore : int
+        -status : RelationshipStatus
+        +getTargetSim() Sim
+        +getFriendshipScore() int
+        +getStatus() RelationshipStatus
+        +updateStatus() void
+    }
+
+    class WorkResult {
+        -success : boolean
+        -message : String
+        -earnings : int
+        -promoted : boolean
+        -overworked : boolean
+        +success(int, boolean, boolean)$ WorkResult
+        +failure(String)$ WorkResult
+    }
+
+    %% ═══════════════════════════════════════════════════════════
+    %%  NEEDS PACKAGE
+    %% ═══════════════════════════════════════════════════════════
+
+    class Need {
+        <<abstract>>
+        #name : String
+        #value : int
+        #baseDecayRate : int
+        +calculateDecay(Sim, double)* void
+        +increase(int) void
+        +decrease(int) void
+        +getValue() int
+    }
+
+    class Energy {
+        +calculateDecay(Sim, double) void
+    }
+    class Hunger {
+        +calculateDecay(Sim, double) void
+    }
+    class Hygiene {
+        +calculateDecay(Sim, double) void
+    }
+    class Happiness {
+        +calculateDecay(Sim, double) void
+    }
+    class Social {
+        +calculateDecay(Sim, double) void
+    }
+
+    class SimsNeedsTracker {
+        -hunger : Need
+        -energy : Need
+        -hygiene : Need
+        -happiness : Need
+        -social : Need
+        +applyDailyDecay(Sim) void
+    }
+
+    %% ═══════════════════════════════════════════════════════════
+    %%  PERSISTENCE PACKAGE
+    %% ═══════════════════════════════════════════════════════════
+
+    class Savable {
+        <<interface>>
+        +toSaveString() String
+    }
+
+    class SaveManager {
+        +saveGame(GameEngine, String)$ void
+        +loadGame(String)$ GameEngine
+        +getExistingSaves()$ List~String~
+        +saveExists(String)$ boolean
+    }
+
+    %% ═══════════════════════════════════════════════════════════
+    %%  UI PACKAGE
+    %% ═══════════════════════════════════════════════════════════
+
+    class IRenderer {
+        <<interface>>
+        +clear() void
+        +printHint() void
+        +renderHUD(Sim, Building, int, String, String, boolean, String) void
+        +renderHouseholdDashboard(List~Sim~, Sim) void
+        +renderActiveSimStats(Sim, List~Sim~) void
+        +renderDeathStats(Sim) void
+        +renderActions(Sim, List~Interactable~, boolean) void
+    }
+
+    class TerminalRenderer {
+        -asciiEngine : AsciiEngine
+        +clear() void
+        +renderHUD(...) void
+        +renderActiveSimStats(...) void
+    }
+
+    class AsciiArt {
+        +printLogo()$ void
+        +printTravelAnimation()$ void
+    }
+
+    class UIManager {
+        +clearScreen()$ void
+        +printHint()$ void
+        +sleepAnimation()$ void
+    }
+
+    class MainMenu {
+        -scanner : Scanner
+        +display() void
+    }
+
+    class MenuPagination {
+        +displayPaginatedMenu(String, List, String, Scanner, MenuAction)$ void
+    }
+
+    %% ═══════════════════════════════════════════════════════════
+    %%  UI — ASCII ENGINE
+    %% ═══════════════════════════════════════════════════════════
+
+    class IAsciiProvider {
+        <<interface>>
+        +getAsciiArt(Sim, Building) String
+    }
+
+    class AsciiEngine {
+        -actionProviders : Map~ActionState IAsciiProvider~
+        -houseProvider : IAsciiProvider
+        -storeProvider : IAsciiProvider
+        +render(Sim, Building) String
+    }
+
+    %% ═══════════════════════════════════════════════════════════
+    %%  UTILS PACKAGE
+    %% ═══════════════════════════════════════════════════════════
+
+    class GameConstants {
+        <<utility>>
+        +TICKS_PER_DAY$ : int
+        +MORNING_HOUR$ : int
+        +MAX_NPCS$ : int
+        +STARTING_MONEY$ : int
+        +TEEN_AGE$ : int
+        +ADULT_AGE$ : int
+        +ELDER_AGE$ : int
+        +DEATH_AGE$ : int
+    }
+
+    class GameRandom {
+        <<utility>>
+        +RANDOM$ : Random
+    }
+
+    %% ═══════════════════════════════════════════════════════════
+    %%  WORLD PACKAGE
+    %% ═══════════════════════════════════════════════════════════
+
+    class Building {
+        <<abstract>>
+        #name : String
+        #interactables : List~Interactable~
+        +getName() String
+        +isResidential() boolean
+        +enter(Sim)* void
+        +getInteractables() List~Interactable~
+    }
+
+    class Room {
+        -name : String
+        -maxCapacity : int
+        -interactablesList : List~Interactable~
+        +getName() String
+        +getMaxCapacity() int
+        +canFit(Furniture) boolean
+        +placeFurniture(Interactable, int) void
+        +upgradeCapacity(Sim, int, int) void
+    }
+
+    class Residential {
+        -rooms : List~Room~
+        -purchasePrice : int
+        -isOwned : boolean
+        +addRoom(Room) void
+        +getRooms() List~Room~
+        +purchase(Sim) boolean
+        +isResidential() boolean
+    }
+
+    class Commercial {
+        +enter(Sim) void
+    }
+
+    class Park {
+        -npcProvider : NPCProvider
+        +getVisitors() List~NPCSim~
+        +enter(Sim) void
+    }
+
+    %% ═══════════════════════════════════════════════════════════
+    %%  WORLD — INTERACTABLES
+    %% ═══════════════════════════════════════════════════════════
+
+    class Interactable {
+        <<interface>>
+        +interact(Sim, Scanner, TimeManager) void
+        +getObjectName() String
+    }
+
+    class Container {
+        <<interface>>
+        +getStoredItems() List~Item~
+        +storeItem(Item) void
+        +retrieveItem(int) Item
+    }
+
+    class AbstractShop {
+        <<abstract>>
+        #shopName : String
+        +getCatalog(Sim)* List~Item~
+        +interact(Sim, Scanner, TimeManager) void
+    }
+
+    class InteractableFactory {
+        +create(String)$ Interactable
+    }
+
+    class Bed {
+        +interact(Sim, Scanner, TimeManager) void
+        +getObjectName() String
+    }
+
+    class Fridge {
+        -storedFood : List~Item~
+        +getStoredItems() List~Item~
+        +storeItem(Item) void
+        +retrieveItem(int) Item
+        +interact(Sim, Scanner, TimeManager) void
+    }
+
+    class Shower {
+        +interact(Sim, Scanner, TimeManager) void
+    }
+
+    class Computer {
+        +interact(Sim, Scanner, TimeManager) void
+    }
+
+    class WeightBench {
+        +interact(Sim, Scanner, TimeManager) void
+    }
+
+    class StorageChest {
+        -storedItems : List~Item~
+        +getStoredItems() List~Item~
+        +storeItem(Item) void
+        +retrieveItem(int) Item
+    }
+
+    class GroceryShelf {
+        +getCatalog(Sim) List~Item~
+    }
+
+    class BookshopShelf {
+        +getCatalog(Sim) List~Item~
+    }
+
+    class ParkBench {
+        -npcManager : NPCManager
+        -neighborhood : List~Sim~
+        +interact(Sim, Scanner, TimeManager) void
+    }
+
+    %% ═══════════════════════════════════════════════════════════
+    %%  ENTRY POINT
+    %% ═══════════════════════════════════════════════════════════
+
+    class Main {
+        +main(String[])$ void
+    }
+
+    %% ╔═════════════════════════════════════════════════════════╗
+    %% ║  INHERITANCE (extends / implements)                     ║
+    %% ╚═════════════════════════════════════════════════════════╝
+
+    %% -- Engine --
+    InputHandler ..|> IInputHandler
+    WorldManager ..|> IWorldManager
+    BaseCommand ..|> ICommand
+    SimulationException --|> Exception
+    SleepEventException --|> SimulationException
+
+    %% -- Commands --
+    WorkCommand --|> BaseCommand
+    JobMarketCommand --|> BaseCommand
+    TravelCommand --|> BaseCommand
+    MoveRoomCommand --|> BaseCommand
+    HouseInfoCommand --|> BaseCommand
+    CharacterStatusCommand --|> BaseCommand
+    InventoryCommand --|> BaseCommand
+    InteractCommand --|> BaseCommand
+    UpgradeRoomCommand --|> BaseCommand
+    SwitchSimCommand --|> BaseCommand
+    SpouseInteractionCommand --|> BaseCommand
+
+    %% -- Actors --
+    Sim ..|> ISimBehaviour
+    NPCSim --|> Sim
+
+    %% -- Items --
+    Consumable --|> Item
+    Food --|> Consumable
+    Furniture --|> Item
+    Item ..|> Interactable
+    Item ..|> Savable
+
+    %% -- Lifecycle --
+    ChildStage ..|> LifeStage
+    TeenStage ..|> LifeStage
+    AdultStage ..|> LifeStage
+    ElderStage ..|> LifeStage
+
+    %% -- Managers --
+    NPCManager ..|> NPCProvider
+
+    %% -- Needs --
+    Energy --|> Need
+    Hunger --|> Need
+    Hygiene --|> Need
+    Happiness --|> Need
+    Social --|> Need
+
+    %% -- UI --
+    TerminalRenderer ..|> IRenderer
+
+    %% -- World --
+    Residential --|> Building
+    Commercial --|> Building
+    Park --|> Building
+
+    %% -- Interactables --
+    AbstractShop ..|> Interactable
+    Bed ..|> Interactable
+    Fridge ..|> Interactable
+    Fridge ..|> Container
+    Shower ..|> Interactable
+    Computer ..|> Interactable
+    WeightBench ..|> Interactable
+    StorageChest ..|> Interactable
+    StorageChest ..|> Container
+    GroceryShelf --|> AbstractShop
+    BookshopShelf --|> AbstractShop
+    ParkBench ..|> Interactable
+
+    %% ╔═════════════════════════════════════════════════════════╗
+    %% ║  COMPOSITION / AGGREGATION (has-a)                      ║
+    %% ╚═════════════════════════════════════════════════════════╝
+
+    %% -- GameEngine compositions --
+    GameEngine *-- GameLoop
+    GameEngine *-- TimeManager
+    GameEngine *-- RandomEventManager
+    GameEngine *-- LifecycleManager
+    GameEngine *-- SimulationLogger
+    GameEngine *-- NPCManager
+    GameEngine o-- IWorldManager : worldManager
+    GameEngine o-- IInputHandler : inputHandler
+    GameEngine o-- IRenderer : renderer
+    GameEngine o-- "0..*" Sim : neighborhood
+
+    %% -- GameLoop compositions --
+    GameLoop o-- TimeManager
+    GameLoop o-- "0..*" Sim : neighborhood
+    GameLoop *-- RandomEventManager
+    GameLoop *-- LifecycleManager
+
+    %% -- Sim compositions --
+    Sim *-- SimsNeedsTracker : needsTracker
+    Sim *-- CareerManager : careerManager
+    Sim *-- InventoryManager : inventoryManager
+    Sim *-- RelationshipManager : relationshipManager
+    Sim o-- LifeStage : currentStage
+    Sim o-- Room : currentRoom
+
+    %% -- Needs tracker --
+    SimsNeedsTracker *-- Need : hunger
+    SimsNeedsTracker *-- Need : energy
+    SimsNeedsTracker *-- Need : hygiene
+    SimsNeedsTracker *-- Need : happiness
+    SimsNeedsTracker *-- Need : social
+
+    %% -- Relationship --
+    RelationshipManager o-- "0..*" Relationship
+    Relationship o-- Sim : targetSim
+
+    %% -- Career --
+    CareerManager o-- Job : career
+
+    %% -- Inventory --
+    InventoryManager o-- "0..*" Item : inventory
+
+    %% -- Command pattern --
+    BaseCommand *-- CommandContext : ctx
+    CommandContext o-- Sim : activePlayer
+    CommandContext o-- IWorldManager : worldManager
+    CommandContext o-- TimeManager : timeManager
+    CommandContext o-- "0..*" Interactable : availableItems
+
+    %% -- World --
+    WorldManager o-- "0..*" Building : cityMap
+    WorldManager o-- Building : currentLocation
+    WorldManager o-- NPCManager : npcManager
+
+    Building o-- "0..*" Interactable : interactables
+
+    Residential *-- "0..*" Room : rooms
+    Room o-- "0..*" Interactable : interactablesList
+    Park o-- NPCProvider : npcProvider
+
+    %% -- Interactable containers --
+    Fridge o-- "0..*" Item : storedFood
+    StorageChest o-- "0..*" Item : storedItems
+
+    %% -- Park bench --
+    ParkBench o-- NPCManager
+    ParkBench o-- "0..*" Sim : neighborhood
+
+    %% -- UI --
+    TerminalRenderer *-- AsciiEngine : asciiEngine
+    AsciiEngine o-- IAsciiProvider : providers
+
+    %% -- Save --
+    SaveManager ..> GameEngine : saves/loads
+
+    %% -- Main --
+    Main ..> MainMenu
+    Main ..> GameEngine
+    MainMenu ..> SaveManager
+    MainMenu ..> GameEngine
