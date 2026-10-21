@@ -9,6 +9,8 @@ public enum SocialAction {
     CHAT("Chat", 5, 10, -5, 30),
     /** A joke that has a high chance of success, boosting relationship and social stats. */
     JOKE("Joke", 10, 15, -10, 70),
+    /** A flirt — the biggest relationship boost, but only between adults who already know each other, and it can fall flat. */
+    FLIRT("Flirt", 15, 15, -10, 25),
     /** An argument that negatively impacts relationship and happiness. */
     ARGUE("Argue", -15, -10, -15, 20);
 

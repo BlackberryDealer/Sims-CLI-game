@@ -32,11 +32,24 @@ The project emphasises clean OOP architecture, making heavy use of established d
 - Each Sim is assigned a **random personality trait** (Active, Lazy, Socialite) that modifies gameplay
 - **5 decaying needs**: Hunger, Energy, Hygiene, Happiness, Social — each with unique decay rules and cross-penalties
 - **Health system**: low hunger slowly drains health; starving (hunger at 0) drains it faster every consecutive hour, and a Sim dies when health reaches 0 — infants included
+- **Autonomy**: household members you aren't controlling look after themselves. They eat the most filling food in a fridge at home when hungry, shower when filthy, nap when exhausted, go to bed when you do, and feed hungry babies. If the fridge is empty, they'll tell you.
+
+### 🎯 Skills
+| Skill | Trained by | Pays off |
+|---|---|---|
+| Fitness | Working out on the Weight Bench (Active Sims learn 50% faster) | Cheaper workouts; Personal Trainer pay and promotions |
+| Logic | Studying at a Computer | Software Engineer and Hardware Technician pay and promotions |
+| Charisma | Chatting, joking, flirting, dates (Socialites learn 50% faster) | Jokes and flirts land more often; relationships grow faster; Photographer pay and promotions |
+
+- Skills go from level 0 to 10, and working a shift trains your career's skill a little
+- Each level of your career's skill adds **+5% pay** and **+5% promotion chance**
+- Promotion past tier 2 needs skill: tier 3 needs level 2, tier 4 needs level 4, tier 5 needs level 6
+- See every skill's level and progress on the status screen (`I`)
 
 ### 💼 Career System
 - **4 careers**: Software Engineer, Hardware Technician, Freelance Photographer, Personal Trainer
 - Each job has unique salary, energy drain, working hours, age limits, and up to **5 promotion tiers**
-- **25% promotion chance** per shift — salary scales with a per-career multiplier
+- Each career rewards one **skill**: promotion chance starts at 25% per shift and rises with that skill (up to 75%), and pay scales with both tier and skill
 - Overwork penalties and forced retirement when a Sim exceeds the job's maximum age
 
 ### 🏙️ World & Locations
@@ -53,9 +66,9 @@ The project emphasises clean OOP architecture, making heavy use of established d
 - **Property purchasing** — buy the Bungalow to upgrade your living situation
 
 ### 💕 Relationships & Family
-- **Social actions**: Chat, Joke, Argue, Flirt — each with distinct stat effects
+- **Social actions**: Chat (always safe), Joke (60% to land), Flirt (adults who know each other, 40%+ to land, best relationship boost) and Argue. The menu shows each action's odds. Charisma raises them, and a flop costs a little relationship and happiness
 - **Relationship progression**: Stranger → Acquaintance → Friend → Romantic → Married
-- **Marriage** at 100 relationship score; spouse interactions include gift-giving and reproduction
+- **Marriage** at 100 relationship score; the Family menu (`L`) lets you go on dates, try for a baby, feed the babies and **give gifts** from your bag (pricier gifts build more relationship)
 - **Children**: 50% conception chance, born as non-playable infants who age into teens and become playable members of the household
 - **NPC pool** of up to 8 park visitors to socialize and build relationships with
 
@@ -159,7 +172,7 @@ This generates the full API documentation into the `docs/` directory. Open `docs
 | `V` | Open inventory (eat food, use/drop items) |
 | `U` | Upgrade room storage capacity ($500) |
 | `K` | Switch active Sim to another household member |
-| `L` | Family: date your spouse, try for a baby, feed the babies |
+| `L` | Family: date your spouse, try for a baby, feed the babies, give a gift |
 | `S` | Save and exit to main menu |
 | `1-9` | Use the numbered things listed under **HERE** (bed, fridge, shop, park bench...) |
 
@@ -170,7 +183,9 @@ without doing anything costs no time.
 - **Keep hunger above 20** — hunger at zero drains health faster every hour until your Sim dies
 - **Sleep regularly** — sleeping fast-forwards time to 8 AM and restores energy
 - **Socialize at the park** — the Socialite trait gives bonus relationship and happiness gains
-- **Save up for the Bungalow** ($5,000) — it comes with a Computer for extra interactions
+- **Train your career's skill** — without it you'll stall at tier 2 (check `I` to see what the next promotion needs)
+- **Keep the fridge stocked** — idle household members feed themselves (and the babies) from it
+- **Save up for the Bungalow** ($5,000) — it comes with a Computer for studying Logic
 - **Watch your Sim's age** — elders are forced into retirement and have increased energy decay
 
 ---
@@ -211,6 +226,7 @@ Sims-CLI-game/
 │   ├── engine/                      # Core game engine
 │   │   ├── GameEngine.java          # Facade — main game coordinator
 │   │   ├── GameLoop.java            # Per-tick simulation processing
+│   │   ├── AutonomyManager.java     # Idle Sims eat, sleep, shower, feed babies
 │   │   ├── InputHandler.java        # Maps input → Command objects
 │   │   ├── TimeManager.java         # Tick/day/time-of-day tracking
 │   │   ├── WorldManager.java        # City map and location management
@@ -255,6 +271,7 @@ Sims-CLI-game/
 │   │   │   ├── CareerManager.java   # Job, promotions, shifts
 │   │   │   ├── InventoryManager.java
 │   │   │   ├── RelationshipManager.java
+│   │   │   ├── SkillManager.java    # Skill experience and levels
 │   │   │   ├── NPCManager.java      # NPC pool management
 │   │   │   └── NPCProvider.java     # NPC access interface
 │   │   └── models/                  # Enums and data classes
@@ -263,7 +280,8 @@ Sims-CLI-game/
 │   │       ├── ActionState.java     # IDLE, WORKING, SLEEPING, etc.
 │   │       ├── Gender.java
 │   │       ├── Trait.java           # ACTIVE, LAZY, SOCIALITE
-│   │       ├── SocialAction.java    # CHAT, JOKE, ARGUE, FLIRT
+│   │       ├── SocialAction.java    # CHAT, JOKE, FLIRT, ARGUE
+│   │       ├── SkillType.java       # FITNESS, LOGIC, CHARISMA
 │   │       ├── Relationship.java
 │   │       ├── RelationshipStatus.java
 │   │       └── WorkResult.java

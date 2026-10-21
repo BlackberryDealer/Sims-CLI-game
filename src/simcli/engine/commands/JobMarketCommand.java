@@ -45,7 +45,7 @@ public class JobMarketCommand extends BaseCommand {
         UIManager.printMessage("  {k}" + activePlayer.getName() + ", age " + activePlayer.getAge()
                 + " " + Panel.DOT + " currently: {/}{W}" + activePlayer.getCareer().getTitle() + "{/}\n");
         UIManager.printMessage("  {k}     " + Style.fit("Career", 24) + Style.fit("Pay", 10)
-                + Style.fit("Hours", 8) + "Ages{/}");
+                + Style.fit("Hours", 8) + Style.fit("Ages", 8) + "Skill{/}");
 
         Job[] allJobs = Job.values();
         for (int i = 1; i < allJobs.length; i++) {
@@ -53,7 +53,8 @@ public class JobMarketCommand extends BaseCommand {
             String row = Style.fit(j.getTitle(), 24)
                     + Style.fit("{G}$" + j.getBaseSalary() + "{/}", 10)
                     + Style.fit(j.getWorkingHours() + "h", 8)
-                    + Style.fit(j.getMinAge() + "-" + j.getMaxAge(), 8);
+                    + Style.fit(j.getMinAge() + "-" + j.getMaxAge(), 8)
+                    + Style.fit(j.getPrimarySkill().getDisplayName(), 10);
             if (j == activePlayer.getCareer()) {
                 row += "{C}" + Panel.ARROW + " your job{/}";
             } else if (activePlayer.getAge() < j.getMinAge() || activePlayer.getAge() > j.getMaxAge()) {

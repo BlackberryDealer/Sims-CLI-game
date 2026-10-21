@@ -25,9 +25,11 @@ public class GameLoop {
     private final List<Sim> neighborhood;
     private final RandomEventManager eventManager;
     private final LifecycleManager lifecycleManager;
+    private final AutonomyManager autonomyManager;
 
     /**
-     * Creates a new GameLoop, instantiating its own event and lifecycle managers.
+     * Creates a new GameLoop with no world: idle Sims still sleep on their
+     * own, but have no fridge or shower to use.
      *
      * @param timeManager  tracks tick/day/time-of-day progression.
      * @param neighborhood every Sim in the current game world.
@@ -35,11 +37,27 @@ public class GameLoop {
      */
     public GameLoop(TimeManager timeManager, List<Sim> neighborhood,
                     SimulationLogger logger) {
+        this(timeManager, neighborhood, logger, null);
+    }
+
+    /**
+     * Creates a new GameLoop, instantiating its own event, lifecycle and
+     * autonomy managers.
+     *
+     * @param timeManager  tracks tick/day/time-of-day progression.
+     * @param neighborhood every Sim in the current game world.
+     * @param logger       the simulation logger for event and lifecycle messages.
+     * @param worldManager the city, where idle Sims find food and showers
+     *                     (may be {@code null}).
+     */
+    public GameLoop(TimeManager timeManager, List<Sim> neighborhood,
+                    SimulationLogger logger, IWorldManager worldManager) {
         this.timeManager = timeManager;
         this.neighborhood = neighborhood;
         this.eventManager = new RandomEventManager(logger);
         this.lifecycleManager = new LifecycleManager(
                 GameConstants.DAYS_PER_AGE_TICK, logger);
+        this.autonomyManager = new AutonomyManager(worldManager, logger);
     }
 
     /**
@@ -48,6 +66,8 @@ public class GameLoop {
      *
      * <p>Each hour is simulated individually:</p>
      * <ol>
+     *     <li>Lets idle household Sims look after themselves via the
+     *         {@link AutonomyManager}.</li>
      *     <li>Decays needs for every Sim via {@link Sim#tick()}.</li>
      *     <li>Advances the simulation clock by one tick.</li>
      *     <li>If a new day has started, delegates to
@@ -56,23 +76,23 @@ public class GameLoop {
      * <p>A random event is rolled once per turn, after the clock has moved.</p>
      *
      * <p>Sims other than the active player are reset to
-     * {@link ActionState#IDLE} first, so an action they performed while they
-     * were last controlled (e.g. sleeping) does not keep affecting their
-     * need decay forever.</p>
+     * {@link ActionState#IDLE} first (unless asleep), so an action they
+     * performed while they were last controlled does not keep affecting
+     * their need decay forever. If the active player is asleep, the whole
+     * household sleeps through the turn with them.</p>
      *
      * @param activePlayer   the currently controlled Sim (passed to the event
      *                       manager for targeted events).
      * @param ticksToAdvance the number of hours this turn takes.
      */
     public void processTick(Sim activePlayer, int ticksToAdvance) {
-        for (Sim sim : neighborhood) {
-            if (sim != activePlayer) {
-                sim.setCurrentAction(ActionState.IDLE);
-            }
-        }
+        autonomyManager.startTurn(activePlayer, neighborhood);
+        boolean bedtime = activePlayer.getCurrentAction() == ActionState.SLEEPING;
 
         for (int i = 0; i < ticksToAdvance; i++) {
             int previousDay = timeManager.getCurrentDay();
+
+            autonomyManager.act(activePlayer, neighborhood, bedtime);
 
             for (Sim sim : neighborhood) {
                 sim.tick();

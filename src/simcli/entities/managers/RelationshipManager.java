@@ -7,11 +7,14 @@ import java.util.Map;
 import simcli.engine.SimulationException;
 import simcli.engine.SimulationLogger;
 import simcli.entities.actors.Sim;
+import simcli.entities.items.Item;
 import simcli.entities.models.ActionState;
 import simcli.entities.models.Gender;
 import simcli.entities.models.Relationship;
+import simcli.entities.models.SkillType;
 import simcli.entities.models.Trait;
 import simcli.entities.models.SocialAction;
+import simcli.needs.Need;
 import simcli.utils.GameConstants;
 import simcli.utils.GameRandom;
 
@@ -201,6 +204,146 @@ public class RelationshipManager {
         owner.increaseHappiness(happinessBonus);
 
         interactWith(otherSim, SocialAction.CHAT);
+    }
+
+    /**
+     * Checks whether the owner may flirt with another Sim: both must be
+     * adults, the owner must already know them
+     * ({@link GameConstants#FLIRT_MIN_RELATIONSHIP}), and neither may be
+     * married to someone else.
+     *
+     * @param otherSim the Sim to flirt with.
+     * @return {@code true} if flirting is allowed.
+     */
+    public boolean canFlirtWith(Sim otherSim) {
+        if (otherSim == owner) {
+            return false;
+        }
+        Sim theirSpouse = otherSim.getRelationshipManager().getSpouse();
+        return owner.getAge() >= GameConstants.ADULT_AGE
+                && otherSim.getAge() >= GameConstants.ADULT_AGE
+                && getRelationship(otherSim) >= GameConstants.FLIRT_MIN_RELATIONSHIP
+                && (this.spouse == null || this.spouse == otherSim)
+                && (theirSpouse == null || theirSpouse == owner);
+    }
+
+    /**
+     * Returns the percentage chance (0–100) that a social action lands.
+     *
+     * <p>Chats and arguments always "land". Jokes succeed
+     * {@link GameConstants#JOKE_BASE_SUCCESS_CHANCE}% of the time, and
+     * flirts {@link GameConstants#FLIRT_BASE_SUCCESS_CHANCE}% plus half of
+     * every relationship point above the flirting minimum. Each Charisma
+     * level adds {@link GameConstants#CHARISMA_SUCCESS_BONUS_PER_LEVEL}
+     * points. The chance never goes above 95%.</p>
+     *
+     * @param otherSim the Sim on the receiving end.
+     * @param action   the social action.
+     * @return the success chance, 0–100.
+     */
+    public int getSuccessChance(Sim otherSim, SocialAction action) {
+        int base;
+        switch (action) {
+            case JOKE:
+                base = GameConstants.JOKE_BASE_SUCCESS_CHANCE;
+                break;
+            case FLIRT:
+                base = GameConstants.FLIRT_BASE_SUCCESS_CHANCE
+                        + Math.max(0, getRelationship(otherSim) - GameConstants.FLIRT_MIN_RELATIONSHIP) / 2;
+                break;
+            default:
+                return 100;
+        }
+        int charisma = owner.getSkillLevel(SkillType.CHARISMA);
+        return Math.min(95, base + charisma * GameConstants.CHARISMA_SUCCESS_BONUS_PER_LEVEL);
+    }
+
+    /**
+     * Performs a social action with another Sim and applies its effects.
+     *
+     * <p>If the action lands, the owner gains the action's happiness and
+     * social values and the relationship changes by its relationship
+     * value. Socialites get {@link GameConstants#BONUS_TIMES} of all of
+     * these, and each Charisma level adds
+     * {@link GameConstants#CHARISMA_RELATIONSHIP_BONUS_PER_LEVEL} to
+     * positive relationship gains. If it falls flat, the relationship and
+     * happiness drop a little instead. Friendly actions train Charisma
+     * either way (half as much on a failure).</p>
+     *
+     * @param otherSim the Sim to interact with.
+     * @param action   the social action to perform.
+     * @return {@code true} if the action landed.
+     */
+    public boolean performSocialAction(Sim otherSim, SocialAction action) {
+        if (otherSim == owner) {
+            return false;
+        }
+        relationships.putIfAbsent(otherSim, 0);
+        double traitMultiplier = owner.hasTrait(Trait.SOCIALITE) ? GameConstants.BONUS_TIMES : 1.0;
+        boolean landed = GameRandom.RANDOM.nextInt(100) < getSuccessChance(otherSim, action);
+
+        if (landed) {
+            int relChange = (int) (action.getRelationshipChange() * traitMultiplier);
+            if (relChange > 0) {
+                int charisma = owner.getSkillLevel(SkillType.CHARISMA);
+                relChange = (int) Math.round(relChange
+                        * (1 + charisma * GameConstants.CHARISMA_RELATIONSHIP_BONUS_PER_LEVEL));
+            }
+            increaseRelationship(otherSim, relChange);
+            changeNeed(owner.getHappiness(), (int) (action.getHappinessChange() * traitMultiplier));
+            changeNeed(owner.getSocial(), (int) (action.getSocialChange() * traitMultiplier));
+        } else {
+            increaseRelationship(otherSim, -GameConstants.SOCIAL_FAIL_RELATIONSHIP_PENALTY);
+            owner.getHappiness().decrease(GameConstants.SOCIAL_FAIL_HAPPINESS_PENALTY);
+            owner.getSocial().increase(action.getSocialChange() / 2);
+        }
+        owner.getEnergy().decrease((int) (-action.getEnergyChange() * traitMultiplier));
+
+        if (action.getRelationshipChange() > 0) {
+            int xp = landed ? GameConstants.SOCIAL_CHARISMA_XP : GameConstants.SOCIAL_CHARISMA_XP / 2;
+            owner.trainSkill(SkillType.CHARISMA, xp);
+        }
+        return landed;
+    }
+
+    /** Raises or lowers a need, keeping it within 0–100 either way. */
+    private static void changeNeed(Need need, int amount) {
+        if (amount >= 0) {
+            need.increase(amount);
+        } else {
+            need.decrease(-amount);
+        }
+    }
+
+    /**
+     * Gives an item from the owner's bag to another Sim.
+     *
+     * <p>The item moves into the receiver's bag if it has room (otherwise
+     * it is used up). The receiver gains {@link GameConstants#GIFT_HAPPINESS}
+     * happiness and the relationship rises — in both directions — by
+     * {@link GameConstants#GIFT_BASE_RELATIONSHIP} plus one point per
+     * {@link GameConstants#GIFT_PRICE_PER_RELATIONSHIP_POINT} Simoleons the
+     * item is worth, up to {@link GameConstants#GIFT_MAX_RELATIONSHIP}.</p>
+     *
+     * @param otherSim the Sim receiving the gift.
+     * @param gift     an item from the owner's bag.
+     * @return the relationship points gained.
+     * @throws SimulationException if the item is not in the owner's bag.
+     */
+    public int giveGift(Sim otherSim, Item gift) throws SimulationException {
+        if (otherSim == owner || !owner.getInventory().remove(gift)) {
+            throw new SimulationException(owner.getName() + " doesn't have that to give.");
+        }
+        if (otherSim.getInventory().size() < otherSim.getInventoryCapacity()) {
+            otherSim.addItem(gift);
+        }
+        int relGain = Math.min(GameConstants.GIFT_MAX_RELATIONSHIP, GameConstants.GIFT_BASE_RELATIONSHIP
+                + gift.getPrice() / GameConstants.GIFT_PRICE_PER_RELATIONSHIP_POINT);
+        increaseRelationship(otherSim, relGain);
+        otherSim.getRelationshipManager().increaseRelationship(owner, relGain);
+        otherSim.getHappiness().increase(GameConstants.GIFT_HAPPINESS);
+        owner.getHappiness().increase(GameConstants.GIFT_HAPPINESS / 3);
+        return relGain;
     }
 
     /**

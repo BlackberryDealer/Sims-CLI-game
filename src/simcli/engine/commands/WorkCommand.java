@@ -6,6 +6,7 @@ import simcli.entities.actors.Sim;
 import simcli.entities.models.Job;
 import simcli.entities.models.ActionState;
 import simcli.entities.models.SimState;
+import simcli.entities.models.SkillType;
 import simcli.entities.models.WorkResult;
 import simcli.ui.UIManager;
 
@@ -95,6 +96,13 @@ public class WorkCommand extends BaseCommand {
                     + result.getEarnings() + "{/}!");
             if (result.isOverworked()) {
                 UIManager.printWarning(activePlayer.getName() + " feels the heavy strain of overworking!");
+            }
+            int skillNeeded = activePlayer.getSkillNeededForPromotion();
+            if (skillNeeded > 0) {
+                SkillType skill = activePlayer.getCareer().getPrimarySkill();
+                UIManager.info("To be promoted to tier " + (activePlayer.getJobTier() + 1) + ", "
+                        + activePlayer.getName() + " needs " + skill.getDisplayName() + " level " + skillNeeded
+                        + " {k}(now " + activePlayer.getSkillLevel(skill) + " - " + skill.getTrainingHint() + "){/}");
             }
         }
 

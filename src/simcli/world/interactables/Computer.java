@@ -6,12 +6,14 @@ import simcli.engine.TimeManager;
 import simcli.entities.actors.Sim;
 import simcli.entities.models.ActionState;
 import simcli.entities.models.SimState;
+import simcli.entities.models.SkillType;
+import simcli.utils.GameConstants;
 
 import java.util.Scanner;
 
 /**
- * A utility interactable that allows a Sim to browse the web for fun,
- * increasing happiness, or study for personal enjoyment.
+ * A utility interactable where a Sim studies, gaining a little happiness
+ * and training the {@link SkillType#LOGIC} skill.
  */
 public class Computer implements Interactable {
     private static final int ENERGY_COST = 15;
@@ -32,6 +34,9 @@ public class Computer implements Interactable {
         sim.getEnergy().decrease(ENERGY_COST);
         sim.getHunger().decrease(HUNGER_COST);
         sim.getHappiness().increase(HAPPINESS_GAIN);
+        sim.trainSkill(SkillType.LOGIC, GameConstants.STUDY_LOGIC_XP);
+        SimulationLogger.getInstance().log(sim.getName() + "'s Logic skill is now level "
+                + sim.getSkillLevel(SkillType.LOGIC) + ".");
     }
 
     @Override

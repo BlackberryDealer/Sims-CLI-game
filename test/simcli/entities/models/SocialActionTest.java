@@ -45,9 +45,19 @@ public class SocialActionTest {
     }
 
     @Test
-    @DisplayName("SocialAction enum has exactly 3 values")
+    @DisplayName("FLIRT is the strongest relationship boost")
+    void testFlirtValues() {
+        SocialAction flirt = SocialAction.FLIRT;
+        assertEquals("Flirt", flirt.getDisplayName());
+        assertTrue(flirt.getRelationshipChange() > SocialAction.JOKE.getRelationshipChange(),
+                "Flirting should build a relationship faster than joking");
+        assertTrue(flirt.getEnergyChange() < 0, "Flirting should cost energy");
+    }
+
+    @Test
+    @DisplayName("SocialAction enum has exactly 4 values")
     void testEnumCount() {
-        assertEquals(3, SocialAction.values().length,
-                "Should have CHAT, JOKE, ARGUE");
+        assertEquals(4, SocialAction.values().length,
+                "Should have CHAT, JOKE, FLIRT, ARGUE");
     }
 }

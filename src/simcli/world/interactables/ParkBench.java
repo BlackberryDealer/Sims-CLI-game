@@ -13,9 +13,9 @@ import simcli.engine.TimeManager;
 import simcli.entities.actors.NPCSim;
 import simcli.entities.actors.Sim;
 import simcli.entities.managers.NPCManager;
+import simcli.entities.managers.RelationshipManager;
 import simcli.entities.models.ActionState;
 import simcli.entities.models.SocialAction;
-import simcli.entities.models.Trait;
 import simcli.utils.GameConstants;
 
 /**
@@ -74,8 +74,15 @@ public class ParkBench implements Interactable {
                 NPCSim target = visitors.get(choice - 1);
                 int relScore = sim.getRelationshipManager().getRelationship(target);
 
-                SocialAction[] actions = {SocialAction.CHAT, SocialAction.JOKE, SocialAction.ARGUE};
-                String[] hints = {"safe and friendly", "big boost if it lands", "why would you?"};
+                RelationshipManager rm = sim.getRelationshipManager();
+                SocialAction[] actions = {SocialAction.CHAT, SocialAction.JOKE, SocialAction.FLIRT, SocialAction.ARGUE};
+                boolean canFlirt = rm.canFlirtWith(target);
+                String[] hints = {
+                        "safe and friendly",
+                        "big boost if it lands (" + rm.getSuccessChance(target, SocialAction.JOKE) + "%)",
+                        canFlirt ? "romantic, " + rm.getSuccessChance(target, SocialAction.FLIRT) + "% chance"
+                                : "{k}" + flirtBlocker(sim, target) + "{/}",
+                        "why would you?"};
                 UIManager.title("Talking to " + target.getName());
                 for (int i = 0; i < actions.length; i++) {
                     UIManager.option(String.valueOf(i + 1), Style.fit(actions[i].getDisplayName(), 10), hints[i]);
@@ -99,23 +106,16 @@ public class ParkBench implements Interactable {
                 }
 
                 if (actionChoice > 0 && actionChoice <= actions.length) {
+                    SocialAction selectedAction = actions[actionChoice - 1];
+                    if (selectedAction == SocialAction.FLIRT && !canFlirt) {
+                        UIManager.info(sim.getName() + " can't flirt with " + target.getName() + ": "
+                                + flirtBlocker(sim, target) + ".");
+                        throw new ActionCancelledException();
+                    }
                     sim.setCurrentAction(ActionState.SOCIALIZING);
                     SimulationLogger.getInstance().logAnimation(sim);
-                    SocialAction selectedAction = actions[actionChoice - 1];
-                    boolean isSocialite = sim.hasTrait(Trait.SOCIALITE);
-                    double multiplier = isSocialite ? GameConstants.BONUS_TIMES : 1.0;
-
-                    int relGain = (int) (selectedAction.getRelationshipChange() * multiplier);
-                    int happyGain = (int) (selectedAction.getHappinessChange() * multiplier);
-                    int energyLoss = (int) (selectedAction.getEnergyChange() * multiplier);
-                    int socialGain = (int) (selectedAction.getSocialChange() * multiplier);
-
-                    SimulationLogger.getInstance().log(sim.getName() + " performs " + selectedAction.getDisplayName().toLowerCase() + " with " + target.getName() + ".");
-                    
-                    sim.getRelationshipManager().increaseRelationship(target, relGain);
-                    sim.getHappiness().increase(happyGain);
-                    sim.getEnergy().decrease(-energyLoss);
-                    sim.getSocial().increase(socialGain);
+                    boolean landed = rm.performSocialAction(target, selectedAction);
+                    SimulationLogger.getInstance().log(describe(sim, target, selectedAction, landed));
                 } else if (actionChoice == proposeChoice && canPropose) {
                     handleProposal(sim, target);
                 } else {
@@ -134,6 +134,32 @@ public class ParkBench implements Interactable {
             UIManager.error("Invalid selection.");
             throw new ActionCancelledException();
         }
+    }
+
+    /** Says why the Sim can't flirt with the target right now. */
+    private static String flirtBlocker(Sim sim, Sim target) {
+        if (sim.getAge() < GameConstants.ADULT_AGE || target.getAge() < GameConstants.ADULT_AGE) {
+            return "adults only";
+        }
+        if (sim.getRelationshipManager().getSpouse() != null) {
+            return "you're married";
+        }
+        if (target.getRelationshipManager().getSpouse() != null) {
+            return "they're married";
+        }
+        return "get to know them first (" + GameConstants.FLIRT_MIN_RELATIONSHIP + "+)";
+    }
+
+    /** One line describing how a social action went. */
+    private static String describe(Sim sim, Sim target, SocialAction action, boolean landed) {
+        String verb = action.getDisplayName().toLowerCase();
+        if (landed) {
+            return sim.getName() + " " + (action == SocialAction.ARGUE ? "argues" : verb + "s") + " with "
+                    + target.getName() + (action == SocialAction.JOKE ? " - it lands!"
+                    : action == SocialAction.FLIRT ? " - " + target.getName() + " blushes." : ".");
+        }
+        return sim.getName() + " tries to " + verb + " with " + target.getName()
+                + ", but it falls flat. Awkward...";
     }
 
     /** Friendly label for a relationship score. */

@@ -2,7 +2,9 @@ package simcli.engine.commands;
 
 import simcli.engine.CommandResult;
 import simcli.entities.actors.Sim;
+import simcli.entities.managers.SkillManager;
 import simcli.entities.models.Job;
+import simcli.entities.models.SkillType;
 import simcli.entities.models.Trait;
 import simcli.ui.Panel;
 import simcli.ui.Style;
@@ -51,9 +53,16 @@ public class CharacterStatusCommand extends BaseCommand {
             if (sim.getCareer() == Job.UNEMPLOYED) {
                 lines.add("{k}Job{/}        Unemployed {k}- visit the Job Market with [J]{/}");
             } else {
-                lines.add("{k}Job{/}        " + sim.getCareer().getTitle() + " {k}(tier " + sim.getJobTier()
-                        + "/" + sim.getCareer().getMaxTier() + ", $"
-                        + sim.getCareer().getSalaryAtTier(sim.getJobTier()) + " per shift){/}");
+                Job job = sim.getCareer();
+                lines.add("{k}Job{/}        " + job.getTitle() + " {k}(tier " + sim.getJobTier()
+                        + "/" + job.getMaxTier() + ", $"
+                        + job.getShiftPay(sim.getJobTier(), sim.getSkillLevel(job.getPrimarySkill()))
+                        + " per shift){/}");
+                int needed = sim.getSkillNeededForPromotion();
+                if (needed > 0) {
+                    lines.add("           {Y}Next promotion needs " + job.getPrimarySkill().getDisplayName()
+                            + " " + needed + "{/}");
+                }
             }
         }
         lines.add("{k}Location{/}   " + currentLocation.getName()
@@ -66,6 +75,13 @@ public class CharacterStatusCommand extends BaseCommand {
         lines.add(Panel.meter("Health", sim.getHealth(), w) + "   " + Panel.meter("Hunger", sim.getHunger().getValue(), w));
         lines.add(Panel.meter("Energy", sim.getEnergy().getValue(), w) + "   " + Panel.meter("Hygiene", sim.getHygiene().getValue(), w));
         lines.add(Panel.meter("Fun", sim.getHappiness().getValue(), w) + "   " + Panel.meter("Social", sim.getSocial().getValue(), w));
+        lines.add("");
+        for (SkillType skill : SkillType.values()) {
+            SkillManager skills = sim.getSkillManager();
+            lines.add("{k}" + Style.fit(skill.getDisplayName(), 11) + "{/}" + "Lv " + Style.fit(
+                    String.valueOf(skills.getLevel(skill)), 3) + Panel.bar(skills.getProgressPercent(skill), 10)
+                    + "  {k}" + skill.getTrainingHint() + "{/}");
+        }
         lines.add("");
 
         Sim spouse = sim.getRelationshipManager().getSpouse();

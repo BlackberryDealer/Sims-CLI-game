@@ -13,20 +13,23 @@ import simcli.utils.GameConstants;
 public enum Job {
 
     /** Default state — no employment, no salary. */
-    UNEMPLOYED("Unemployed", 0, 0, 0, 0, 100, 1.0, 1),
+    UNEMPLOYED("Unemployed", 0, 0, 0, 0, 100, 1.0, 1, null),
 
     /** High-paying desk job with moderate energy drain. */
-    SOFTWARE_ENGINEER("Software Engineer", 150, 4, 30, GameConstants.ADULT_AGE, GameConstants.ELDER_AGE, 1.2, 5),
+    SOFTWARE_ENGINEER("Software Engineer", 150, 4, 30, GameConstants.ADULT_AGE, GameConstants.ELDER_AGE, 1.2, 5,
+            SkillType.LOGIC),
 
     /** Hands-on technical work with higher energy drain. */
-    HARDWARE_TECHNICIAN("Hardware Technician", 120, 5, 45, GameConstants.ADULT_AGE, 55, 1.1, 4),
+    HARDWARE_TECHNICIAN("Hardware Technician", 120, 5, 45, GameConstants.ADULT_AGE, 55, 1.1, 4,
+            SkillType.LOGIC),
 
     /** Flexible creative career with low energy requirements. */
     FREELANCE_PHOTOGRAPHER("Freelance Photographer", 80, 2, 15, GameConstants.ADULT_AGE, 80, GameConstants.BONUS_TIMES,
-            3),
+            3, SkillType.CHARISMA),
 
     /** Physical career with high energy drain but good pay. */
-    PERSONAL_TRAINER("Personal Trainer", 90, 3, 60, GameConstants.ADULT_AGE, 40, 1.3, 3);
+    PERSONAL_TRAINER("Personal Trainer", 90, 3, 60, GameConstants.ADULT_AGE, 40, 1.3, 3,
+            SkillType.FITNESS);
 
     /** The human-readable job title. */
     private final String title;
@@ -52,6 +55,9 @@ public enum Job {
     /** The highest promotion tier achievable in this career. */
     private final int maxTier;
 
+    /** The skill that raises pay and promotion chances, or {@code null} for no job. */
+    private final SkillType primarySkill;
+
     /**
      * Constructs a new Job enum constant.
      *
@@ -63,9 +69,10 @@ public enum Job {
      * @param maxAge              maximum eligible age.
      * @param promotionMultiplier salary multiplier per tier.
      * @param maxTier             highest achievable promotion tier.
+     * @param primarySkill        the skill this career rewards.
      */
     Job(String title, int baseSalary, int workingHours, int energyDrain, int minAge, int maxAge,
-            double promotionMultiplier, int maxTier) {
+            double promotionMultiplier, int maxTier, SkillType primarySkill) {
         this.title = title;
         this.baseSalary = baseSalary;
         this.workingHours = workingHours;
@@ -74,6 +81,7 @@ public enum Job {
         this.maxAge = maxAge;
         this.promotionMultiplier = promotionMultiplier;
         this.maxTier = maxTier;
+        this.primarySkill = primarySkill;
     }
 
     /**
@@ -165,5 +173,55 @@ public enum Job {
         int safeTier = Math.max(1, Math.min(tier, this.maxTier));
 
         return (int) (baseSalary * Math.pow(promotionMultiplier, safeTier - 1));
+    }
+
+    /**
+     * Returns the skill this career rewards with higher pay and faster
+     * promotions.
+     *
+     * @return the career's skill, or {@code null} for {@link #UNEMPLOYED}.
+     */
+    public SkillType getPrimarySkill() {
+        return primarySkill;
+    }
+
+    /**
+     * Returns the level of {@link #getPrimarySkill()} a Sim needs before
+     * they can be promoted <em>to</em> the given tier. Tier 2 needs no
+     * skill; each tier after that needs
+     * {@link GameConstants#SKILL_LEVELS_PER_TIER} more levels.
+     *
+     * @param tier the tier being promoted to.
+     * @return the skill level required.
+     */
+    public int getSkillRequiredForTier(int tier) {
+        return Math.max(0, (tier - 2) * GameConstants.SKILL_LEVELS_PER_TIER);
+    }
+
+    /**
+     * Computes the pay for one shift: {@link #getSalaryAtTier(int)} plus
+     * {@link GameConstants#SKILL_PAY_BONUS_PER_LEVEL} per level of the
+     * career's skill.
+     *
+     * @param tier       the promotion tier (1-indexed).
+     * @param skillLevel the Sim's level in {@link #getPrimarySkill()}.
+     * @return the shift pay in Simoleons.
+     */
+    public int getShiftPay(int tier, int skillLevel) {
+        return (int) Math.round(getSalaryAtTier(tier) * (1 + skillLevel * GameConstants.SKILL_PAY_BONUS_PER_LEVEL));
+    }
+
+    /**
+     * Computes the chance of promotion after one shift:
+     * {@link GameConstants#BASE_PROMOTION_CHANCE} plus
+     * {@link GameConstants#PROMOTION_CHANCE_PER_SKILL_LEVEL} per skill level,
+     * capped at {@link GameConstants#MAX_PROMOTION_CHANCE}.
+     *
+     * @param skillLevel the Sim's level in {@link #getPrimarySkill()}.
+     * @return the promotion chance, 0.0–1.0.
+     */
+    public double getPromotionChance(int skillLevel) {
+        return Math.min(GameConstants.MAX_PROMOTION_CHANCE,
+                GameConstants.BASE_PROMOTION_CHANCE + skillLevel * GameConstants.PROMOTION_CHANCE_PER_SKILL_LEVEL);
     }
 }

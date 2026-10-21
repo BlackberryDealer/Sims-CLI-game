@@ -7,6 +7,7 @@ import simcli.needs.SimsNeedsTracker;
 import simcli.entities.managers.CareerManager;
 import simcli.entities.managers.InventoryManager;
 import simcli.entities.managers.RelationshipManager;
+import simcli.entities.managers.SkillManager;
 import simcli.entities.items.Item;
 
 import java.util.ArrayList;
@@ -50,6 +51,7 @@ public class Sim implements ISimBehaviour {
     private SimsNeedsTracker needsTracker;
     private CareerManager careerManager;
     private InventoryManager inventoryManager;
+    private SkillManager skillManager;
     private List<Trait> traits;
 
     private RelationshipManager relationshipManager;
@@ -78,6 +80,7 @@ public class Sim implements ISimBehaviour {
         this.needsTracker = new SimsNeedsTracker();
         this.careerManager = new CareerManager();
         this.inventoryManager = new InventoryManager(GameConstants.STARTING_INVENTORY_CAPACITY);
+        this.skillManager = new SkillManager();
         this.traits = new ArrayList<>();
         Trait[] allTraits = Trait.values();
         this.traits.add(allTraits[GameRandom.RANDOM.nextInt(allTraits.length)]);
@@ -465,6 +468,65 @@ public class Sim implements ISimBehaviour {
     }
 
     // -------------------------------------------------------------------------
+    // Skill Delegates
+    // -------------------------------------------------------------------------
+
+    /**
+     * Returns the skill manager for this Sim, which tracks experience
+     * in every {@link SkillType}.
+     *
+     * @return the Sim's {@link SkillManager}.
+     */
+    public SkillManager getSkillManager() {
+        return skillManager;
+    }
+
+    /**
+     * Returns this Sim's level in a skill.
+     *
+     * @param skill the skill to look up, or {@code null}.
+     * @return the skill level, or 0 if {@code skill} is {@code null}.
+     */
+    public int getSkillLevel(SkillType skill) {
+        return skill == null ? 0 : skillManager.getLevel(skill);
+    }
+
+    /**
+     * Trains a skill. Active Sims learn Fitness 50% faster and Socialites
+     * learn Charisma 50% faster.
+     *
+     * @param skill  the skill to train, or {@code null} to do nothing.
+     * @param points the base experience points earned.
+     * @return {@code true} if the skill went up a level.
+     */
+    public boolean trainSkill(SkillType skill, int points) {
+        if (skill == null) {
+            return false;
+        }
+        if ((skill == SkillType.FITNESS && hasTrait(Trait.ACTIVE))
+                || (skill == SkillType.CHARISMA && hasTrait(Trait.SOCIALITE))) {
+            points = (int) (points * GameConstants.BONUS_TIMES);
+        }
+        return skillManager.addExperience(skill, points, name);
+    }
+
+    /**
+     * Returns the skill level this Sim still needs before their next
+     * promotion is possible.
+     *
+     * @return the required level of the career's skill, or 0 if the Sim
+     *         already meets it, is unemployed or is at the top tier.
+     */
+    public int getSkillNeededForPromotion() {
+        Job job = getCareer();
+        if (job == Job.UNEMPLOYED || getJobTier() >= job.getMaxTier()) {
+            return 0;
+        }
+        int required = job.getSkillRequiredForTier(getJobTier() + 1);
+        return getSkillLevel(job.getPrimarySkill()) >= required ? 0 : required;
+    }
+
+    // -------------------------------------------------------------------------
     // Need Modification Shortcuts
     // -------------------------------------------------------------------------
 
@@ -735,7 +797,13 @@ public class Sim implements ISimBehaviour {
 
     /**
      * Performs a work shift: drains energy/hunger/hygiene, earns salary,
-     * and has a 25% chance of promotion.
+     * trains the career's skill, and may earn a promotion.
+     *
+     * <p>Pay and promotion chance both rise with the career's skill
+     * (see {@link Job#getShiftPay(int, int)} and
+     * {@link Job#getPromotionChance(int)}), and promotion past tier 2 is
+     * only possible once the skill reaches
+     * {@link Job#getSkillRequiredForTier(int)}.</p>
      *
      * @return a {@link WorkResult} indicating earnings, promotion, and overwork status.
      */
@@ -748,19 +816,22 @@ public class Sim implements ISimBehaviour {
         getHunger().decrease(20 * multiplier);
         getHygiene().decrease(30 * multiplier);
 
-        int earnings = getCareer().getSalaryAtTier(getJobTier());
+        SkillType skill = getCareer().getPrimarySkill();
+        int skillLevel = getSkillLevel(skill);
+        int earnings = getCareer().getShiftPay(getJobTier(), skillLevel);
         money += earnings;
         addTotalMoneyEarned(earnings);
         incrementShiftsWorkedToday();
         resetConsecutiveDaysMissed();
 
         boolean promoted = false;
-        if (getJobTier() < getCareer().getMaxTier()) {
-            if (GameRandom.RANDOM.nextDouble() < 0.25) {
+        if (getJobTier() < getCareer().getMaxTier() && getSkillNeededForPromotion() == 0) {
+            if (GameRandom.RANDOM.nextDouble() < getCareer().getPromotionChance(skillLevel)) {
                 getCareerManager().promote(getName());
                 promoted = true;
             }
         }
+        trainSkill(skill, GameConstants.WORK_SKILL_XP);
 
         return WorkResult.success(earnings, promoted, multiplier > 1);
     }

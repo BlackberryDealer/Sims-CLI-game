@@ -5,13 +5,15 @@ import simcli.engine.TimeManager;
 import simcli.entities.actors.Sim;
 import simcli.entities.models.ActionState;
 import simcli.entities.models.SimState;
+import simcli.entities.models.SkillType;
 import simcli.ui.UIManager;
+import simcli.utils.GameConstants;
 
 import java.util.Scanner;
 
 /**
- * A piece of exercise equipment. When used, it reduces energy and hygiene
- * while occasionally increasing the Sim's fitness.
+ * A piece of exercise equipment. When used, it costs energy and hunger
+ * and trains the Sim's {@link SkillType#FITNESS} skill.
  */
 public class WeightBench implements Interactable {
     private static final int ENERGY_COST = 25;
@@ -30,10 +32,15 @@ public class WeightBench implements Interactable {
         }
         sim.setCurrentAction(ActionState.EXERCISING);
         UIManager.displayActionAnimation(sim);
-        sim.getEnergy().decrease(ENERGY_COST);
+        // fitter Sims tire less from the same workout
+        int energyCost = ENERGY_COST
+                - sim.getSkillLevel(SkillType.FITNESS) * GameConstants.FITNESS_WORKOUT_ENERGY_SAVING;
+        sim.getEnergy().decrease(energyCost);
         sim.getHunger().decrease(HUNGER_COST);
-        UIManager.success(sim.getName() + " finishes a high-intensity full-body workout.  {R}-" + ENERGY_COST
-                + " energy -" + HUNGER_COST + " hunger{/}");
+        sim.trainSkill(SkillType.FITNESS, GameConstants.WORKOUT_FITNESS_XP);
+        UIManager.success(sim.getName() + " finishes a high-intensity full-body workout.  {R}-" + energyCost
+                + " energy -" + HUNGER_COST + " hunger{/}  {G}+fitness{/} {k}(level "
+                + sim.getSkillLevel(SkillType.FITNESS) + "){/}");
     }
 
     @Override

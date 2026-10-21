@@ -176,7 +176,7 @@ public class GameEngine {
                 this.neighborhood, this::setActivePlayer, this.logger);
 
         // Simulation subsystems (created by GameLoop to respect ownership)
-        this.gameLoop = new GameLoop(this.timeManager, this.neighborhood, this.logger);
+        this.gameLoop = new GameLoop(this.timeManager, this.neighborhood, this.logger, this.worldManager);
         this.randomEventManager = this.gameLoop.getRandomEventManager();
         this.lifecycleManager = this.gameLoop.getLifecycleManager();
     }

@@ -62,6 +62,69 @@ public final class GameConstants {
     /** The percentage chance (0-100) of a successful reproduction attempt. */
     public static final int REPRODUCE_SUCCESS_CHANCE = 50;
 
+    /** Base percentage chance (0-100) that a joke lands. */
+    public static final int JOKE_BASE_SUCCESS_CHANCE = 60;
+    /** Base percentage chance (0-100) that a flirt lands with an acquaintance. */
+    public static final int FLIRT_BASE_SUCCESS_CHANCE = 40;
+    /** Relationship score needed before a Sim can flirt with someone. */
+    public static final int FLIRT_MIN_RELATIONSHIP = 20;
+    /** Relationship lost when a joke or flirt falls flat. */
+    public static final int SOCIAL_FAIL_RELATIONSHIP_PENALTY = 5;
+    /** Happiness lost when a joke or flirt falls flat. */
+    public static final int SOCIAL_FAIL_HAPPINESS_PENALTY = 5;
+    /** Relationship gained from any gift, before its value is added. */
+    public static final int GIFT_BASE_RELATIONSHIP = 5;
+    /** Every this many Simoleons a gift is worth adds 1 relationship point. */
+    public static final int GIFT_PRICE_PER_RELATIONSHIP_POINT = 10;
+    /** Most relationship a single gift can add. */
+    public static final int GIFT_MAX_RELATIONSHIP = 25;
+    /** Happiness the receiver gains from a gift. */
+    public static final int GIFT_HAPPINESS = 15;
+
+    // --- Skills ---
+    /** Experience points needed for each skill level. */
+    public static final int SKILL_XP_PER_LEVEL = 20;
+    /** The highest level a skill can reach. */
+    public static final int MAX_SKILL_LEVEL = 10;
+    /** Fitness experience from one workout. */
+    public static final int WORKOUT_FITNESS_XP = 10;
+    /** Logic experience from one study session. */
+    public static final int STUDY_LOGIC_XP = 10;
+    /** Charisma experience from a successful social action. */
+    public static final int SOCIAL_CHARISMA_XP = 4;
+    /** Experience in the job's skill from one work shift. */
+    public static final int WORK_SKILL_XP = 3;
+    /** Extra pay per level of the job's skill, as a fraction of the base pay. */
+    public static final double SKILL_PAY_BONUS_PER_LEVEL = 0.05;
+    /** Chance of promotion per shift with no skill. */
+    public static final double BASE_PROMOTION_CHANCE = 0.25;
+    /** Extra promotion chance per level of the job's skill. */
+    public static final double PROMOTION_CHANCE_PER_SKILL_LEVEL = 0.05;
+    /** Highest promotion chance per shift. */
+    public static final double MAX_PROMOTION_CHANCE = 0.75;
+    /** Skill levels needed per tier above 2 (tier 3 needs 2, tier 4 needs 4, ...). */
+    public static final int SKILL_LEVELS_PER_TIER = 2;
+    /** Extra percentage points of social success chance per charisma level. */
+    public static final int CHARISMA_SUCCESS_BONUS_PER_LEVEL = 4;
+    /** Extra relationship gain per charisma level, as a fraction. */
+    public static final double CHARISMA_RELATIONSHIP_BONUS_PER_LEVEL = 0.05;
+    /** Energy saved on a workout per fitness level. */
+    public static final int FITNESS_WORKOUT_ENERGY_SAVING = 1;
+
+    // --- Autonomy ---
+    /** Idle Sims at or below this hunger eat from the fridge. */
+    public static final int AUTONOMY_HUNGER_THRESHOLD = 35;
+    /** Idle Sims at or below this energy go to bed. */
+    public static final int AUTONOMY_SLEEP_THRESHOLD = 25;
+    /** Autonomously sleeping Sims wake up once their energy reaches this. */
+    public static final int AUTONOMY_WAKE_THRESHOLD = 90;
+    /** Idle Sims at or below this hygiene take a shower. */
+    public static final int AUTONOMY_HYGIENE_THRESHOLD = 20;
+    /** Babies at or below this hunger get fed by an idle Sim. */
+    public static final int AUTONOMY_BABY_HUNGER_THRESHOLD = 40;
+    /** Hunger restored when a baby is fed. */
+    public static final int BABY_FEED_AMOUNT = 50;
+
     // --- Needs Tracker ---
     /** The number of ticks a Sim can survive at zero hunger before dying. */
     public static final int STARVING_DEATH_THRESHOLD = 3;

@@ -3,17 +3,24 @@ package simcli.engine.commands;
 import simcli.engine.CommandResult;
 import simcli.engine.SimulationException;
 import simcli.entities.actors.Sim;
+import simcli.entities.items.Item;
 import simcli.entities.models.Gender;
 import simcli.entities.models.ActionState;
 import simcli.entities.models.SimState;
+import simcli.entities.models.SkillType;
+import simcli.ui.ItemInfo;
 import simcli.ui.Panel;
+import simcli.ui.Style;
 import simcli.ui.UIManager;
+import simcli.utils.GameConstants;
 import simcli.world.Building;
 import simcli.world.Residential;
 
+import java.util.List;
+
 /**
  * Command to interact with a spouse from anywhere if they are in the household.
- * Supports dating, having babies, and feeding babies.
+ * Supports dating, having babies, feeding babies and giving gifts.
  *
  * <p>Previously coupled to {@code GameEngine} directly. Now uses
  * {@link CommandContext} for all data access and mutations.</p>
@@ -73,7 +80,11 @@ public class SpouseInteractionCommand extends BaseCommand {
             UIManager.option("2", "Try for a baby", "50% chance - takes an hour either way");
         }
         if (hasBabies) {
-            UIManager.option("3", "Feed the babies", "+50 hunger each");
+            UIManager.option("3", "Feed the babies", "+" + GameConstants.BABY_FEED_AMOUNT + " hunger each");
+        }
+        if (spouseAvailable) {
+            UIManager.option("4", "Give a gift", activePlayer.getInventory().isEmpty()
+                    ? "{k}your bag is empty{/}" : "pricier gifts mean more");
         }
 
         UIManager.option("0", "Back");
@@ -92,6 +103,8 @@ public class SpouseInteractionCommand extends BaseCommand {
             } else if (choice == 3 && hasBabies) {
                 handleFeedBabies(activePlayer);
                 return CommandResult.TICK_FORWARD;
+            } else if (choice == 4 && spouseAvailable) {
+                return handleGift(activePlayer, spouse);
             }
         } catch (NumberFormatException e) {
             UIManager.error("Invalid selection.");
@@ -129,6 +142,46 @@ public class SpouseInteractionCommand extends BaseCommand {
         
         sim.getRelationshipManager().increaseRelationship(spouse, 10);
         spouse.getRelationshipManager().increaseRelationship(sim, 10);
+        sim.trainSkill(SkillType.CHARISMA, GameConstants.SOCIAL_CHARISMA_XP);
+    }
+
+    /**
+     * Lets the player pick an item from the bag and give it to the spouse.
+     *
+     * @param sim    the active player Sim.
+     * @param spouse the spouse receiving the gift.
+     * @return {@link CommandResult#TICK_FORWARD} if a gift was given,
+     *         {@link CommandResult#NO_TICK} if the bag is empty or the player backs out.
+     */
+    private CommandResult handleGift(Sim sim, Sim spouse) throws SimulationException {
+        List<Item> bag = sim.getInventory();
+        if (bag.isEmpty()) {
+            UIManager.info(sim.getName() + " has nothing to give. {k}Buy something at a shop first.{/}");
+            pause();
+            return CommandResult.NO_TICK;
+        }
+        UIManager.title("Give " + spouse.getName() + " a gift");
+        for (int i = 0; i < bag.size(); i++) {
+            Item item = bag.get(i);
+            UIManager.option(String.valueOf(i + 1), Style.fit(item.getObjectName(), 18) + ItemInfo.describe(item));
+        }
+        UIManager.option("0", "Never mind");
+        UIManager.prompt("\nGift> ");
+        try {
+            int choice = Integer.parseInt(ctx.getScanner().nextLine().trim());
+            if (choice > 0 && choice <= bag.size()) {
+                Item gift = bag.get(choice - 1);
+                sim.setCurrentAction(ActionState.SOCIALIZING);
+                int gained = sim.getRelationshipManager().giveGift(spouse, gift);
+                ctx.getLogger().log(sim.getName() + " gives " + spouse.getName() + " a " + gift.getObjectName()
+                        + ". " + spouse.getName() + " is delighted! (+" + gained + " relationship)");
+                return CommandResult.TICK_FORWARD;
+            }
+        } catch (NumberFormatException e) {
+            UIManager.error("Invalid selection.");
+            pause();
+        }
+        return CommandResult.NO_TICK;
     }
 
     /**
@@ -210,7 +263,7 @@ public class SpouseInteractionCommand extends BaseCommand {
         int count = 0;
         for (Sim s : ctx.getNeighborhood()) {
             if (s.isChildSim() && !s.isPlayable()) {
-                s.getHunger().increase(50);
+                s.getHunger().increase(GameConstants.BABY_FEED_AMOUNT);
                 count++;
             }
         }

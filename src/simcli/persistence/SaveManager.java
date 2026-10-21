@@ -3,6 +3,7 @@ package simcli.persistence;
 import simcli.engine.GameEngine;
 import simcli.entities.items.Item;
 import simcli.entities.models.Job;
+import simcli.entities.models.SkillType;
 import simcli.entities.models.Trait;
 import simcli.entities.actors.Sim;
 import simcli.entities.actors.NPCSim;
@@ -221,6 +222,12 @@ public class SaveManager {
             for (Item item : sim.getInventory()) {
                 writer.println("Inventory:" + ids.get(sim) + "," + item.toSaveString());
             }
+            for (SkillType skill : SkillType.values()) {
+                int xp = sim.getSkillManager().getExperience(skill);
+                if (xp > 0) {
+                    writer.println("Skill:" + ids.get(sim) + "," + skill.name() + "," + xp);
+                }
+            }
         }
 
         // Park NPCs
@@ -296,6 +303,7 @@ public class SaveManager {
             List<String[]> spouseLines = new ArrayList<>();
             List<String[]> childLines = new ArrayList<>();
             List<String> inventoryLines = new ArrayList<>();
+            List<String[]> skillLines = new ArrayList<>();
 
             while ((line = reader.readLine()) != null) {
                 if (line.startsWith("VERSION:")) {
@@ -333,6 +341,8 @@ public class SaveManager {
                     childLines.add(line.substring(6).split(","));
                 } else if (line.startsWith("Inventory:")) {
                     inventoryLines.add(line.substring(10));
+                } else if (line.startsWith("Skill:")) {
+                    skillLines.add(line.substring(6).split(","));
                 } else if (line.startsWith("NPC:")) {
                     npcLines.add(line.substring(4).split(",", -1));
                 } else if (line.startsWith("Sim:")) {
@@ -382,6 +392,15 @@ public class SaveManager {
                             owner.addItem((Item) item);
                         }
                     }
+                }
+            }
+
+            // Load Skills
+            for (String[] skillData : skillLines) {
+                Sim owner = resolver.resolve(skillData[0]);
+                if (owner != null) {
+                    owner.getSkillManager().setExperience(SkillType.valueOf(skillData[1]),
+                            Integer.parseInt(skillData[2]));
                 }
             }
 
