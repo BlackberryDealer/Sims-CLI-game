@@ -235,7 +235,10 @@ public class RelationshipManager {
      * flirts {@link GameConstants#FLIRT_BASE_SUCCESS_CHANCE}% plus half of
      * every relationship point above the flirting minimum. Each Charisma
      * level adds {@link GameConstants#CHARISMA_SUCCESS_BONUS_PER_LEVEL}
-     * points. The chance never goes above 95%.</p>
+     * points; Socialites are easier to win over
+     * ({@link GameConstants#SOCIALITE_TARGET_BONUS}) and Lazy Sims harder
+     * ({@link GameConstants#LAZY_TARGET_PENALTY}). The chance stays
+     * between 5% and 95%.</p>
      *
      * @param otherSim the Sim on the receiving end.
      * @param action   the social action.
@@ -255,7 +258,15 @@ public class RelationshipManager {
                 return 100;
         }
         int charisma = owner.getSkillLevel(SkillType.CHARISMA);
-        return Math.min(95, base + charisma * GameConstants.CHARISMA_SUCCESS_BONUS_PER_LEVEL);
+        int chance = base + charisma * GameConstants.CHARISMA_SUCCESS_BONUS_PER_LEVEL;
+        // the other Sim's personality matters too
+        if (otherSim.hasTrait(Trait.SOCIALITE)) {
+            chance += GameConstants.SOCIALITE_TARGET_BONUS;
+        }
+        if (otherSim.hasTrait(Trait.LAZY)) {
+            chance -= GameConstants.LAZY_TARGET_PENALTY;
+        }
+        return Math.max(5, Math.min(95, chance));
     }
 
     /**

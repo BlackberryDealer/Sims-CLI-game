@@ -8,7 +8,9 @@ import simcli.entities.items.Item;
 import simcli.entities.items.Food;
 import simcli.entities.items.Consumable;
 import simcli.entities.items.Furniture;
+import simcli.entities.items.Ingredient;
 import simcli.entities.models.Job;
+import simcli.utils.GameConstants;
 
 /**
  * A commercial interactable that sells {@link simcli.entities.items.Consumable}
@@ -23,8 +25,13 @@ public class GroceryShelf extends AbstractShop {
     @Override
     protected List<Item> getCatalog(Sim sim) {
         List<Item> catalog = new ArrayList<>();
+        // ready to eat, but cooking ingredients is far better value
         catalog.add(new Food("Apple", 10, 15, 5));
-        catalog.add(new Food("Steak", 40, 50, 20));
+        catalog.add(new Food("Microwave Dinner", 30, 40, 5));
+        catalog.add(new Ingredient("Groceries", 15, 10, "Home-cooked Meal", 55,
+                GameConstants.INGREDIENT_SHELF_LIFE_DAYS));
+        catalog.add(new Ingredient("Raw Steak", 35, 15, "Steak Dinner", 80,
+                GameConstants.INGREDIENT_SHELF_LIFE_DAYS));
         catalog.add(new Consumable("Perfume", 50, 0, 0, 30));
         catalog.add(new Furniture("Bed", 200, 30));
         catalog.add(new Furniture("Shower", 150, 10));

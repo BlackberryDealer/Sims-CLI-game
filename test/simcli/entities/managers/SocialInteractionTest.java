@@ -50,10 +50,11 @@ public class SocialInteractionTest {
         GameRandom.RANDOM.setSeed(System.nanoTime());
     }
 
+    /** An adult with the Active trait, which doesn't change social odds or charisma training. */
     private static Sim adult(String name, Gender gender) {
         Sim sim = new Sim(name, 30, gender, Job.UNEMPLOYED);
         sim.getTraits().clear();
-        sim.getTraits().add(Trait.LAZY);
+        sim.getTraits().add(Trait.ACTIVE);
         return sim;
     }
 

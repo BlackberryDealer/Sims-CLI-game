@@ -3,6 +3,7 @@ package simcli.ui;
 import simcli.engine.GameEngine;
 import simcli.engine.SimulationLogger;
 import simcli.persistence.SaveManager;
+import simcli.entities.models.Aspiration;
 import simcli.entities.models.Gender;
 import simcli.entities.models.Job;
 import simcli.entities.models.Trait;
@@ -169,9 +170,33 @@ public class MainMenu {
                 UIManager.error("Please enter M or F.");
             }
             Sim sim = new Sim(name, age, gender, Job.UNEMPLOYED);
+            Aspiration[] aspirations = Aspiration.values();
+            UIManager.printMessage("  {k}What does " + name + " want out of life?{/}");
+            for (int a = 0; a < aspirations.length; a++) {
+                UIManager.option(String.valueOf(a + 1), Style.fit(aspirations[a].getDisplayName(), 18),
+                        aspirations[a].getGoal());
+            }
+            while (true) {
+                UIManager.prompt("Aspiration (1-" + aspirations.length + ", ENTER for random)> ");
+                String aInput = scanner.nextLine().trim();
+                if (aInput.isEmpty()) {
+                    break; // keep the random one the Sim was born with
+                }
+                try {
+                    int pick = Integer.parseInt(aInput);
+                    if (pick >= 1 && pick <= aspirations.length) {
+                        sim.setAspiration(aspirations[pick - 1]);
+                        break;
+                    }
+                } catch (NumberFormatException e) {
+                    // fall through to the error below
+                }
+                UIManager.error("Please enter a number from 1 to " + aspirations.length + ", or press ENTER.");
+            }
             startingNeighborhood.add(sim);
             UIManager.success("{W}" + name + "{/} joins the household - age " + age + ", personality: {M}"
-                    + traitName(sim.getTraits().get(0)) + "{/} {k}(" + traitBlurb(sim.getTraits().get(0)) + "){/}");
+                    + traitName(sim.getTraits().get(0)) + "{/} {k}(" + traitBlurb(sim.getTraits().get(0)) + "){/}"
+                    + ", dreams of being a {M}" + sim.getAspiration().getDisplayName() + "{/}");
         }
 
         System.out.println();

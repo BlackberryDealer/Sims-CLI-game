@@ -16,6 +16,7 @@ import simcli.entities.managers.NPCManager;
 import simcli.entities.managers.RelationshipManager;
 import simcli.entities.models.ActionState;
 import simcli.entities.models.SocialAction;
+import simcli.entities.models.Trait;
 import simcli.utils.GameConstants;
 
 /**
@@ -63,7 +64,7 @@ public class ParkBench implements Interactable {
             NPCSim npc = visitors.get(i);
             int relScore = sim.getRelationshipManager().getRelationship(npc);
             String who = Style.fit(npc.getName(), 9) + Style.fit("{k}" + npc.getAge() + ", "
-                    + npc.getCareer().getTitle() + "{/}", 28);
+                    + npc.getCareer().getTitle() + "{/}", 27) + Style.fit(personality(npc), 10);
             UIManager.option(String.valueOf(i + 1), who + Panel.bar(relScore, 10) + "  " + bond(relScore));
         }
         UIManager.option("0", "Go back");
@@ -134,6 +135,13 @@ public class ParkBench implements Interactable {
             UIManager.error("Invalid selection.");
             throw new ActionCancelledException();
         }
+    }
+
+    /** The visitor's personality, coloured by how easy they are to win over. */
+    private static String personality(Sim npc) {
+        if (npc.hasTrait(Trait.SOCIALITE)) return "{G}socialite{/}";
+        if (npc.hasTrait(Trait.LAZY)) return "{Y}lazy{/}";
+        return "{k}active{/}";
     }
 
     /** Says why the Sim can't flirt with the target right now. */

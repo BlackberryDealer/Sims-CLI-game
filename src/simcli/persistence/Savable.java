@@ -16,7 +16,7 @@ public interface Savable {
     /**
      * Creates a Savable object from a saved string representation.
      * @param data the saved string representation of the object.
-     * @return a new Savable object (Furniture, Food, or Consumable), or null if the type is unknown.
+     * @return a new Savable object (Furniture, Food, Ingredient or Consumable), or null if the type is unknown.
      */
     static Savable fromSaveString(String data) {
         String[] parts = data.split(",");
@@ -24,7 +24,15 @@ public interface Savable {
         if (type.equals("Furniture")) {
             return new Furniture(parts[1], Integer.parseInt(parts[2]), Integer.parseInt(parts[3]));
         } else if (type.equals("Food")) {
+            // freshness was added later; food from older saves comes back fresh
+            if (parts.length > 5) {
+                return new Food(parts[1], Integer.parseInt(parts[2]), Integer.parseInt(parts[3]),
+                        Integer.parseInt(parts[4]), Integer.parseInt(parts[5]));
+            }
             return new Food(parts[1], Integer.parseInt(parts[2]), Integer.parseInt(parts[3]), Integer.parseInt(parts[4]));
+        } else if (type.equals("Ingredient")) {
+            return new Ingredient(parts[1], Integer.parseInt(parts[2]), Integer.parseInt(parts[3]), parts[4],
+                    Integer.parseInt(parts[5]), Integer.parseInt(parts[6]));
         } else if (type.equals("Consumable")) {
             return new Consumable(parts[1], Integer.parseInt(parts[2]), Integer.parseInt(parts[3]), Integer.parseInt(parts[4]), Integer.parseInt(parts[5]));
         }

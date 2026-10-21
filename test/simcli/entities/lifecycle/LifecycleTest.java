@@ -152,7 +152,8 @@ public class LifecycleTest {
         Sim teenSim = new Sim("Teenager", 15, Gender.MALE, Job.UNEMPLOYED);
         assertEquals("Teen", teenSim.getCurrentStageName(),
                 "A Sim created at age 15 should start in TeenStage");
-        assertFalse(teenSim.canWork(), "A teen should not be able to work");
+        assertTrue(teenSim.canWork(), "A teen can take a part-time job");
+        assertTrue(teenSim.getLifeStage().attendsSchool(), "Teens go to school");
     }
 
     @Test
@@ -166,7 +167,7 @@ public class LifecycleTest {
         assertEquals(13, sim.getAge(), "Age should be 13 after ageUp()");
         assertEquals("Teen", sim.getCurrentStageName(),
                 "LifeStage should have transitioned to TeenStage at age 13");
-        assertFalse(sim.canWork(), "Teens cannot work");
+        assertTrue(sim.canWork(), "Teens can work part-time");
     }
 
     @Test

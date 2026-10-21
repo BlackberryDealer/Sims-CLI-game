@@ -23,6 +23,7 @@ public class InputHandler implements IInputHandler {
     private final List<Sim> neighborhood;
     private final Consumer<Sim> setActivePlayer;
     private final SimulationLogger logger;
+    private GoalManager goalManager;
 
     /**
      * Creates a new InputHandler.
@@ -41,6 +42,16 @@ public class InputHandler implements IInputHandler {
         this.neighborhood = neighborhood;
         this.setActivePlayer = setActivePlayer;
         this.logger = logger;
+    }
+
+    /**
+     * Gives the handler the household's goals, for the goals screen ([G]).
+     * Without one, the screen tracks nothing between visits.
+     *
+     * @param goalManager the goal manager owned by the game loop.
+     */
+    public void setGoalManager(GoalManager goalManager) {
+        this.goalManager = goalManager;
     }
 
     @Override
@@ -102,6 +113,10 @@ public class InputHandler implements IInputHandler {
                     break;
                 case "L":
                     command = new SpouseInteractionCommand(ctx);
+                    break;
+                case "G":
+                    command = new GoalsCommand(ctx, goalManager != null ? goalManager
+                            : new GoalManager(worldManager, logger));
                     break;
                 default:
                     int choice = Integer.parseInt(input) - 1;

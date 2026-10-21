@@ -94,7 +94,9 @@ public class LifecycleManager {
      *
      * <p>Increments the Sim's day counter via {@link Sim#incrementDaysAlive()},
      * resets daily career counters, and checks whether the Sim has reached an
-     * age-up boundary (every {@link #daysPerAgeTick} days). On an age-up:</p>
+     * age-up boundary (every {@link #daysPerAgeTick} days, or every
+     * {@link GameConstants#CHILD_DAYS_PER_AGE_TICK} days for children, so
+     * babies reach their playable teens sooner). On an age-up:</p>
      * <ul>
      *     <li>Calls {@link Sim#ageUp()} to increment age and trigger the
      *         State Pattern transition if applicable.</li>
@@ -118,7 +120,7 @@ public class LifecycleManager {
         sim.getCareerManager().resetDaily(true);
 
         // Check if a full age-up cycle has elapsed.
-        if (sim.getDaysAlive() % daysPerAgeTick == 0) {
+        if (sim.getDaysAlive() % daysPerAgeTickFor(sim) == 0) {
             sim.ageUp();
 
             // Death by old age.
@@ -164,5 +166,29 @@ public class LifecycleManager {
      */
     public int getDaysPerAgeTick() {
         return daysPerAgeTick;
+    }
+
+    /**
+     * Returns how many days make up one year of the given Sim's life:
+     * children grow up faster than everyone else.
+     *
+     * @param sim the Sim.
+     * @return days per year of age for this Sim.
+     */
+    public int daysPerAgeTickFor(Sim sim) {
+        return daysPerAgeTickFor(sim, daysPerAgeTick);
+    }
+
+    /**
+     * Returns how many days make up one year of the given Sim's life, given
+     * the normal rate for teens and adults.
+     *
+     * @param sim        the Sim.
+     * @param normalRate days per year for teens and adults.
+     * @return days per year of age for this Sim.
+     */
+    public static int daysPerAgeTickFor(Sim sim, int normalRate) {
+        return sim.getAge() < GameConstants.TEEN_AGE
+                ? Math.min(normalRate, GameConstants.CHILD_DAYS_PER_AGE_TICK) : normalRate;
     }
 }

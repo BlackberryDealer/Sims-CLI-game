@@ -2,6 +2,8 @@ package simcli.engine;
 
 import simcli.entities.actors.Sim;
 import simcli.entities.items.Consumable;
+import simcli.entities.items.Food;
+import simcli.entities.items.Ingredient;
 import simcli.entities.items.Item;
 import simcli.entities.models.ActionState;
 import simcli.entities.models.SimState;
@@ -126,7 +128,10 @@ public class AutonomyManager {
         return sim.getState() != SimState.DEAD && sim.isPlayable();
     }
 
-    /** Eats the most filling food found in any fridge at home. */
+    /**
+     * Eats the most filling food found in any fridge at home, cooking raw
+     * ingredients first.
+     */
     private void eat(Sim sim) {
         Fridge bestFridge = null;
         Consumable bestFood = null;
@@ -134,8 +139,7 @@ public class AutonomyManager {
             for (Item item : fridge.getStoredItems()) {
                 if (item instanceof Consumable) {
                     Consumable food = (Consumable) item;
-                    if (food.getSatiationValue() > 0
-                            && (bestFood == null || food.getSatiationValue() > bestFood.getSatiationValue())) {
+                    if (fillingness(food) > 0 && (bestFood == null || fillingness(food) > fillingness(bestFood))) {
                         bestFood = food;
                         bestFridge = fridge;
                     }
@@ -149,8 +153,20 @@ public class AutonomyManager {
             return;
         }
         bestFridge.getStoredItems().remove(bestFood);
-        sim.eat(bestFood);
-        logger.log(sim.getName() + " grabs a " + bestFood.getObjectName() + " from the fridge.");
+        if (bestFood instanceof Ingredient) {
+            Food meal = ((Ingredient) bestFood).cook();
+            sim.getHappiness().increase(GameConstants.COOKING_HAPPINESS);
+            sim.eat(meal);
+            logger.log(sim.getName() + " cooks a " + meal.getObjectName() + " and eats it.");
+        } else {
+            sim.eat(bestFood);
+            logger.log(sim.getName() + " grabs a " + bestFood.getObjectName() + " from the fridge.");
+        }
+    }
+
+    /** How much hunger the food restores, counting ingredients as the meal they cook into. */
+    private static int fillingness(Consumable food) {
+        return food instanceof Ingredient ? ((Ingredient) food).getMealSatiation() : food.getSatiationValue();
     }
 
     /** Takes a shower if there is one at home. */

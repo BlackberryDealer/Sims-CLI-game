@@ -192,7 +192,8 @@ public class IntegrationTest {
 
         assertEquals(CommandResult.NO_TICK, result);
         assertEquals(Job.UNEMPLOYED, teen.getCareer(), "Teen should remain unemployed.");
-        assertTrue(outputStreamCaptor.toString().contains("Children and Teens cannot access the professional job market."), 
+        // teens can open the job market now (for part-time work), but adult careers stay age-gated
+        assertTrue(outputStreamCaptor.toString().contains("Sorry, you are too young for this position."),
             "Should reject due to Age Boundary.");
     }
 

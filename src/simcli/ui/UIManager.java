@@ -21,11 +21,16 @@ public class UIManager {
             "Visit the Park to meet new people - you might find love!",
             "Sleeping restores energy, but you'll wake up hungry.",
             "Keep an eye on the plumbob: green is happy, red means trouble.",
-            "Store food in the Fridge so it's there when you need it.",
+            "Food keeps twice as long in the Fridge as in your bag.",
+            "Cook raw groceries at the Fridge - a meal fills you up far more.",
+            "Bills for every home you own are due each Monday.",
+            "Press G to see each Sim's aspiration and your achievements.",
+            "The park crowd changes daily - friends you've made come back.",
             "The office is closed on weekends - plan some fun instead.",
             "Missing too many weekdays of work will get you fired.",
             "Press K to switch between the Sims in your household.",
-            "Babies can't feed themselves - use [L] to feed them.",
+            "Babies can't feed themselves - use [L], or let an idle Sim do it.",
+            "Teens go to school on weekdays and can take part-time jobs.",
             "Save the money for the Bungalow: it's a lovely upgrade.",
     };
 

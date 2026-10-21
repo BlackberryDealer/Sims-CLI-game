@@ -6,14 +6,14 @@ import simcli.entities.actors.Sim;
 import simcli.ui.Panel;
 import simcli.ui.Style;
 import simcli.ui.UIManager;
+import simcli.utils.GameConstants;
 
 /**
  * Command that opens the job market menu for the active Sim.
  *
  * <p>Displays all available jobs with salary, hours and age-range
  * information. The player can switch careers or quit their job (become
- * unemployed). Children and teens cannot access the professional job
- * market.</p>
+ * unemployed). Children cannot work; teens can take part-time jobs.</p>
  */
 public class JobMarketCommand extends BaseCommand {
 
@@ -36,7 +36,8 @@ public class JobMarketCommand extends BaseCommand {
         Sim activePlayer = ctx.getActivePlayer();
 
         if (!activePlayer.canWork()) {
-            UIManager.info("Children and Teens cannot access the professional job market.");
+            UIManager.info("Children can't work yet. {k}At " + GameConstants.TEEN_AGE
+                    + " they can take a part-time job.{/}");
             pause();
             return CommandResult.NO_TICK;
         }
@@ -55,6 +56,9 @@ public class JobMarketCommand extends BaseCommand {
                     + Style.fit(j.getWorkingHours() + "h", 8)
                     + Style.fit(j.getMinAge() + "-" + j.getMaxAge(), 8)
                     + Style.fit(j.getPrimarySkill().getDisplayName(), 10);
+            if (j.isPartTime()) {
+                row += "{k}part-time{/} ";
+            }
             if (j == activePlayer.getCareer()) {
                 row += "{C}" + Panel.ARROW + " your job{/}";
             } else if (activePlayer.getAge() < j.getMinAge() || activePlayer.getAge() > j.getMaxAge()) {

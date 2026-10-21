@@ -197,7 +197,8 @@ public class TerminalRenderer implements IRenderer {
         List<String> me = new ArrayList<>(List.of(
                 Panel.option("I", "Status"),
                 Panel.option("V", "Inventory"),
-                Panel.option("K", "Switch Sim")));
+                Panel.option("K", "Switch Sim"),
+                Panel.option("G", "Goals")));
         if (activePlayer.getRelationshipManager().getSpouse() != null) {
             me.add(Panel.option("L", "Family"));
         }

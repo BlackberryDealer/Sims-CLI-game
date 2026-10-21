@@ -171,14 +171,17 @@ public class GameEngine {
         this.worldManager = new WorldManager(this.npcManager, this.neighborhood);
         this.worldManager.setupWorld();
 
-        // Input
-        this.inputHandler = new InputHandler(this.worldManager, this.timeManager,
-                this.neighborhood, this::setActivePlayer, this.logger);
-
         // Simulation subsystems (created by GameLoop to respect ownership)
-        this.gameLoop = new GameLoop(this.timeManager, this.neighborhood, this.logger, this.worldManager);
+        this.gameLoop = new GameLoop(this.timeManager, this.neighborhood, this.logger, this.worldManager,
+                this.npcManager);
         this.randomEventManager = this.gameLoop.getRandomEventManager();
         this.lifecycleManager = this.gameLoop.getLifecycleManager();
+
+        // Input
+        InputHandler handler = new InputHandler(this.worldManager, this.timeManager,
+                this.neighborhood, this::setActivePlayer, this.logger);
+        handler.setGoalManager(this.gameLoop.getGoalManager());
+        this.inputHandler = handler;
     }
 
     // -------------------------------------------------------------------------
@@ -208,6 +211,16 @@ public class GameEngine {
     /** Returns the lifecycle manager handling aging and death. */
     public LifecycleManager getLifecycleManager() {
         return lifecycleManager;
+    }
+
+    /** Returns the goal manager tracking aspirations and achievements. */
+    public GoalManager getGoalManager() {
+        return gameLoop.getGoalManager();
+    }
+
+    /** Returns the upkeep manager handling bills and food spoilage. */
+    public UpkeepManager getUpkeepManager() {
+        return gameLoop.getUpkeepManager();
     }
 
     // -------------------------------------------------------------------------

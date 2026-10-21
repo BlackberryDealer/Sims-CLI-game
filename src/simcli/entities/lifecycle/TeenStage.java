@@ -3,8 +3,9 @@ package simcli.entities.lifecycle;
 import simcli.utils.GameConstants;
 
 /**
- * Life stage for Sims aged 13–17. Teens cannot work and have
- * slightly elevated energy decay ({@code 1.2x}). Transitions to
+ * Life stage for Sims aged 13–17. Teens go to school on weekdays, can
+ * take part-time jobs (adult careers are age-gated), and have slightly
+ * elevated energy decay ({@code 1.2x}). Transitions to
  * {@link AdultStage} at age {@value simcli.utils.GameConstants#ADULT_AGE}.
  */
 public class TeenStage implements LifeStage {
@@ -12,11 +13,21 @@ public class TeenStage implements LifeStage {
     /**
      * {@inheritDoc}
      *
-     * @return {@code false} — teens cannot work.
+     * @return {@code true} — teens can take part-time jobs.
      */
     @Override
     public boolean canWork() {
-        return false;
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return {@code true} — teens go to school on weekdays.
+     */
+    @Override
+    public boolean attendsSchool() {
+        return true;
     }
 
     /**

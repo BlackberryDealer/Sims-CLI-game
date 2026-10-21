@@ -29,7 +29,19 @@ public enum Job {
 
     /** Physical career with high energy drain but good pay. */
     PERSONAL_TRAINER("Personal Trainer", 90, 3, 60, GameConstants.ADULT_AGE, 40, 1.3, 3,
-            SkillType.FITNESS);
+            SkillType.FITNESS),
+
+    /** Part-time job open to teens: friendly customers train charisma. */
+    BARISTA("Barista", 45, 3, 15, GameConstants.TEEN_AGE, 75, 1.1, 3,
+            SkillType.CHARISMA),
+
+    /** Part-time job open to teens: an active job that trains fitness. */
+    LIFEGUARD("Lifeguard", 50, 3, 30, GameConstants.TEEN_AGE, 45, 1.1, 3,
+            SkillType.FITNESS),
+
+    /** Part-time job open to teens: a quiet job that trains logic. */
+    LIBRARY_ASSISTANT("Library Assistant", 40, 3, 10, GameConstants.TEEN_AGE, 80, 1.1, 3,
+            SkillType.LOGIC);
 
     /** The human-readable job title. */
     private final String title;
@@ -183,6 +195,15 @@ public enum Job {
      */
     public SkillType getPrimarySkill() {
         return primarySkill;
+    }
+
+    /**
+     * Returns whether this is a part-time job that teens can take.
+     *
+     * @return {@code true} if the job's minimum age is below adulthood.
+     */
+    public boolean isPartTime() {
+        return this != UNEMPLOYED && minAge < GameConstants.ADULT_AGE;
     }
 
     /**

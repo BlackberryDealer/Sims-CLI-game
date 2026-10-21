@@ -125,6 +125,60 @@ public final class GameConstants {
     /** Hunger restored when a baby is fed. */
     public static final int BABY_FEED_AMOUNT = 50;
 
+    // --- Food & Bills ---
+    /** Days shop food stays fresh in a fridge (it goes off twice as fast elsewhere). */
+    public static final int FOOD_SHELF_LIFE_DAYS = 5;
+    /** Days raw ingredients stay fresh in a fridge. */
+    public static final int INGREDIENT_SHELF_LIFE_DAYS = 6;
+    /** Days a cooked meal stays fresh in a fridge. */
+    public static final int MEAL_SHELF_LIFE_DAYS = 3;
+    /** Freshness lost per day by food stored in a fridge. */
+    public static final int FRIDGE_SPOIL_RATE = 1;
+    /** Freshness lost per day by food kept anywhere else. */
+    public static final int UNREFRIGERATED_SPOIL_RATE = 2;
+    /** Happiness the cook gains from making a meal. */
+    public static final int COOKING_HAPPINESS = 10;
+    /** Weekly bills for the free starter home. */
+    public static final int DORM_WEEKLY_BILL = 100;
+    /** Weekly bills for the Bungalow. */
+    public static final int BUNGALOW_WEEKLY_BILL = 250;
+    /** Happiness every household Sim loses when the bills can't be paid. */
+    public static final int UNPAID_BILLS_HAPPINESS_PENALTY = 20;
+
+    // --- Children ---
+    /** Days per year of age for children (under {@link #TEEN_AGE}). */
+    public static final int CHILD_DAYS_PER_AGE_TICK = 1;
+    /** Logic experience a teen gains from a day at school. */
+    public static final int SCHOOL_LOGIC_XP = 8;
+
+    // --- Park ---
+    /** Visitors who leave the park each morning, to be replaced. */
+    public static final int DAILY_VISITORS_LEAVING = 3;
+    /** Percentage chance (0-100) that a replacement visitor is someone the town already knows. */
+    public static final int RETURNING_VISITOR_CHANCE = 50;
+    /** Townsfolk move away once they reach this age. */
+    public static final int NPC_MOVE_AWAY_AGE = 80;
+    /** Extra success chance (percentage points) when joking or flirting with a Socialite. */
+    public static final int SOCIALITE_TARGET_BONUS = 15;
+    /** Lost success chance (percentage points) when joking or flirting with a Lazy Sim. */
+    public static final int LAZY_TARGET_PENALTY = 10;
+
+    // --- Household Events ---
+    /** Percentage chance (0-100) per turn of a household-wide event. */
+    public static final int HOUSEHOLD_EVENT_CHANCE = 4;
+
+    // --- Goals ---
+    /** Money awarded for fulfilling a life aspiration. */
+    public static final int ASPIRATION_REWARD_MONEY = 1000;
+    /** Children needed for the Family aspiration. */
+    public static final int FAMILY_ASPIRATION_CHILDREN = 3;
+    /** Friends (relationship 50+) needed for the Social Butterfly aspiration. */
+    public static final int SOCIAL_ASPIRATION_FRIENDS = 5;
+    /** Relationship score that counts as a friend for goals. */
+    public static final int FRIEND_THRESHOLD = 50;
+    /** Household savings that count as a fortune. */
+    public static final int FORTUNE_AMOUNT = 10000;
+
     // --- Needs Tracker ---
     /** The number of ticks a Sim can survive at zero hunger before dying. */
     public static final int STARVING_DEATH_THRESHOLD = 3;

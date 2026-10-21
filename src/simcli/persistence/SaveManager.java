@@ -1,7 +1,10 @@
 package simcli.persistence;
 
 import simcli.engine.GameEngine;
+import simcli.engine.GoalManager;
 import simcli.entities.items.Item;
+import simcli.entities.models.Achievement;
+import simcli.entities.models.Aspiration;
 import simcli.entities.models.Job;
 import simcli.entities.models.SkillType;
 import simcli.entities.models.Trait;
@@ -155,6 +158,10 @@ public class SaveManager {
         for (int j = 0; j < npcs.size(); j++) {
             ids.putIfAbsent(npcs.get(j), "N" + j);
         }
+        List<NPCSim> townsfolk = engine.getNpcManager().getTownsfolk();
+        for (int k = 0; k < townsfolk.size(); k++) {
+            ids.putIfAbsent(townsfolk.get(k), "T" + k);
+        }
 
         writer.println("VERSION:" + SAVE_VERSION);
         writer.println("WORLD:" + encode(engine.getWorldName()));
@@ -164,6 +171,12 @@ public class SaveManager {
         if (engine.isGameOver()) {
             writer.println("STATS_MONEY:" + engine.getSessionTotalMoney());
             writer.println("STATS_ITEMS:" + engine.getSessionTotalItems());
+        }
+
+        GoalManager goals = engine.getGoalManager();
+        writer.println("LEGACY:" + goals.isLegacyComplete());
+        for (Achievement achievement : goals.getUnlocked()) {
+            writer.println("Achievement:" + achievement.name());
         }
 
         // Building states: ownership, room capacities, furniture, container contents
@@ -228,21 +241,22 @@ public class SaveManager {
                     writer.println("Skill:" + ids.get(sim) + "," + skill.name() + "," + xp);
                 }
             }
+            writer.println("Aspiration:" + ids.get(sim) + "," + sim.getAspiration().name() + ","
+                    + sim.isAspirationFulfilled());
         }
 
-        // Park NPCs
+        // Park NPCs (today's visitors), then townsfolk who aren't at the park today
         for (NPCSim npc : npcs) {
-            writer.println("NPC:" + encode(npc.getName()) + "," + npc.getAge() + ","
-                    + npc.getGender().name() + "," + npc.getCareer().name() + ","
-                    + npc.getHunger().getValue() + "," + npc.getEnergy().getValue() + ","
-                    + npc.getHappiness().getValue() + "," + npc.getHygiene().getValue() + ","
-                    + npc.getSocial().getValue() + "," + npc.getHealth() + "," + npc.getStarvingTicks() + ","
-                    + npc.getDaysAlive() + "," + encodeTraits(npc));
+            writer.println("NPC:" + npcFields(npc));
+        }
+        for (NPCSim npc : townsfolk) {
+            writer.println("Townsperson:" + npcFields(npc));
         }
 
         // Relationships, spouses and children — by id, never by name
         List<Sim> allTrackedSims = new ArrayList<>(household);
         allTrackedSims.addAll(npcs);
+        allTrackedSims.addAll(townsfolk);
 
         for (Sim sim : allTrackedSims) {
             for (Map.Entry<Sim, Integer> entry : sim.getRelationshipManager().getRelationships().entrySet()) {
@@ -264,6 +278,16 @@ public class SaveManager {
                 }
             }
         }
+    }
+
+    /** The comma-separated fields of an {@code NPC:} or {@code Townsperson:} line. */
+    private static String npcFields(NPCSim npc) {
+        return encode(npc.getName()) + "," + npc.getAge() + ","
+                + npc.getGender().name() + "," + npc.getCareer().name() + ","
+                + npc.getHunger().getValue() + "," + npc.getEnergy().getValue() + ","
+                + npc.getHappiness().getValue() + "," + npc.getHygiene().getValue() + ","
+                + npc.getSocial().getValue() + "," + npc.getHealth() + "," + npc.getStarvingTicks() + ","
+                + npc.getDaysAlive() + "," + encodeTraits(npc);
     }
 
     // -------------------------------------------------------------------------
@@ -304,6 +328,10 @@ public class SaveManager {
             List<String[]> childLines = new ArrayList<>();
             List<String> inventoryLines = new ArrayList<>();
             List<String[]> skillLines = new ArrayList<>();
+            List<String[]> aspirationLines = new ArrayList<>();
+            List<String> achievementLines = new ArrayList<>();
+            List<String[]> townsfolkLines = new ArrayList<>();
+            boolean legacyComplete = false;
 
             while ((line = reader.readLine()) != null) {
                 if (line.startsWith("VERSION:")) {
@@ -343,6 +371,14 @@ public class SaveManager {
                     inventoryLines.add(line.substring(10));
                 } else if (line.startsWith("Skill:")) {
                     skillLines.add(line.substring(6).split(","));
+                } else if (line.startsWith("Aspiration:")) {
+                    aspirationLines.add(line.substring(11).split(","));
+                } else if (line.startsWith("Achievement:")) {
+                    achievementLines.add(line.substring(12));
+                } else if (line.startsWith("LEGACY:")) {
+                    legacyComplete = Boolean.parseBoolean(line.substring(7));
+                } else if (line.startsWith("Townsperson:")) {
+                    townsfolkLines.add(line.substring(12).split(",", -1));
                 } else if (line.startsWith("NPC:")) {
                     npcLines.add(line.substring(4).split(",", -1));
                 } else if (line.startsWith("Sim:")) {
@@ -377,9 +413,24 @@ public class SaveManager {
                 loadedNPCs.add(parseNPC(data, encoded));
             }
 
+            List<NPCSim> loadedTownsfolk = new ArrayList<>();
+            for (String[] data : townsfolkLines) {
+                loadedTownsfolk.add(parseNPC(data, encoded));
+            }
+
             List<Sim> allSims = new ArrayList<>(loadedNeighborhood);
             allSims.addAll(loadedNPCs);
-            SimResolver resolver = new SimResolver(encoded, loadedNeighborhood, loadedNPCs, allSims);
+            allSims.addAll(loadedTownsfolk);
+            SimResolver resolver = new SimResolver(encoded, loadedNeighborhood, loadedNPCs, loadedTownsfolk, allSims);
+
+            // Load Aspirations (saves from before aspirations keep the random one each Sim was given)
+            for (String[] aspData : aspirationLines) {
+                Sim owner = resolver.resolve(aspData[0]);
+                if (owner != null) {
+                    owner.setAspiration(Aspiration.valueOf(aspData[1]));
+                    owner.setAspirationFulfilled(Boolean.parseBoolean(aspData[2]));
+                }
+            }
 
             // Load Inventory
             for (String invLine : inventoryLines) {
@@ -458,7 +509,16 @@ public class SaveManager {
             for (NPCSim npc : loadedNPCs) {
                 engine.getNpcManager().addNPC(npc);
             }
+            for (NPCSim npc : loadedTownsfolk) {
+                engine.getNpcManager().addTownsperson(npc);
+            }
             engine.getNpcManager().replenishNPCs(GameConstants.MAX_NPCS);
+
+            GoalManager goals = engine.getGoalManager();
+            goals.setLegacyComplete(legacyComplete);
+            for (String name : achievementLines) {
+                goals.restoreUnlocked(Achievement.valueOf(name));
+            }
 
             // Post-Load injection: ownership and upgraded room capacities
             List<Building> map = engine.getWorldManager().getCityMap();
@@ -627,18 +687,21 @@ public class SaveManager {
 
     /**
      * Turns a reference from the save file back into a Sim: positional ids
-     * ({@code H0}, {@code N3}) in version 2+, plain names in version 1.
+     * ({@code H0} household, {@code N3} park visitor, {@code T2} townsperson)
+     * in version 2+, plain names in version 1.
      */
     private static final class SimResolver {
         private final boolean byId;
         private final List<Sim> household;
         private final List<NPCSim> npcs;
+        private final List<NPCSim> townsfolk;
         private final List<Sim> all;
 
-        SimResolver(boolean byId, List<Sim> household, List<NPCSim> npcs, List<Sim> all) {
+        SimResolver(boolean byId, List<Sim> household, List<NPCSim> npcs, List<NPCSim> townsfolk, List<Sim> all) {
             this.byId = byId;
             this.household = household;
             this.npcs = npcs;
+            this.townsfolk = townsfolk;
             this.all = all;
         }
 
@@ -650,6 +713,7 @@ public class SaveManager {
             switch (ref.charAt(0)) {
                 case 'H': return household.get(index);
                 case 'N': return npcs.get(index);
+                case 'T': return townsfolk.get(index);
                 default: throw new IllegalArgumentException("bad Sim reference: " + ref);
             }
         }

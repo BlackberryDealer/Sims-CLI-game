@@ -56,6 +56,10 @@ public class Sim implements ISimBehaviour {
 
     private RelationshipManager relationshipManager;
 
+    // Life goal
+    private Aspiration aspiration;
+    private boolean aspirationFulfilled;
+
     // World Stats trackers
     private int totalMoneyEarned;
     private int totalItemsBought;
@@ -86,6 +90,9 @@ public class Sim implements ISimBehaviour {
         this.traits.add(allTraits[GameRandom.RANDOM.nextInt(allTraits.length)]);
 
         this.relationshipManager = new RelationshipManager(this);
+        Aspiration[] allAspirations = Aspiration.values();
+        this.aspiration = allAspirations[GameRandom.RANDOM.nextInt(allAspirations.length)];
+        this.aspirationFulfilled = false;
         this.totalMoneyEarned = money;
         this.totalItemsBought = 0;
 
@@ -188,6 +195,44 @@ public class Sim implements ISimBehaviour {
      */
     public boolean hasTrait(Trait t) {
         return traits.contains(t);
+    }
+
+    /**
+     * Returns this Sim's life aspiration (randomly chosen at creation unless
+     * the player picks one).
+     *
+     * @return the Sim's {@link Aspiration}.
+     */
+    public Aspiration getAspiration() {
+        return aspiration;
+    }
+
+    /**
+     * Sets this Sim's life aspiration and marks it as not yet fulfilled.
+     *
+     * @param aspiration the new aspiration.
+     */
+    public void setAspiration(Aspiration aspiration) {
+        this.aspiration = aspiration;
+        this.aspirationFulfilled = false;
+    }
+
+    /**
+     * Returns whether this Sim has fulfilled their aspiration.
+     *
+     * @return {@code true} once fulfilled.
+     */
+    public boolean isAspirationFulfilled() {
+        return aspirationFulfilled;
+    }
+
+    /**
+     * Marks this Sim's aspiration as fulfilled (or not, when loading a save).
+     *
+     * @param fulfilled whether the aspiration is fulfilled.
+     */
+    public void setAspirationFulfilled(boolean fulfilled) {
+        this.aspirationFulfilled = fulfilled;
     }
 
     // -------------------------------------------------------------------------
@@ -711,7 +756,24 @@ public class Sim implements ISimBehaviour {
      * transition if the current stage's threshold is reached (State Pattern).
      */
     public void ageUp() {
+        ageUp(true);
+    }
+
+    /**
+     * Increments this Sim's age by one year and triggers a life-stage
+     * transition if needed, optionally without announcing it (used for
+     * townsfolk, whose birthdays the player doesn't need to hear about).
+     *
+     * @param announce {@code true} to log the birthday or stage change.
+     */
+    public void ageUp(boolean announce) {
         this.age++;
+        if (!announce) {
+            if (this.currentStage != null) {
+                this.currentStage = this.currentStage.getNextStage(this.age);
+            }
+            return;
+        }
         if (this.currentStage == null) {
             SimulationLogger.getInstance()
                     .log("[" + this.name + "] Birthday! Age: " + this.age + " (no life stage assigned yet).");

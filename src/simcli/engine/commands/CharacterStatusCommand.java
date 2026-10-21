@@ -1,6 +1,7 @@
 package simcli.engine.commands;
 
 import simcli.engine.CommandResult;
+import simcli.engine.LifecycleManager;
 import simcli.entities.actors.Sim;
 import simcli.entities.managers.SkillManager;
 import simcli.entities.models.Job;
@@ -44,7 +45,8 @@ public class CharacterStatusCommand extends BaseCommand {
         Building currentLocation = ctx.getCurrentLocation();
         List<String> lines = new ArrayList<>();
 
-        int daysToBirthday = GameConstants.DAYS_PER_AGE_TICK - (sim.getDaysAlive() % GameConstants.DAYS_PER_AGE_TICK);
+        int yearLength = LifecycleManager.daysPerAgeTickFor(sim, GameConstants.DAYS_PER_AGE_TICK);
+        int daysToBirthday = yearLength - (sim.getDaysAlive() % yearLength);
         lines.add("{k}Age{/}        " + sim.getAge() + " " + Panel.DOT + " " + sim.getCurrentStageName()
                 + "  {k}(next birthday in " + daysToBirthday + (daysToBirthday == 1 ? " day)" : " days)") + "{/}");
         lines.add("{k}Traits{/}     " + traits(sim));

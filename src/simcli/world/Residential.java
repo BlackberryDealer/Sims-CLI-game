@@ -15,6 +15,7 @@ public class Residential extends Building {
     private List<Room> rooms;
     private int purchasePrice;
     private boolean isOwned;
+    private int weeklyBill;
 
     public Residential(String name) {
         super(name);
@@ -48,6 +49,15 @@ public class Residential extends Building {
 
     public void setOwned(boolean owned) {
         this.isOwned = owned;
+    }
+
+    // rent and utilities, charged every Monday while the household owns the home
+    public int getWeeklyBill() {
+        return weeklyBill;
+    }
+
+    public void setWeeklyBill(int weeklyBill) {
+        this.weeklyBill = weeklyBill;
     }
 
     public boolean purchase(Sim sim) {

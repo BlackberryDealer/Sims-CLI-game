@@ -1,8 +1,10 @@
 package simcli.engine;
 
 import simcli.entities.actors.Sim;
+import simcli.entities.managers.NPCManager;
 import simcli.entities.models.ActionState;
 import simcli.entities.models.SimState;
+import simcli.entities.models.SkillType;
 import simcli.utils.GameConstants;
 
 import java.util.List;
@@ -16,20 +18,26 @@ import java.util.List;
  * {@link LifecycleManager}.</p>
  *
  * <h2>Ownership</h2>
- * <p>This class owns the creation of {@link RandomEventManager} and
- * {@link LifecycleManager}, keeping subsystem factories close to their
+ * <p>This class owns the creation of {@link RandomEventManager},
+ * {@link LifecycleManager}, {@link AutonomyManager}, {@link UpkeepManager}
+ * and {@link GoalManager}, keeping subsystem factories close to their
  * consumers and reducing the construction burden on {@link GameEngine}.</p>
  */
 public class GameLoop {
     private final TimeManager timeManager;
     private final List<Sim> neighborhood;
+    private final IWorldManager worldManager;
+    private final NPCManager npcManager;
+    private final SimulationLogger logger;
     private final RandomEventManager eventManager;
     private final LifecycleManager lifecycleManager;
     private final AutonomyManager autonomyManager;
+    private final UpkeepManager upkeepManager;
+    private final GoalManager goalManager;
 
     /**
      * Creates a new GameLoop with no world: idle Sims still sleep on their
-     * own, but have no fridge or shower to use.
+     * own, but have no fridge or shower to use, and there are no bills.
      *
      * @param timeManager  tracks tick/day/time-of-day progression.
      * @param neighborhood every Sim in the current game world.
@@ -37,12 +45,11 @@ public class GameLoop {
      */
     public GameLoop(TimeManager timeManager, List<Sim> neighborhood,
                     SimulationLogger logger) {
-        this(timeManager, neighborhood, logger, null);
+        this(timeManager, neighborhood, logger, null, null);
     }
 
     /**
-     * Creates a new GameLoop, instantiating its own event, lifecycle and
-     * autonomy managers.
+     * Creates a new GameLoop with a world but no park NPCs to manage.
      *
      * @param timeManager  tracks tick/day/time-of-day progression.
      * @param neighborhood every Sim in the current game world.
@@ -52,12 +59,34 @@ public class GameLoop {
      */
     public GameLoop(TimeManager timeManager, List<Sim> neighborhood,
                     SimulationLogger logger, IWorldManager worldManager) {
+        this(timeManager, neighborhood, logger, worldManager, null);
+    }
+
+    /**
+     * Creates a new GameLoop, instantiating its own event, lifecycle,
+     * autonomy, upkeep and goal managers.
+     *
+     * @param timeManager  tracks tick/day/time-of-day progression.
+     * @param neighborhood every Sim in the current game world.
+     * @param logger       the simulation logger for event and lifecycle messages.
+     * @param worldManager the city, where idle Sims find food and showers and
+     *                     whose homes cost bills (may be {@code null}).
+     * @param npcManager   the townsfolk, who rotate through the park each day
+     *                     (may be {@code null}).
+     */
+    public GameLoop(TimeManager timeManager, List<Sim> neighborhood,
+                    SimulationLogger logger, IWorldManager worldManager, NPCManager npcManager) {
         this.timeManager = timeManager;
         this.neighborhood = neighborhood;
+        this.worldManager = worldManager;
+        this.npcManager = npcManager;
+        this.logger = logger;
         this.eventManager = new RandomEventManager(logger);
         this.lifecycleManager = new LifecycleManager(
                 GameConstants.DAYS_PER_AGE_TICK, logger);
         this.autonomyManager = new AutonomyManager(worldManager, logger);
+        this.upkeepManager = new UpkeepManager(worldManager, logger);
+        this.goalManager = new GoalManager(worldManager, logger);
     }
 
     /**
@@ -73,7 +102,9 @@ public class GameLoop {
      *     <li>If a new day has started, delegates to
      *         {@link #processDayBoundary(int)}.</li>
      * </ol>
-     * <p>A random event is rolled once per turn, after the clock has moved.</p>
+     * <p>Once per turn, after the clock has moved, a random event is rolled
+     * for the active Sim, another for the whole household, and the
+     * household's goals are checked.</p>
      *
      * <p>Sims other than the active player are reset to
      * {@link ActionState#IDLE} first (unless asleep), so an action they
@@ -105,15 +136,19 @@ public class GameLoop {
         }
 
         eventManager.trigger(activePlayer, timeManager);
+        eventManager.triggerHouseholdEvent(neighborhood, timeManager, worldManager);
+        goalManager.check(neighborhood);
     }
 
     /**
      * Processes a day boundary.
      *
-     * <p>Prints a new-day message, runs truancy checks for the day that just
-     * ended, then delegates lifecycle processing (aging, death, retirement)
-     * to the {@link LifecycleManager}. Truancy must run first because the
-     * lifecycle step resets each Sim's shifts-worked-today counter.</p>
+     * <p>Prints a new-day message, runs truancy checks and school for the
+     * day that just ended, then delegates lifecycle processing (aging,
+     * death, retirement) to the {@link LifecycleManager}. Truancy must run
+     * first because the lifecycle step resets each Sim's shifts-worked-today
+     * counter. Finally, food ages and bills are charged
+     * ({@link UpkeepManager}) and the park's visitors change.</p>
      *
      * @param dayNumber the day that has just begun.
      */
@@ -128,9 +163,27 @@ public class GameLoop {
                 s.getCareerManager().checkTruancy(s.getName(), endedDayWasWorkday);
             }
         }
+        if (endedDayWasWorkday) {
+            attendSchool();
+        }
 
         // Delegate aging/death/retirement to LifecycleManager (SRP).
         lifecycleManager.processDayForAll(neighborhood);
+
+        upkeepManager.processDay(dayNumber, neighborhood);
+        if (npcManager != null) {
+            npcManager.startNewDay(dayNumber, logger);
+        }
+    }
+
+    /** School-age Sims spent the weekday at school, which trains their Logic. */
+    private void attendSchool() {
+        for (Sim s : neighborhood) {
+            if (s.getState() != SimState.DEAD && s.getLifeStage() != null && s.getLifeStage().attendsSchool()) {
+                s.trainSkill(SkillType.LOGIC, GameConstants.SCHOOL_LOGIC_XP);
+                logger.log(s.getName() + " went to school. (+Logic)");
+            }
+        }
     }
 
     /** Returns the event manager owned by this loop. */
@@ -141,5 +194,15 @@ public class GameLoop {
     /** Returns the lifecycle manager owned by this loop. */
     public LifecycleManager getLifecycleManager() {
         return lifecycleManager;
+    }
+
+    /** Returns the upkeep (bills and spoilage) manager owned by this loop. */
+    public UpkeepManager getUpkeepManager() {
+        return upkeepManager;
+    }
+
+    /** Returns the goal (aspirations and achievements) manager owned by this loop. */
+    public GoalManager getGoalManager() {
+        return goalManager;
     }
 }

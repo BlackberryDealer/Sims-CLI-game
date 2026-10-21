@@ -1,6 +1,7 @@
 package simcli.engine;
 
 import simcli.entities.managers.NPCManager;
+import simcli.utils.GameConstants;
 import simcli.world.Building;
 import simcli.world.Commercial;
 import simcli.world.Park;
@@ -54,6 +55,7 @@ public class WorldManager implements IWorldManager {
 
         // Build Home
         Residential home = new Residential("The Shared Dorm");
+        home.setWeeklyBill(GameConstants.DORM_WEEKLY_BILL);
 
         Room mainRoom = new Room("Bedroom", 100);
         mainRoom.placeFurniture(new Bed(), 30);
@@ -75,6 +77,7 @@ public class WorldManager implements IWorldManager {
 
         // Build the Bungalow — purchasable for $5000 (proposal Slide 7)
         Residential bungalow = new Residential("The Bungalow", 5000);
+        bungalow.setWeeklyBill(GameConstants.BUNGALOW_WEEKLY_BILL);
 
         Room livingRoom = new Room("Living Room", 120);
         livingRoom.placeFurniture(new Bed(), 30);

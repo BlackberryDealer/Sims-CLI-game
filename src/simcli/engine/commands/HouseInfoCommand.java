@@ -51,6 +51,15 @@ public class HouseInfoCommand extends BaseCommand {
                 lines.add(Style.fit("{W}" + r.getName() + "{/}", 18) + space
                         + Style.fit("  " + used + "/" + max + " space", 16) + contents(r));
             }
+            int bills = 0;
+            for (Building b : ctx.getWorldManager().getCityMap()) {
+                if (b instanceof Residential && ((Residential) b).isOwned()) {
+                    bills += ((Residential) b).getWeeklyBill();
+                }
+            }
+            lines.add("");
+            lines.add("{k}Bills{/}  {Y}$" + bills + "{/} {k}every Monday for all the homes you own"
+                    + " (this one: $" + res.getWeeklyBill() + "){/}");
             System.out.println(Panel.box("{W}" + res.getName() + "{/}", 'm', lines));
             UIManager.printMessage("  {k}Tip: upgrade a room with [U] to fit more furniture.{/}");
         } else {

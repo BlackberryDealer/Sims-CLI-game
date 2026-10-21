@@ -46,8 +46,16 @@ The project emphasises clean OOP architecture, making heavy use of established d
 - Promotion past tier 2 needs skill: tier 3 needs level 2, tier 4 needs level 4, tier 5 needs level 6
 - See every skill's level and progress on the status screen (`I`)
 
+### 🎯 Goals
+- Every Sim has a **life aspiration**: Career Star (top tier of a career), Big Family (3 children), Homeowner (buy the Bungalow), Master of One (a skill at level 10) or Social Butterfly (5 friends at 50+). You pick it when creating a Sim; babies and spouses get a random one
+- Fulfilling an aspiration pays **$1,000** and a big mood boost
+- **Legacy complete**: once every playable Sim in the household has fulfilled their aspiration, you've won. You can keep playing afterwards
+- **12 achievements** for household milestones (first job, wedding, first baby, Bungalow, $10,000 saved, ...)
+- Press `G` to see everyone's progress and the achievements list
+
 ### 💼 Career System
 - **4 careers**: Software Engineer, Hardware Technician, Freelance Photographer, Personal Trainer
+- **3 part-time jobs open to teens**: Barista, Lifeguard, Library Assistant
 - Each job has unique salary, energy drain, working hours, age limits, and up to **5 promotion tiers**
 - Each career rewards one **skill**: promotion chance starts at 25% per shift and rises with that skill (up to 75%), and pay scales with both tier and skill
 - Overwork penalties and forced retirement when a Sim exceeds the job's maximum age
@@ -57,7 +65,7 @@ The project emphasises clean OOP architecture, making heavy use of established d
 |---|---|---|
 | The Shared Dorm | Residential (free) | Bed, Fridge, Shower, Weight Bench |
 | The Bungalow | Residential ($5,000) | Bed, Fridge, Shower, Computer |
-| Town Supermarket | Commercial | Grocery Shelf (buy food) |
+| Town Supermarket | Commercial | Grocery Shelf (ready food, raw ingredients, furniture) |
 | The Bookshop | Commercial | Bookshop Shelf (buy books) |
 | City Park | Park | Park Bench (socialize with NPCs) |
 
@@ -65,16 +73,21 @@ The project emphasises clean OOP architecture, making heavy use of established d
 - **Room upgrades** — expand storage capacity for $500
 - **Property purchasing** — buy the Bungalow to upgrade your living situation
 
+### 💸 Money & Food
+- **Weekly bills** every Monday for each home you own: $100 for the Dorm, $250 for the Bungalow. The richest Sim pays first. If the household can't cover the bill, everyone loses happiness. `H` shows what's due
+- **Cooking**: raw Groceries ($15) and Raw Steak ($35) barely fill you up raw, but cooked at a fridge (`C`) they make a Home-cooked Meal (+55 hunger) or a Steak Dinner (+80). Ready food like Microwave Dinners costs more for less
+- **Spoilage**: food stays fresh for a few days and loses 1 day of freshness per day in a fridge, 2 per day in a bag or chest. Food that runs out of freshness is thrown away
+
 ### 💕 Relationships & Family
 - **Social actions**: Chat (always safe), Joke (60% to land), Flirt (adults who know each other, 40%+ to land, best relationship boost) and Argue. The menu shows each action's odds. Charisma raises them, and a flop costs a little relationship and happiness
 - **Relationship progression**: Stranger → Acquaintance → Friend → Romantic → Married
 - **Marriage** at 100 relationship score; the Family menu (`L`) lets you go on dates, try for a baby, feed the babies and **give gifts** from your bag (pricier gifts build more relationship)
-- **Children**: 50% conception chance, born as non-playable infants who age into teens and become playable members of the household
-- **NPC pool** of up to 8 park visitors to socialize and build relationships with
+- **Children**: 50% conception chance, born as non-playable infants who grow a year every day and become playable at 13. Teens go to **school** on weekdays (+Logic) and can take **part-time jobs**
+- **A living park**: 8 visitors a day, drawn from a town that remembers who you've met. Each morning 3 visitors leave and others arrive, either old acquaintances or new faces. Townsfolk age, move away at 80, and have personalities shown in the park list. Socialites are easier to win over (+15% on jokes and flirts) and Lazy Sims harder (−10%)
 
 ### 🎂 Lifecycle & Aging
 - **4 life stages** via the State Pattern: Child → Teen (13) → Adult (18) → Elder (65)
-- Sims age 1 year every **3 in-game days**
+- Children age 1 year **every day**; teens, adults and elders age 1 year every **3 in-game days**
 - **Elder penalties**: increased energy decay, forced job retirement
 - **Retirement pension**: $100/age-tick for unemployed elders
 - **Death by old age** at 90 years
@@ -87,6 +100,13 @@ Each tick has a 5% chance to trigger one of six events:
 - 🤧 Mild cold (all needs −10)
 - 🔥 Stove fire (hunger −20, energy −25, health −10)
 - 🎰 Lottery win (+$100–500, happiness +30)
+
+Separately, each turn has a 4% chance of a **household event** that hits everyone, picked from those that fit the time:
+- ☀️ Sunny morning (06:00–11:00): happiness +10
+- 🥧 Neighbour's pie (12:00–17:00): social +10, and a pie in the fridge
+- 🎉 Weekend party (Sat/Sun evenings): social +25, happiness +15, energy −10 for everyone awake
+- 🌩️ Power cut (21:00–05:00): hygiene −10, and fridge food loses 2 days of freshness
+- 🤒 Flu (any time): energy −15, happiness −10
 
 ### 💾 Save System
 - **Text-based persistence** — saves to `saves/<worldName>.txt`
@@ -169,6 +189,7 @@ This generates the full API documentation into the `docs/` directory. Open `docs
 | `M` | Move to a different room (residential only) |
 | `H` | View house info and room details |
 | `I` | View character status and detailed stats |
+| `G` | Goals: aspirations and achievements |
 | `V` | Open inventory (eat food, use/drop items) |
 | `U` | Upgrade room storage capacity ($500) |
 | `K` | Switch active Sim to another household member |
@@ -181,6 +202,8 @@ without doing anything costs no time.
 
 ### Gameplay Tips
 - **Keep hunger above 20** — hunger at zero drains health faster every hour until your Sim dies
+- **Cook instead of buying ready meals** — raw ingredients cooked at the fridge are the cheapest way to stay fed
+- **Keep money aside for Monday** — unpaid bills make the whole household miserable
 - **Sleep regularly** — sleeping fast-forwards time to 8 AM and restores energy
 - **Socialize at the park** — the Socialite trait gives bonus relationship and happiness gains
 - **Train your career's skill** — without it you'll stall at tier 2 (check `I` to see what the next promotion needs)
@@ -231,7 +254,9 @@ Sims-CLI-game/
 │   │   ├── TimeManager.java         # Tick/day/time-of-day tracking
 │   │   ├── WorldManager.java        # City map and location management
 │   │   ├── LifecycleManager.java    # Aging, death, retirement
-│   │   ├── RandomEventManager.java  # Random event generation
+│   │   ├── RandomEventManager.java  # Random and household-wide events
+│   │   ├── UpkeepManager.java       # Weekly bills, food spoilage
+│   │   ├── GoalManager.java         # Aspirations, achievements, legacy
 │   │   ├── SimulationLogger.java    # Buffered message logging
 │   │   ├── CommandResult.java       # Enum result type for commands
 │   │   ├── IInputHandler.java       # Input handler interface
@@ -250,6 +275,7 @@ Sims-CLI-game/
 │   │       ├── JobMarketCommand.java
 │   │       ├── HouseInfoCommand.java
 │   │       ├── CharacterStatusCommand.java
+│   │       ├── GoalsCommand.java     # Aspirations and achievements screen
 │   │       └── UpgradeRoomCommand.java
 │   ├── entities/                    # Game entities and data models
 │   │   ├── actors/
@@ -259,7 +285,8 @@ Sims-CLI-game/
 │   │   ├── items/
 │   │   │   ├── Item.java            # Base item class
 │   │   │   ├── Consumable.java      # Edible items (Food inherits)
-│   │   │   ├── Food.java            # Food item
+│   │   │   ├── Food.java            # Food item that goes off
+│   │   │   ├── Ingredient.java      # Raw food, cooked into meals
 │   │   │   └── Furniture.java       # Furniture items
 │   │   ├── lifecycle/               # State Pattern — life stages
 │   │   │   ├── LifeStage.java       # Interface
@@ -272,7 +299,7 @@ Sims-CLI-game/
 │   │   │   ├── InventoryManager.java
 │   │   │   ├── RelationshipManager.java
 │   │   │   ├── SkillManager.java    # Skill experience and levels
-│   │   │   ├── NPCManager.java      # NPC pool management
+│   │   │   ├── NPCManager.java      # Park visitors and townsfolk
 │   │   │   └── NPCProvider.java     # NPC access interface
 │   │   └── models/                  # Enums and data classes
 │   │       ├── Job.java             # Career definitions
@@ -282,6 +309,8 @@ Sims-CLI-game/
 │   │       ├── Trait.java           # ACTIVE, LAZY, SOCIALITE
 │   │       ├── SocialAction.java    # CHAT, JOKE, FLIRT, ARGUE
 │   │       ├── SkillType.java       # FITNESS, LOGIC, CHARISMA
+│   │       ├── Aspiration.java      # Life goals
+│   │       ├── Achievement.java     # Household milestones
 │   │       ├── Relationship.java
 │   │       ├── RelationshipStatus.java
 │   │       └── WorkResult.java

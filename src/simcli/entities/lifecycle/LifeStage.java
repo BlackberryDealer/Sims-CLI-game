@@ -41,4 +41,14 @@ public interface LifeStage {
      *         or {@code this} if the Sim stays in the current stage.
      */
     LifeStage getNextStage(int currentAge);
+
+    /**
+     * Returns whether Sims in this stage go to school on weekdays, which
+     * trains their Logic skill.
+     *
+     * @return {@code true} for school-age stages; {@code false} by default.
+     */
+    default boolean attendsSchool() {
+        return false;
+    }
 }
