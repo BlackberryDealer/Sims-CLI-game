@@ -1,0 +1,49 @@
+{
+  "_comment": [
+    "What each shop sells. Item types:",
+    "  food        - name, price, hunger, energy, optional freshness (days)",
+    "  ingredient  - name, price, hunger (eaten raw), meal, mealHunger, optional freshness",
+    "  consumable  - name, price, hunger, energy, fun (books, perfume... never go off)",
+    "  furniture   - name, price, space (must be something the game can build: Bed, Fridge,",
+    "                Shower, Weight Bench, Computer, Storage Chest)",
+    "An item with 'availableIf' is only on sale when the shopper meets at least one of",
+    "the listed conditions; each condition may use minAge, minMoney and career (a job id)."
+  ],
+  "shops": [
+    {
+      "id": "grocery",
+      "register": "Store Register",
+      "items": [
+        { "type": "food", "name": "Apple", "price": 10, "hunger": 15, "energy": 5 },
+        { "type": "food", "name": "Microwave Dinner", "price": 30, "hunger": 40, "energy": 5 },
+        { "type": "ingredient", "name": "Groceries", "price": 15, "hunger": 10,
+          "meal": "Home-cooked Meal", "mealHunger": 55 },
+        { "type": "ingredient", "name": "Raw Steak", "price": 35, "hunger": 15,
+          "meal": "Steak Dinner", "mealHunger": 80 },
+        { "type": "consumable", "name": "Perfume", "price": 50, "hunger": 0, "energy": 0, "fun": 30 },
+        { "type": "furniture", "name": "Bed", "price": 200, "space": 30 },
+        { "type": "furniture", "name": "Shower", "price": 150, "space": 10 },
+        { "type": "furniture", "name": "Storage Chest", "price": 100, "space": 10 },
+        { "type": "furniture", "name": "Fridge", "price": 300, "space": 25,
+          "availableIf": [ { "minMoney": 500 }, { "minAge": 25 } ] },
+        { "type": "furniture", "name": "Weight Bench", "price": 150, "space": 40,
+          "availableIf": [ { "minAge": 22 } ] },
+        { "type": "furniture", "name": "Computer", "price": 500, "space": 20,
+          "availableIf": [ { "career": "SOFTWARE_ENGINEER" }, { "minMoney": 1000 } ] }
+      ]
+    },
+    {
+      "id": "bookshop",
+      "register": "Bookshop Register",
+      "items": [
+        { "type": "consumable", "name": "Novel", "price": 15, "hunger": 0, "energy": 0, "fun": 25 },
+        { "type": "consumable", "name": "Comic Book", "price": 8, "hunger": 0, "energy": 0, "fun": 15 },
+        { "type": "consumable", "name": "Cookbook", "price": 20, "hunger": 0, "energy": 0, "fun": 10 },
+        { "type": "consumable", "name": "Textbook", "price": 50, "hunger": 0, "energy": 0, "fun": 5 },
+        { "type": "furniture", "name": "Computer", "price": 500, "space": 20 },
+        { "type": "consumable", "name": "Energy Drink", "price": 25, "hunger": 5, "energy": 30, "fun": 0,
+          "availableIf": [ { "minAge": 18 } ] }
+      ]
+    }
+  ]
+}

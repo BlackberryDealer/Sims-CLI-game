@@ -8,7 +8,13 @@ import simcli.entities.actors.Sim;
  *
  * <p>The friendship score ranges from 0 to 100. As the score changes
  * via social interactions, calling {@link #updateStatus()} re-evaluates
- * the categorical status against predefined thresholds.</p>
+ * the categorical status against predefined thresholds. Once the two Sims
+ * are married ({@link #setMarried(boolean)}) the status stays
+ * {@link RelationshipStatus#MARRIED} whatever the score.</p>
+ *
+ * <p>This is the single record of how one Sim feels about another; the
+ * {@link simcli.entities.managers.RelationshipManager} keeps one per Sim
+ * they know.</p>
  */
 public class Relationship {
 
@@ -20,6 +26,9 @@ public class Relationship {
 
     /** The categorical status derived from the friendship score. */
     private RelationshipStatus status;
+
+    /** Whether the two Sims are married, which overrides the score-based status. */
+    private boolean married;
 
     /**
      * Constructs a new relationship with a starting score of 0
@@ -74,7 +83,9 @@ public class Relationship {
      * </ul>
      */
     public void updateStatus() {
-        if (this.friendshipScore >= 80) {
+        if (this.married) {
+            this.status = RelationshipStatus.MARRIED;
+        } else if (this.friendshipScore >= 80) {
             this.status = RelationshipStatus.ROMANTIC;
         } else if (this.friendshipScore >= 50) {
             this.status = RelationshipStatus.FRIEND;
@@ -83,5 +94,24 @@ public class Relationship {
         } else {
             this.status = RelationshipStatus.STRANGER;
         }
+    }
+
+    /**
+     * Marks the two Sims as married (or not) and updates the status.
+     *
+     * @param married {@code true} if the Sims are married.
+     */
+    public void setMarried(boolean married) {
+        this.married = married;
+        updateStatus();
+    }
+
+    /**
+     * Returns whether the two Sims are married.
+     *
+     * @return {@code true} if married.
+     */
+    public boolean isMarried() {
+        return married;
     }
 }

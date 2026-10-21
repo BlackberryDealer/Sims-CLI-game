@@ -1,7 +1,8 @@
 package simcli.entities.managers;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import simcli.engine.SimulationException;
@@ -11,6 +12,7 @@ import simcli.entities.items.Item;
 import simcli.entities.models.ActionState;
 import simcli.entities.models.Gender;
 import simcli.entities.models.Relationship;
+import simcli.entities.models.RelationshipStatus;
 import simcli.entities.models.SkillType;
 import simcli.entities.models.Trait;
 import simcli.entities.models.SocialAction;
@@ -22,10 +24,10 @@ import simcli.utils.GameRandom;
  * Manages all social bonds, interactions, and romantic relationships
  * for a single Sim.
  *
- * <p>Tracks both a legacy integer-based relationship map (used for
- * quick threshold checks) and a richer {@link Relationship} registry
- * that models progression through {@link simcli.entities.models.RelationshipStatus}
- * tiers. Also handles marriage, reproduction, and child registration.</p>
+ * <p>Keeps one {@link Relationship} per Sim the owner knows, holding the
+ * relationship score (0–100) and the
+ * {@link simcli.entities.models.RelationshipStatus} it implies. Also
+ * handles marriage, reproduction, and child registration.</p>
  *
  * <p>Extracted from {@link Sim} to follow the Single Responsibility
  * Principle.</p>
@@ -35,11 +37,8 @@ public class RelationshipManager {
     /** The Sim that owns this relationship manager. */
     private Sim owner;
 
-    /** Legacy integer-based relationship scores keyed by target Sim. */
-    private Map<Sim, Integer> relationships;
-
-    /** Rich relationship model objects for detailed status tracking. */
-    private List<Relationship> relationshipRegistry;
+    /** How the owner gets on with each Sim they know, keyed by that Sim. */
+    private final Map<Sim, Relationship> relationships;
 
     /** The owner's spouse, or {@code null} if unmarried. */
     private Sim spouse;
@@ -54,20 +53,33 @@ public class RelationshipManager {
      */
     public RelationshipManager(Sim owner) {
         this.owner = owner;
-        this.relationships = new HashMap<>();
-        this.relationshipRegistry = new ArrayList<>();
+        this.relationships = new LinkedHashMap<>();
         this.spouse = null;
         this.children = new ArrayList<>();
     }
 
     /**
-     * Returns the full list of rich {@link Relationship} objects
-     * tracked by this manager.
+     * Returns the owner's relationship with another Sim, creating a new
+     * {@link simcli.entities.models.RelationshipStatus#STRANGER} one if
+     * they haven't met.
      *
-     * @return the relationship registry.
+     * @param otherSim the other Sim.
+     * @return the relationship record.
      */
-    public List<Relationship> getRelationshipRegistry() {
-        return relationshipRegistry;
+    public Relationship getRelationshipWith(Sim otherSim) {
+        return relationships.computeIfAbsent(otherSim, Relationship::new);
+    }
+
+    /**
+     * Returns the relationship status with another Sim (stranger if they
+     * haven't met).
+     *
+     * @param otherSim the other Sim.
+     * @return the status.
+     */
+    public RelationshipStatus getStatus(Sim otherSim) {
+        Relationship rel = relationships.get(otherSim);
+        return rel == null ? RelationshipStatus.STRANGER : rel.getStatus();
     }
 
     /**
@@ -81,12 +93,19 @@ public class RelationshipManager {
 
     /**
      * Sets the owner's spouse. Used when establishing or restoring
-     * a marriage bond.
+     * a marriage bond; the relationship with the spouse is marked
+     * {@link simcli.entities.models.RelationshipStatus#MARRIED}.
      *
      * @param spouse the Sim to marry, or {@code null} to clear.
      */
     public void setSpouse(Sim spouse) {
+        if (this.spouse != null && relationships.containsKey(this.spouse)) {
+            relationships.get(this.spouse).setMarried(false);
+        }
         this.spouse = spouse;
+        if (spouse != null) {
+            getRelationshipWith(spouse).setMarried(true);
+        }
     }
 
     /**
@@ -108,43 +127,46 @@ public class RelationshipManager {
     }
 
     /**
-     * Returns the legacy integer relationship score with another Sim.
+     * Returns the relationship score with another Sim.
      *
      * @param otherSim the target Sim.
      * @return the relationship score (0 if no prior interaction).
      */
     public int getRelationship(Sim otherSim) {
-        return relationships.getOrDefault(otherSim, 0);
+        Relationship rel = relationships.get(otherSim);
+        return rel == null ? 0 : rel.getFriendshipScore();
     }
 
     /**
-     * Returns the full map of legacy relationship scores.
+     * Returns the relationship score with every Sim the owner knows, as a
+     * read-only snapshot.
      *
-     * @return a map of target Sims to integer scores.
+     * @return a map of target Sims to scores, in the order they were met.
      */
     public Map<Sim, Integer> getRelationships() {
-        return relationships;
+        Map<Sim, Integer> scores = new LinkedHashMap<>();
+        for (Map.Entry<Sim, Relationship> entry : relationships.entrySet()) {
+            scores.put(entry.getKey(), entry.getValue().getFriendshipScore());
+        }
+        return Collections.unmodifiableMap(scores);
     }
 
     /**
-     * Increases the legacy relationship score with another Sim,
-     * clamped to {@code [0, MAX_RELATIONSHIP_SCORE]}.
+     * Changes the relationship score with another Sim, clamped to
+     * {@code [0, MAX_RELATIONSHIP_SCORE]}, and updates the status.
      *
      * @param otherSim the target Sim.
-     * @param amount   the amount to add to the score.
+     * @param amount   the amount to add to the score (negative to lower it).
      */
     public void increaseRelationship(Sim otherSim, int amount) {
-        int current = getRelationship(otherSim);
-        int newScore = Math.max(0, Math.min(current + amount, GameConstants.MAX_RELATIONSHIP_SCORE));
-        relationships.put(otherSim, newScore);
+        Relationship rel = getRelationshipWith(otherSim);
+        rel.setFriendshipScore(Math.min(rel.getFriendshipScore() + amount, GameConstants.MAX_RELATIONSHIP_SCORE));
+        rel.updateStatus();
     }
 
     /**
-     * Performs a social action with another Sim, updating the rich
-     * {@link Relationship} model's friendship score and status.
-     *
-     * <p>If no relationship exists yet, a new one is created as
-     * {@link simcli.entities.models.RelationshipStatus#STRANGER}.</p>
+     * Changes the relationship with another Sim by a social action's
+     * relationship value, without any need effects.
      *
      * @param otherSim the Sim to interact with.
      * @param action   the social action to perform.
@@ -152,35 +174,18 @@ public class RelationshipManager {
     public void interactWith(Sim otherSim, SocialAction action) {
         if (otherSim == owner)
             return;
-
-        Relationship rel = null;
-        for (Relationship r : relationshipRegistry) {
-            if (r.getTargetSim() == otherSim) {
-                rel = r;
-                break;
-            }
-        }
-        if (rel == null) {
-            rel = new Relationship(otherSim);
-            relationshipRegistry.add(rel);
-        }
-
-        rel.setFriendshipScore(rel.getFriendshipScore() + action.getRelationshipChange());
-
-        rel.updateStatus();
+        increaseRelationship(otherSim, action.getRelationshipChange());
     }
 
     /**
-     * Legacy social interaction handling — applies need boosts, trait
-     * bonuses, and basic relationship score increases. Also delegates
-     * to {@link #interactWith(Sim, SocialAction)} for the rich model.
+     * Simple social interaction: applies need boosts, trait bonuses and a
+     * {@link GameConstants#RELATIONSHIP_BONUS} relationship increase.
      *
      * @param otherSim the Sim to socialize with.
      */
     public void interactSocially(Sim otherSim) {
         if (otherSim == owner)
             return;
-        relationships.putIfAbsent(otherSim, 0);
 
         int relBonus = GameConstants.RELATIONSHIP_BONUS;
         int socialBonus = GameConstants.SOCIAL_BONUS;
@@ -192,9 +197,7 @@ public class RelationshipManager {
             happinessBonus = (int) (happinessBonus * GameConstants.BONUS_TIMES);
         }
 
-        int current = relationships.get(otherSim);
-        int newScore = Math.min(current + relBonus, GameConstants.MAX_RELATIONSHIP_SCORE);
-        relationships.put(otherSim, newScore);
+        increaseRelationship(otherSim, relBonus);
 
         owner.setCurrentAction(ActionState.SOCIALIZING);
 
@@ -202,8 +205,6 @@ public class RelationshipManager {
         owner.increaseSocial(socialBonus);
         owner.decreaseEnergy(10);
         owner.increaseHappiness(happinessBonus);
-
-        interactWith(otherSim, SocialAction.CHAT);
     }
 
     /**
@@ -289,7 +290,7 @@ public class RelationshipManager {
         if (otherSim == owner) {
             return false;
         }
-        relationships.putIfAbsent(otherSim, 0);
+        getRelationshipWith(otherSim);
         double traitMultiplier = owner.hasTrait(Trait.SOCIALITE) ? GameConstants.BONUS_TIMES : 1.0;
         boolean landed = GameRandom.RANDOM.nextInt(100) < getSuccessChance(otherSim, action);
 
@@ -371,10 +372,9 @@ public class RelationshipManager {
     public boolean marry(Sim otherSim) {
         if (otherSim == owner)
             return false;
-        relationships.putIfAbsent(otherSim, 0);
-        if (relationships.get(otherSim) >= GameConstants.MARRIAGE_THRESHOLD && this.spouse == null
+        if (getRelationship(otherSim) >= GameConstants.MARRIAGE_THRESHOLD && this.spouse == null
                 && otherSim.getRelationshipManager().getSpouse() == null) {
-            this.spouse = otherSim;
+            setSpouse(otherSim);
             otherSim.getRelationshipManager().setSpouse(owner);
             SimulationLogger.getInstance().log(
                     "\n*** WEDDING BELLS! " + owner.getName() + " and " + otherSim.getName() + " are now married! ***");

@@ -33,4 +33,4 @@ if not "%RESULT%"=="0" (
 echo.
 echo Running tests...
 echo ======================================================
-"%JAVA%" -jar lib\junit-platform-console-standalone.jar execute --class-path "bin;bin\test" --scan-class-path --include-package simcli --disable-ansi-colors
+"%JAVA%" -jar lib\junit-platform-console-standalone.jar execute --class-path "bin;bin\test;resources" --scan-class-path "bin;bin\test" --include-package simcli --disable-ansi-colors

@@ -1,24 +1,29 @@
 package simcli.engine;
 
 import simcli.entities.managers.NPCManager;
-import simcli.utils.GameConstants;
+import simcli.persistence.GameContent;
 import simcli.world.Building;
 import simcli.world.Commercial;
 import simcli.world.Park;
 import simcli.world.Residential;
 import simcli.world.Room;
-import simcli.world.interactables.*;
+import simcli.world.interactables.CatalogShop;
+import simcli.world.interactables.Interactable;
+import simcli.world.interactables.InteractableFactory;
+import simcli.world.interactables.ParkBench;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Concrete implementation of {@link IWorldManager}.
  *
- * <p>Builds the city map from hardcoded building definitions (dorm, bungalow,
- * supermarket, bookshop, park) and tracks which building the player is
- * currently inside. The world is rebuilt from scratch each time
- * {@link #setupWorld()} is called (e.g. on new game or load).</p>
+ * <p>Builds the city map from {@code buildings.json} (homes with their rooms
+ * and furniture, shops, the park — see {@link GameContent}) and tracks which
+ * building the player is currently inside. The world is rebuilt from
+ * scratch each time {@link #setupWorld()} is called (e.g. on new game or
+ * load).</p>
  *
  * <p>Receives its {@link NPCManager} dependency via the constructor rather
  * than reaching back into {@code GameEngine}, eliminating the previous
@@ -52,65 +57,63 @@ public class WorldManager implements IWorldManager {
     @Override
     public void setupWorld() {
         this.cityMap.clear();
+        this.currentLocation = null;
 
-        // Build Home
-        Residential home = new Residential("The Shared Dorm");
-        home.setWeeklyBill(GameConstants.DORM_WEEKLY_BILL);
+        for (Map<String, Object> json : GameContent.buildings()) {
+            Building building = build(json);
+            this.cityMap.add(building);
+            // a new household starts in the first home
+            if (this.currentLocation == null && building instanceof Residential) {
+                this.currentLocation = building;
+            }
+        }
+        if (this.currentLocation == null) {
+            throw new IllegalStateException("buildings.json needs at least one home");
+        }
+    }
 
-        Room mainRoom = new Room("Bedroom", 100);
-        mainRoom.placeFurniture(new Bed(), 30);
-        home.addRoom(mainRoom);
-
-        Room kitchen = new Room("Kitchen", 50);
-        kitchen.placeFurniture(new Fridge(), 25);
-        home.addRoom(kitchen);
-
-        Room gym = new Room("Garage", 60);
-        gym.placeFurniture(new WeightBench(), 40);
-        home.addRoom(gym);
-
-        Room bathroom = new Room("Bathroom", 30);
-        bathroom.placeFurniture(new Shower(), 10);
-        home.addRoom(bathroom);
-
-        this.cityMap.add(home);
-
-        // Build the Bungalow — purchasable for $5000 (proposal Slide 7)
-        Residential bungalow = new Residential("The Bungalow", 5000);
-        bungalow.setWeeklyBill(GameConstants.BUNGALOW_WEEKLY_BILL);
-
-        Room livingRoom = new Room("Living Room", 120);
-        livingRoom.placeFurniture(new Bed(), 30);
-        livingRoom.placeFurniture(new Fridge(), 25);
-        bungalow.addRoom(livingRoom);
-
-        Room study = new Room("Study", 80);
-        study.placeFurniture(new Computer(), 20);
-        bungalow.addRoom(study);
-
-        Room bungalowBath = new Room("Ensuite Bathroom", 40);
-        bungalowBath.placeFurniture(new Shower(), 10);
-        bungalow.addRoom(bungalowBath);
-
-        this.cityMap.add(bungalow);
-
-        // Build Supermarket
-        Commercial store = new Commercial("Town Supermarket");
-        store.addInteractable(new GroceryShelf());
-        this.cityMap.add(store);
-
-        // Build Bookshop (proposal Slide 7 — different interactables from Supermarket)
-        Commercial bookshop = new Commercial("The Bookshop");
-        bookshop.addInteractable(new BookshopShelf());
-        this.cityMap.add(bookshop);
-
-        // Build Park — ParkBench now receives NPCManager + neighborhood directly
-        Park park = new Park("City Park", this.npcManager);
-        park.addInteractable(new ParkBench(this.npcManager, this.neighborhood));
-        this.cityMap.add(park);
-
-        // Default spawn location
-        this.currentLocation = home;
+    /** Builds one building from its entry in {@code buildings.json}. */
+    private Building build(Map<String, Object> json) {
+        String name = GameContent.string(json, "name");
+        String type = GameContent.string(json, "type");
+        switch (type) {
+            case "home": {
+                int price = GameContent.integer(json, "price", 0);
+                // a home with no price is owned from the start
+                Residential home = price > 0 ? new Residential(name, price) : new Residential(name);
+                home.setWeeklyBill(GameContent.integer(json, "weeklyBill", 0));
+                for (Object roomEntry : GameContent.list(json, "rooms")) {
+                    Map<String, Object> roomJson = GameContent.map(roomEntry, "room");
+                    Room room = new Room(GameContent.string(roomJson, "name"),
+                            GameContent.integer(roomJson, "capacity", 0));
+                    for (Object furnitureEntry : GameContent.list(roomJson, "furniture")) {
+                        Map<String, Object> furniture = GameContent.map(furnitureEntry, "furniture");
+                        String furnitureName = GameContent.string(furniture, "name");
+                        Interactable object = InteractableFactory.create(furnitureName);
+                        if (object == null) {
+                            throw new IllegalStateException("buildings.json: the game can't build a '"
+                                    + furnitureName + "' (in " + name + ")");
+                        }
+                        room.placeFurniture(object, GameContent.integer(furniture, "space", 0));
+                    }
+                    home.addRoom(room);
+                }
+                return home;
+            }
+            case "shop": {
+                Commercial shop = new Commercial(name);
+                shop.addInteractable(new CatalogShop(GameContent.string(json, "shop")));
+                return shop;
+            }
+            case "park": {
+                // ParkBench receives NPCManager + neighborhood directly
+                Park park = new Park(name, this.npcManager);
+                park.addInteractable(new ParkBench(this.npcManager, this.neighborhood));
+                return park;
+            }
+            default:
+                throw new IllegalStateException("buildings.json: unknown building type '" + type + "' for " + name);
+        }
     }
 
     /** {@inheritDoc} */

@@ -82,7 +82,7 @@ public class UpkeepManagerTest {
         assertEquals(500, rich.getMoney(), "No bills on a Tuesday");
 
         upkeep.processDay(MONDAY, household);
-        assertEquals(500 - GameConstants.DORM_WEEKLY_BILL, rich.getMoney());
+        assertEquals(500 - home(0).getWeeklyBill(), rich.getMoney());
         assertEquals(50, poor.getMoney());
     }
 
@@ -90,7 +90,7 @@ public class UpkeepManagerTest {
     @DisplayName("Owning the Bungalow adds its bill")
     void testBungalowBill() {
         home(1).setOwned(true);
-        assertEquals(GameConstants.DORM_WEEKLY_BILL + GameConstants.BUNGALOW_WEEKLY_BILL, upkeep.getWeeklyBills());
+        assertEquals(home(0).getWeeklyBill() + home(1).getWeeklyBill(), upkeep.getWeeklyBills());
     }
 
     @Test

@@ -114,6 +114,10 @@ public class InputHandler implements IInputHandler {
                 case "L":
                     command = new SpouseInteractionCommand(ctx);
                     break;
+                case "?":
+                case "HELP":
+                    command = new HelpCommand(ctx);
+                    break;
                 case "G":
                     command = new GoalsCommand(ctx, goalManager != null ? goalManager
                             : new GoalManager(worldManager, logger));

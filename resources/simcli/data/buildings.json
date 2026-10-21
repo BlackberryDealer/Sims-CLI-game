@@ -1,0 +1,33 @@
+{
+  "_comment": [
+    "The city, in travel-menu order. Saves refer to buildings by position, so add new",
+    "buildings at the end. The first home is where a new household starts.",
+    "  home  - name, optional price (0 or missing = owned from the start), weeklyBill,",
+    "          rooms: [ { name, capacity, furniture: [ { name, space } ] } ]",
+    "  shop  - name, shop (an id from shops.json)",
+    "  park  - name (the place to meet NPCs)"
+  ],
+  "buildings": [
+    {
+      "type": "home", "name": "The Shared Dorm", "weeklyBill": 100,
+      "rooms": [
+        { "name": "Bedroom", "capacity": 100, "furniture": [ { "name": "Bed", "space": 30 } ] },
+        { "name": "Kitchen", "capacity": 50, "furniture": [ { "name": "Fridge", "space": 25 } ] },
+        { "name": "Garage", "capacity": 60, "furniture": [ { "name": "Weight Bench", "space": 40 } ] },
+        { "name": "Bathroom", "capacity": 30, "furniture": [ { "name": "Shower", "space": 10 } ] }
+      ]
+    },
+    {
+      "type": "home", "name": "The Bungalow", "price": 5000, "weeklyBill": 250,
+      "rooms": [
+        { "name": "Living Room", "capacity": 120,
+          "furniture": [ { "name": "Bed", "space": 30 }, { "name": "Fridge", "space": 25 } ] },
+        { "name": "Study", "capacity": 80, "furniture": [ { "name": "Computer", "space": 20 } ] },
+        { "name": "Ensuite Bathroom", "capacity": 40, "furniture": [ { "name": "Shower", "space": 10 } ] }
+      ]
+    },
+    { "type": "shop", "name": "Town Supermarket", "shop": "grocery" },
+    { "type": "shop", "name": "The Bookshop", "shop": "bookshop" },
+    { "type": "park", "name": "City Park" }
+  ]
+}

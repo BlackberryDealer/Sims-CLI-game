@@ -55,6 +55,9 @@ out/
 # Compiled Java classes
 bin/
 
+# Maven build output
+target/
+
 
 # mpeltonen/sbt-idea plugin
 .idea_modules/

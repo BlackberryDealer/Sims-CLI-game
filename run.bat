@@ -18,5 +18,5 @@ if errorlevel 1 (
 echo Starting game...
 rem Switch the console to UTF-8 so box lines, bars, stars and hearts display properly.
 chcp 65001 >nul
-"%JAVA%" -cp bin simcli.Main
+"%JAVA%" -cp "bin;resources" simcli.Main
 pause

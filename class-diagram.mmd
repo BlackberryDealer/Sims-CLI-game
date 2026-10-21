@@ -662,11 +662,9 @@ classDiagram
         +retrieveItem(int) Item
     }
 
-    class GroceryShelf {
-        +getCatalog(Sim) List~Item~
-    }
-
-    class BookshopShelf {
+    class CatalogShop {
+        -shopId : String
+        +getShopId() String
         +getCatalog(Sim) List~Item~
     }
 
@@ -753,8 +751,7 @@ classDiagram
     WeightBench ..|> Interactable
     StorageChest ..|> Interactable
     StorageChest ..|> Container
-    GroceryShelf --|> AbstractShop
-    BookshopShelf --|> AbstractShop
+    CatalogShop --|> AbstractShop
     ParkBench ..|> Interactable
 
     %% ╔═════════════════════════════════════════════════════════╗

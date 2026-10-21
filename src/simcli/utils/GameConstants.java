@@ -138,10 +138,6 @@ public final class GameConstants {
     public static final int UNREFRIGERATED_SPOIL_RATE = 2;
     /** Happiness the cook gains from making a meal. */
     public static final int COOKING_HAPPINESS = 10;
-    /** Weekly bills for the free starter home. */
-    public static final int DORM_WEEKLY_BILL = 100;
-    /** Weekly bills for the Bungalow. */
-    public static final int BUNGALOW_WEEKLY_BILL = 250;
     /** Happiness every household Sim loses when the bills can't be paid. */
     public static final int UNPAID_BILLS_HAPPINESS_PENALTY = 20;
 

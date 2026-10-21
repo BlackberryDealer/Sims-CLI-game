@@ -8,6 +8,7 @@ import simcli.entities.models.ActionState;
 import simcli.entities.models.SimState;
 import simcli.persistence.SaveManager;
 import simcli.ui.IRenderer;
+import simcli.ui.NeedSummary;
 import simcli.ui.TerminalRenderer;
 import simcli.ui.UIManager;
 import simcli.utils.GameConstants;
@@ -263,6 +264,9 @@ public class GameEngine {
             UIManager.prompt("\nYour choice> ");
 
             String input = scanner.nextLine().trim().toUpperCase();
+            // taken before the command runs, so the summary includes what it did (e.g. a shift's costs)
+            Sim actor = this.activePlayer;
+            NeedSummary before = NeedSummary.capture(actor);
             CommandResult result = inputHandler.handle(input, this.activePlayer, scanner);
 
             int ticksToAdvance = 1;
@@ -298,6 +302,9 @@ public class GameEngine {
                 if (result == CommandResult.SLEEP_EVENT) {
                     // it's morning — the Sim is awake now, so show the room, not the bed
                     this.activePlayer.setCurrentAction(ActionState.IDLE);
+                }
+                if (ticksToAdvance > 1 && actor.getState() != SimState.DEAD) {
+                    NeedSummary.print(actor, before, ticksToAdvance);
                 }
                 maybeAutosave();
                 UIManager.prompt("\nPress ENTER to continue...");

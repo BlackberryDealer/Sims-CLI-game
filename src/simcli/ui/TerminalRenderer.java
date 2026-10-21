@@ -7,6 +7,7 @@ import simcli.world.Building;
 import simcli.world.interactables.Interactable;
 import simcli.ui.ascii.AsciiEngine;
 import simcli.ui.ascii.Sprites;
+import simcli.utils.GameConstants;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,7 +27,7 @@ public class TerminalRenderer implements IRenderer {
     /** Friendly verbs for the things a Sim can use, keyed by object name. */
     private static final Map<String, String> VERBS = new HashMap<>();
     static {
-        VERBS.put("Bed", "Sleep");
+        VERBS.put("Bed", "Sleep till " + String.format("%02d:00", GameConstants.MORNING_HOUR));
         VERBS.put("Fridge", "Open fridge");
         VERBS.put("Shower", "Shower");
         VERBS.put("Weight Bench", "Work out");
@@ -92,6 +93,38 @@ public class TerminalRenderer implements IRenderer {
             return;
         }
         System.out.println(Panel.box("{W}Household{/}", 'k', Panel.columns(cells, 37)));
+        for (String alert : householdAlerts(neighborhood, activePlayer)) {
+            UIManager.printMessage("  {R}" + Panel.WARN + "{/} " + alert);
+        }
+    }
+
+    /**
+     * Warnings about other household members who are in danger and may
+     * need the player's attention.
+     *
+     * @param neighborhood every Sim in the household.
+     * @param activePlayer the Sim being controlled (never warned about here).
+     * @return one line per Sim in danger, most urgent problem only.
+     */
+    static List<String> householdAlerts(List<Sim> neighborhood, Sim activePlayer) {
+        List<String> alerts = new ArrayList<>();
+        for (Sim sim : neighborhood) {
+            if (sim == activePlayer || sim.getState() == SimState.DEAD) {
+                continue;
+            }
+            int hunger = sim.getHunger().getValue();
+            if (sim.isChildSim() && !sim.isPlayable()) {
+                if (hunger <= GameConstants.HUNGER_WARNING_LEVEL) {
+                    alerts.add("{R}Baby " + sim.getName() + " is starving!{/} {k}Feed them with [L].{/}");
+                }
+            } else if (sim.getHealth() <= 40) {
+                alerts.add("{R}" + sim.getName() + "'s health is low (" + sim.getHealth() + ").{/} "
+                        + "{k}Switch with [K] and get them fed and rested.{/}");
+            } else if (hunger <= GameConstants.HUNGER_WARNING_LEVEL / 2) {
+                alerts.add("{Y}" + sim.getName() + " is going hungry.{/} {k}Stock the fridge, or switch with [K].{/}");
+            }
+        }
+        return alerts;
     }
 
     private String householdCell(Sim sim) {
@@ -182,9 +215,11 @@ public class TerminalRenderer implements IRenderer {
         }
         addGroup(lines, "HERE", here, 22);
 
+        Job job = activePlayer.getCareer();
+        String work = job == Job.UNEMPLOYED ? "Work" : "Work (" + job.getWorkingHours() + "h)";
         addGroup(lines, "OUT", List.of(
-                Panel.option("W", "Work"),
-                Panel.option("T", "Travel"),
+                Panel.option("W", work),
+                Panel.option("T", "Travel (1h)"),
                 Panel.option("J", "Jobs")), 16);
 
         if (isResidential) {
@@ -204,7 +239,9 @@ public class TerminalRenderer implements IRenderer {
         }
         addGroup(lines, "SIM", me, 16);
 
-        addGroup(lines, "GAME", List.of(Panel.option("S", "Save & quit to menu")), 16);
+        addGroup(lines, "GAME", List.of(Panel.option("?", "Help"),
+                Panel.option("S", "Save & quit to menu")), 16);
+        lines.add("{k}Using things here takes 1 hour; menus and info screens are free.{/}");
 
         System.out.println(Panel.box("What should {W}" + activePlayer.getName() + "{/} do?", 'b', lines));
     }

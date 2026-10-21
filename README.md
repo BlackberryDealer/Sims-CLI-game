@@ -122,6 +122,13 @@ Separately, each turn has a 4% chance of a **household event** that hits everyon
 - Short **animations** when your Sim acts, travels, or sleeps through the night
 - A colour-coded HUD: date and time banner, need bars, household summary, and an action menu grouped by purpose
 
+### 🧭 Quality of Life
+- **Costs up front**: the action menu shows how long things take, e.g. `Work (4h)`, `Travel (1h)`, `Sleep till 08:00`
+- **What changed**: after a shift or a night's sleep, a panel lists how each need, health and money moved (e.g. `Hunger 72 → 49`)
+- **Danger alerts**: warnings under the household panel when someone else is in trouble, like a starving baby, low health or going hungry
+- **Risky choices**: going to bed very hungry asks you to confirm first, and says how hungry the Sim will be by morning
+- **Help** (`?`): every key, how long things take, and the main rules
+
 ### 🖥️ Display settings
 - Colours and animations can be toggled from **Settings** in the main menu
 - Colours are detected automatically (Windows Terminal, VS Code, most Linux/macOS terminals);
@@ -133,12 +140,19 @@ Separately, each turn has a 4% chance of a **household event** that hits everyon
 ## Getting Started
 
 ### Prerequisites
-- **Java JDK 8+** (tested with JDK 17+)
-- Windows OS (batch scripts provided)
+- **Java JDK 17+**
+- **Maven 3.6+** to build on any OS (Windows, macOS, Linux). On Windows you can use the batch scripts instead, which need only a JDK
 
 ### Run the Game
 
-**Option 1 — Using the batch script:**
+**Option 1 — Maven (any OS):**
+```bash
+mvn package
+java -jar target/sims-cli-game.jar
+```
+`mvn package` compiles the game, runs the tests and builds a runnable jar. Add `-DskipTests` to skip the tests.
+
+**Option 2 — Windows batch script:**
 ```bash
 run.bat
 ```
@@ -146,20 +160,28 @@ The scripts find a JDK automatically: `JAVA_HOME` first, then `javac` on the `PA
 with VS Code's Java extension, then the usual install folders. If none is found, install one
 (e.g. `winget install EclipseAdoptium.Temurin.21.JDK`) or set `JAVA_HOME`.
 
-**Option 2 — Manual compilation:**
+**Option 3 — Manual compilation:**
 ```bash
 # Compile
 javac -d bin -sourcepath src src/simcli/Main.java
 
-# Run
-java -cp bin simcli.Main
+# Run (resources/ holds the game's data files; use ':' instead of ';' on macOS/Linux)
+java -cp "bin;resources" simcli.Main
 ```
 
 ### Run Tests
 ```bash
-run-tests.bat
+mvn test
 ```
-This compiles JUnit 5 tests from the `test/` directory and runs them using the standalone JUnit Platform Console launcher located in `lib/`.
+On Windows, `run-tests.bat` does the same without Maven, using the standalone JUnit Platform Console launcher in `lib/`.
+GitHub Actions runs the tests on Windows, macOS and Linux for every push and pull request (`.github/workflows/tests.yml`).
+
+### Adding content
+Shops, their stock and the city's buildings are defined in JSON under `resources/simcli/data/`, so you can add them without changing code:
+- `shops.json` — each shop's items (food, raw ingredients, books and other consumables, furniture), with optional `availableIf` conditions such as a minimum age or money
+- `buildings.json` — the travel map in order: homes with their price, weekly bill, rooms and furniture, shops (by shop id) and the park
+
+Each file starts with a comment block describing its fields. Add new buildings at the end of the list, because saves refer to buildings by position.
 
 ### Generate Javadoc
 ```bash
@@ -190,6 +212,7 @@ This generates the full API documentation into the `docs/` directory. Open `docs
 | `H` | View house info and room details |
 | `I` | View character status and detailed stats |
 | `G` | Goals: aspirations and achievements |
+| `?` | Help: every key, how long things take, and the main rules |
 | `V` | Open inventory (eat food, use/drop items) |
 | `U` | Upgrade room storage capacity ($500) |
 | `K` | Switch active Sim to another household member |
@@ -240,7 +263,10 @@ without doing anything costs no time.
 ```
 Sims-CLI-game/
 ├── run.bat                          # Compile and run the game
-├── run-tests.bat                    # Compile and run JUnit 5 tests
+├── run-tests.bat                    # Compile and run JUnit 5 tests (Windows, no Maven)
+├── pom.xml                          # Maven build: mvn package / mvn test
+├── .github/workflows/tests.yml      # CI: tests on Windows, macOS and Linux
+├── resources/simcli/data/           # Game content: shops.json, buildings.json
 ├── docs/                            # Generated Javadoc (javadoc -d docs ...)
 ├── lib/                             # JUnit 5 standalone JAR
 ├── saves/                           # Persistent save files (auto-created)
@@ -276,6 +302,7 @@ Sims-CLI-game/
 │   │       ├── HouseInfoCommand.java
 │   │       ├── CharacterStatusCommand.java
 │   │       ├── GoalsCommand.java     # Aspirations and achievements screen
+│   │       ├── HelpCommand.java      # The [?] help screen
 │   │       └── UpgradeRoomCommand.java
 │   ├── entities/                    # Game entities and data models
 │   │   ├── actors/
@@ -324,10 +351,12 @@ Sims-CLI-game/
 │   │   └── SimsNeedsTracker.java   # Aggregates all needs + cross-penalties
 │   ├── persistence/
 │   │   ├── SaveManager.java        # Text-file serialization/deserialization
-│   │   └── Savable.java            # Item save/load contract
+│   │   ├── Savable.java            # Item save/load contract
+│   │   └── GameContent.java        # Loads shops and buildings from JSON
 │   ├── ui/
 │   │   ├── MainMenu.java           # Main menu controller
 │   │   ├── UIManager.java          # Centralized print utilities
+│   │   ├── NeedSummary.java        # "Hunger 72 → 49" after long actions
 │   │   ├── IRenderer.java          # Renderer interface (DI)
 │   │   ├── TerminalRenderer.java   # Terminal-based HUD rendering
 │   │   ├── AsciiArt.java           # Logo and static ASCII art
@@ -338,7 +367,8 @@ Sims-CLI-game/
 │   │       └── providers/
 │   ├── utils/
 │   │   ├── GameConstants.java      # All tunable game parameters
-│   │   └── GameRandom.java         # Shared Random instance
+│   │   ├── GameRandom.java         # Shared Random instance
+│   │   └── Json.java               # Small JSON reader for the data files
 │   └── world/                      # World and location model
 │       ├── Building.java           # Abstract base for all locations
 │       ├── Residential.java        # Homes with rooms
@@ -354,8 +384,7 @@ Sims-CLI-game/
 │           ├── Computer.java
 │           ├── WeightBench.java
 │           ├── ParkBench.java      # NPC social interactions
-│           ├── GroceryShelf.java
-│           ├── BookshopShelf.java
+│           ├── CatalogShop.java     # Shops whose stock comes from shops.json
 │           ├── StorageChest.java
 │           ├── Container.java
 │           └── InteractableFactory.java
@@ -391,10 +420,11 @@ The project includes a **JUnit 5** test suite covering:
 
 Run all tests:
 ```bash
-run-tests.bat
+mvn test
 ```
 
-The test runner uses the JUnit Platform Console Standalone JAR (`lib/junit-platform-console-standalone.jar`) — no Maven or Gradle required.
+or, on Windows without Maven, `run-tests.bat`, which uses the JUnit Platform Console Standalone JAR (`lib/junit-platform-console-standalone.jar`).
+GitHub Actions runs `mvn package` on Windows, macOS and Linux for every push and pull request.
 
 ---
 
