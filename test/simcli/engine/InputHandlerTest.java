@@ -158,8 +158,8 @@ public class InputHandlerTest {
     @Test
     @DisplayName("'J' routes to JobMarketCommand and returns NO_TICK on cancel")
     void testJobMarketCommandRouting() {
-        // Input "-1" to cancel the job market menu
-        CommandResult result = handler.handle("J", activePlayer, mockScanner("-1\n"));
+        // Input "0" (Back) to cancel the job market menu
+        CommandResult result = handler.handle("J", activePlayer, mockScanner("0\n"));
         assertEquals(CommandResult.NO_TICK, result,
                 "'J' with cancel input should return NO_TICK");
     }

@@ -6,6 +6,8 @@ import simcli.engine.SleepEventException;
 import simcli.entities.actors.Sim;
 import simcli.entities.items.Furniture;
 import simcli.entities.items.Item;
+import simcli.ui.ItemInfo;
+import simcli.ui.Style;
 import simcli.ui.UIManager;
 import simcli.world.Building;
 import simcli.world.Residential;
@@ -54,11 +56,12 @@ public class InventoryCommand extends BaseCommand {
             if (currentPage >= totalPages)
                 currentPage = totalPages - 1;
 
-            UIManager.printMessage("\n=== INVENTORY (Page " + (currentPage + 1) + " of " + totalPages + ") ===");
-            UIManager.printMessage("Capacity: " + inventorySize + " / " + activePlayer.getInventoryCapacity());
+            String pages = totalPages > 1 ? "  {k}page " + (currentPage + 1) + "/" + totalPages + "{/}" : "";
+            UIManager.title(activePlayer.getName() + "'s bag  " + inventorySize + "/"
+                    + activePlayer.getInventoryCapacity() + pages);
 
             if (inv.isEmpty()) {
-                UIManager.printMessage("Your inventory is empty.");
+                UIManager.info("Your inventory is empty. {k}Shops sell food, books and furniture.{/}");
                 managingInventory = false;
                 break;
             }
@@ -67,17 +70,18 @@ public class InventoryCommand extends BaseCommand {
             int endIdx = Math.min(startIdx + pageSize, inventorySize);
 
             for (int i = startIdx; i < endIdx; i++) {
-                UIManager.printMessage("[" + (i - startIdx + 1) + "] " + inv.get(i).getObjectName());
+                Item item = inv.get(i);
+                UIManager.option(String.valueOf(i - startIdx + 1),
+                        Style.fit(item.getObjectName(), 18) + ItemInfo.describe(item));
             }
 
+            System.out.println();
             if (inventorySize > pageSize) {
-                UIManager.printMessage("\n[N] Next Page   [P] Previous Page");
-            } else {
-                UIManager.printMessage("");
+                UIManager.option("N", "Next page", null);
+                UIManager.option("P", "Previous page", null);
             }
-
-            UIManager.printMessage("[0] Back");
-            UIManager.prompt("Select item to Use/Place> ");
+            UIManager.option("0", "Back");
+            UIManager.prompt("\nUse or place> ");
 
             String invInput = ctx.getScanner().nextLine().trim().toUpperCase();
 
@@ -98,48 +102,58 @@ public class InventoryCommand extends BaseCommand {
 
                         if (selectedItem instanceof Furniture
                                 && currentLocation.isResidential()) {
-                            Furniture furn = (Furniture) selectedItem;
-                            Residential res = (Residential) currentLocation;
-                            UIManager.printMessage("Select a room to place " + furn.getObjectName() + " (Requires "
-                                    + furn.getSpaceScore() + " space):");
-                            List<Room> rooms = res.getRooms();
-                            for (int i = 0; i < rooms.size(); i++) {
-                                Room r = rooms.get(i);
-                                UIManager.printMessage("[" + (i + 1) + "] " + r.getName() + " (Capacity: "
-                                        + r.getUsedCapacity() + "/" + r.getMaxCapacity() + ")");
-                            }
-                            UIManager.printMessage("[0] Cancel");
-                            UIManager.prompt("Room> ");
-                            int rChoice = Integer.parseInt(ctx.getScanner().nextLine().trim());
-                            if (rChoice > 0 && rChoice <= rooms.size()) {
-                                Room targetRoom = rooms.get(rChoice - 1);
-                                if (targetRoom != activePlayer.getCurrentRoom()) {
-                                    UIManager.printMessage("You can only place furniture in the room you are currently in!");
-                                } else if (targetRoom.canFit(furn)) {
-                                    Interactable instance = furn.createInteractable();
-                                    if (instance != null) {
-                                        targetRoom.placeFurniture(instance, furn.getSpaceScore());
-                                        activePlayer.getInventory().remove(selectedItem);
-                                        UIManager.printMessage("Placed " + furn.getObjectName() + " in "
-                                                + targetRoom.getName() + "!");
-                                    }
-                                } else {
-                                    UIManager.printMessage("Not enough space in " + targetRoom.getName() + "!");
-                                }
-                            }
+                            placeFurniture(activePlayer, (Furniture) selectedItem);
                         } else {
-                            // Call the interaction on the item natively (so Consume propagates appropriately)
-                            selectedItem.interact(activePlayer, ctx.getScanner(), ctx.getTimeManager());
+                            // Call the interaction on the item natively (so Consume propagates appropriately).
+                            // A rejected use (e.g. furniture away from home) keeps the player in the bag.
+                            try {
+                                selectedItem.interact(activePlayer, ctx.getScanner(), ctx.getTimeManager());
+                            } catch (SleepEventException e) {
+                                throw e;
+                            } catch (SimulationException e) {
+                                UIManager.error(e.getMessage());
+                            }
                         }
                     } else {
-                        UIManager.printMessage("Invalid selection.");
+                        UIManager.error("Invalid selection.");
                     }
                 } catch (NumberFormatException e) {
-                    UIManager.printMessage("Invalid input.");
+                    UIManager.error("Invalid input.");
                 }
             }
         }
         pause();
         return CommandResult.NO_TICK;
+    }
+
+    /**
+     * Places furniture in the room the Sim is standing in, after a quick
+     * confirmation showing how much space it takes.
+     */
+    private void placeFurniture(Sim sim, Furniture furn) {
+        Room room = sim.getCurrentRoom();
+        if (room == null) {
+            UIManager.error("Step into a room first (use [M] to move between rooms).");
+            return;
+        }
+        UIManager.info("Place {W}" + furn.getObjectName() + "{/} in the {W}" + room.getName() + "{/}? It needs "
+                + furn.getSpaceScore() + " space; " + (room.getMaxCapacity() - room.getUsedCapacity()) + " is free.");
+        UIManager.prompt("Place it here? (Y/N)> ");
+        if (!ctx.getScanner().nextLine().trim().equalsIgnoreCase("Y")) {
+            UIManager.info("Kept in your bag.");
+            return;
+        }
+        if (!room.canFit(furn)) {
+            UIManager.error("Not enough space in " + room.getName() + "! Upgrade the room with [U] or try another room.");
+            return;
+        }
+        Interactable instance = furn.createInteractable();
+        if (instance == null) {
+            UIManager.error(furn.getObjectName() + " can't be placed.");
+            return;
+        }
+        room.placeFurniture(instance, furn.getSpaceScore());
+        sim.getInventory().remove(furn);
+        UIManager.success("Placed " + furn.getObjectName() + " in the " + room.getName() + "!");
     }
 }

@@ -42,7 +42,7 @@ public class InteractCommand extends BaseCommand {
             items.get(choiceIndex).interact(ctx.getActivePlayer(), ctx.getScanner(), ctx.getTimeManager());
             return CommandResult.TICK_FORWARD;
         } else {
-            UIManager.printMessage("Invalid item choice.");
+            UIManager.error("Invalid item choice. Pick one of the numbers under HERE.");
             pause();
             return CommandResult.NO_TICK;
         }

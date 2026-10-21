@@ -2,6 +2,7 @@ package simcli.engine.commands;
 
 import simcli.engine.CommandResult;
 import simcli.entities.actors.Sim;
+import simcli.ui.Style;
 import simcli.ui.UIManager;
 import simcli.utils.GameConstants;
 import simcli.world.Building;
@@ -41,28 +42,32 @@ public class UpgradeRoomCommand extends BaseCommand {
 
         if (currentLocation.isResidential()) {
             Residential res = (Residential) currentLocation;
-            UIManager.printMessage("\n=== UPGRADE ROOM ===");
-            UIManager.printMessage("Cost: $" + GameConstants.UPGRADE_COST + " for +" + GameConstants.UPGRADE_CAPACITY_BONUS + " Capacity");
-            UIManager.printMessage("Your Cash: $" + activePlayer.getMoney());
+            UIManager.title("Upgrade a room");
+            UIManager.printMessage("  {k}Each upgrade costs{/} {Y}$" + GameConstants.UPGRADE_COST + "{/} {k}and adds{/} +"
+                    + GameConstants.UPGRADE_CAPACITY_BONUS + " {k}space. You have{/} {G}$" + activePlayer.getMoney() + "{/}\n");
             List<Room> rooms = res.getRooms();
             for (int i = 0; i < rooms.size(); i++) {
                 Room r = rooms.get(i);
-                UIManager.printMessage("[" + (i + 1) + "] " + r.getName() + " (Capacity: " + r.getUsedCapacity()
-                        + "/" + r.getMaxCapacity() + ")");
+                UIManager.option(String.valueOf(i + 1), Style.fit(r.getName(), 18) + "{k}"
+                        + r.getUsedCapacity() + "/" + r.getMaxCapacity() + " space used{/}");
             }
-            UIManager.printMessage("[0] Cancel");
-            UIManager.prompt("Room> ");
+            UIManager.option("0", "Cancel");
+            UIManager.prompt("\nUpgrade> ");
             try {
                 int rChoice = Integer.parseInt(ctx.getScanner().nextLine().trim());
                 if (rChoice > 0 && rChoice <= rooms.size()) {
                     Room targetRoom = rooms.get(rChoice - 1);
                     targetRoom.upgradeCapacity(activePlayer, GameConstants.UPGRADE_CAPACITY_BONUS, GameConstants.UPGRADE_COST);
+                } else if (rChoice == 0) {
+                    return CommandResult.NO_TICK;
+                } else {
+                    UIManager.error("Invalid selection.");
                 }
-            } catch (Exception e) {
-                UIManager.printMessage("Invalid selection.");
+            } catch (NumberFormatException e) {
+                UIManager.error("Invalid selection.");
             }
         } else {
-            UIManager.printMessage("You can only upgrade rooms at home!");
+            UIManager.info("You can only upgrade rooms at home!");
         }
         pause();
         return CommandResult.NO_TICK;

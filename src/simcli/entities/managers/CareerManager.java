@@ -124,7 +124,9 @@ public class CareerManager {
         this.jobTier = 1;
         this.consecutiveDaysMissed = 0;
         this.shiftsWorkedToday = 0;
-        SimulationLogger.getInstance().log(simName + " has started a new job as a " + newJob.getTitle() + ".");
+        // Callers announce the change themselves (job market, forced retirement),
+        // so nothing is logged here — that produced duplicates such as
+        // "started a new job as a Unemployed".
     }
 
     /**

@@ -3,164 +3,187 @@ package simcli.ui;
 import simcli.engine.SimulationLogger;
 import simcli.entities.actors.Sim;
 import simcli.ui.ascii.AsciiEngine;
-import simcli.utils.GameRandom;
-import simcli.world.interactables.Interactable;
-import java.util.List;
 
 /**
  * Centralised static utility for all user-facing output: screen clearing,
- * hints, animations, prompts, warnings, and game-over stats.
+ * tips, animations, prompts, message styles, and game-over stats.
  *
  * <p>Centralizes formatting and common CLI prompts so that the rest of
  * the engine does not depend on system-specific print commands. All UI
- * output in the application is routed through this class for consistency.</p>
+ * output in the application is routed through this class for consistency.
+ * Messages may contain colour tags (see {@link Style}).</p>
  */
 public class UIManager {
     private static final String[] HINTS = {
-            "Hint: Buying food at the supermarket keeps you from starving!",
-            "Hint: A good job requires energy and time management.",
-            "Hint: Upgrading your home lets you buy more furniture.",
-            "Hint: Visit the Park to meet new people.",
-            "Hint: Sleep restores energy but leaves you hungry.",
-            "Hint: Always check your SIMs needs every few ticks."
+            "Groceries from the Supermarket keep your Sims from starving.",
+            "A good job needs energy and time management - sleep before your shift!",
+            "Upgrade a room to make space for more furniture.",
+            "Visit the Park to meet new people - you might find love!",
+            "Sleeping restores energy, but you'll wake up hungry.",
+            "Keep an eye on the plumbob: green is happy, red means trouble.",
+            "Store food in the Fridge so it's there when you need it.",
+            "The office is closed on weekends - plan some fun instead.",
+            "Missing too many weekdays of work will get you fired.",
+            "Press K to switch between the Sims in your household.",
+            "Babies can't feed themselves - use [L] to feed them.",
+            "Save the money for the Bungalow: it's a lovely upgrade.",
     };
 
-    /**
-     * Clears the terminal screen. Uses OS-specific commands (cls for Windows, 
-     * clear for Unix) or falls back to printing empty lines.
-     */
+    private static final AsciiEngine ASCII = new AsciiEngine();
+    private static int hintCounter = 0;
+
+    // -------------------------------------------------------------------------
+    // Screen & animation
+    // -------------------------------------------------------------------------
+
+    /** Clears the terminal (see {@link Term#clearScreen()}). */
     public static void clearScreen() {
-        try {
-            if (System.getProperty("os.name").contains("Windows")) {
-                new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
-            } else {
-                new ProcessBuilder("clear").inheritIO().start().waitFor();
-            }
-        } catch (Exception e) {
-            for (int i = 0; i < 50; i++)
-                System.out.println();
-        }
+        Term.clearScreen();
     }
 
-    /**
-     * Prints a randomly selected gameplay hint enclosed in brackets.
-     */
+    /** Prints a gameplay tip. The tip changes every few turns rather than every frame. */
     public static void printHint() {
-        int index = GameRandom.RANDOM.nextInt(HINTS.length);
-        System.out.println("[" + HINTS[index] + "]");
+        int index = (hintCounter++ / 4) % HINTS.length;
+        printMessage("  {Y}" + Panel.STAR + " Tip:{/} {k}" + HINTS[index] + "{/}");
     }
 
     /**
-     * Displays a brief animated sequence of "Zzz..." to simulate time passing 
-     * while a Sim sleeps.
+     * Plays the night-to-morning sleep animation.
+     *
+     * @param name  the sleeping Sim's name.
+     * @param hours how long they sleep.
      */
-    public static void sleepAnimation() {
-        try {
-            String[] frames = {
-                    "Zzz...   ",
-                    " Zzz...  ",
-                    "  Zzz... ",
-                    "   Zzz..."
-            };
-            for (int i = 0; i < 4; i++) {
-                System.out.print("\r" + frames[i]);
-                Thread.sleep(500);
-            }
-            System.out.println("\nMorning has arrived!");
-        } catch (InterruptedException e) {
-            System.out.println("Morning has arrived!");
-        }
+    public static void sleepAnimation(String name, int hours) {
+        AsciiArt.printSleepAnimation(name, hours);
     }
 
-    /**
-     * Briefly flashes the ASCII art for the Sim's current action before continuing.
-     * 
-     * @param player the Sim performing the action to be rendered
-     */
+    /** Clears the screen and plays the animation for the Sim's current action. */
     public static void displayActionAnimation(Sim player) {
         clearScreen();
-        System.out.println(new AsciiEngine().render(player, null)); // fetches ascii based on current sim state
         System.out.println();
-        try {
-            Thread.sleep(600);
-        } catch (Exception ignored) {
-        }
+        ASCII.animate(player, null);
+        System.out.println();
     }
 
-    /**
-     * Prints the primary command menu, dynamically separating contextual actions 
-     * like interactable objects from system commands.
-     * 
-     * @param player        the currently active Sim
-     * @param items         the list of interactable objects available in the current room
-     * @param isResidential true if the location is a home, exposing build/buy commands
-     */
-    public static void printActionGrid(Sim player, List<Interactable> items, boolean isResidential) {
-        System.out.println("\nAvailable Actions:");
-        for (int i = 0; i < items.size(); i++) {
-            System.out.printf("[%2d] Use %-15s", (i + 1), items.get(i).getObjectName());
-            if ((i + 1) % 4 == 0)
-                System.out.println();
-        }
-        if (items.size() % 4 != 0)
-            System.out.println();
+    // -------------------------------------------------------------------------
+    // Message styles
+    // -------------------------------------------------------------------------
 
-        System.out.println("\n[System]   [W] Go to Work   [T] Travel   [J] Job Market");
-        if (isResidential) {
-            System.out.println("[House]    [M] Move Room    [H] House Info   [U] Upgrade Room");
-        }
-
-        String personalLine = "[Personal] [I] Character Status   [V] Inventory   [K] Switch Sim";
-        if (player.getRelationshipManager().getSpouse() != null) {
-            personalLine += "   [L] Interact with Spouse";
-        }
-        System.out.println(personalLine);
-
-        System.out.println("[General]  [S] Save & Exit");
-    }
-
-    /**
-     * Standard utility to print a message to the terminal.
-     * 
-     * @param message the string to print
-     */
+    /** Prints a line of text (colour tags allowed). */
     public static void printMessage(String message) {
-        System.out.println(message);
+        System.out.println(Style.render(message));
     }
 
-    /**
-     * Standard utility to print an alert or warning, prefixed with [WARNING].
-     * 
-     * @param message the warning string to print
-     */
+    /** Prints a yellow warning. */
     public static void printWarning(String message) {
-        System.out.println("\n[WARNING] " + message);
+        System.out.println(Style.render("\n  {Y}" + Panel.WARN + " " + message + "{/}"));
+    }
+
+    /** Prints a green success message. */
+    public static void success(String message) {
+        System.out.println(Style.render("  {G}" + Panel.CHECK + "{/} " + message));
+    }
+
+    /** Prints a red error message. */
+    public static void error(String message) {
+        System.out.println(Style.render("  {R}" + Panel.CROSS + "{/} " + message));
+    }
+
+    /** Prints a neutral, indented info line. */
+    public static void info(String message) {
+        System.out.println(Style.render("  {C}" + Panel.DOT + "{/} " + message));
     }
 
     /**
-     * Flushes the SimulationLogger backlog and prepares the terminal for user input.
-     * 
-     * @param message the prompt string (e.g., "COMMAND> ")
+     * Prints a message from the simulation log, styling it by kind:
+     * warnings in yellow, big moments ({@code *** ... ***}) as highlighted
+     * events, everything else as a plain bullet.
+     */
+    public static void printEvent(String message) {
+        for (String raw : message.split("\n")) {
+            String line = raw.trim();
+            if (line.isEmpty()) {
+                continue;
+            }
+            if (line.startsWith("[WARNING]")) {
+                System.out.println(Style.render("  {Y}" + Panel.WARN + " "
+                        + line.substring("[WARNING]".length()).trim() + "{/}"));
+            } else if (line.contains("***")) {
+                String text = line.replace("*", "").trim();
+                if (!text.isEmpty()) {
+                    System.out.println(Style.render("  {M}{*}" + Panel.STAR + " " + text + "{/}"));
+                }
+            } else {
+                info(line);
+            }
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Menus & prompts
+    // -------------------------------------------------------------------------
+
+    /** Prints a sub-menu title bar. */
+    public static void title(String title) {
+        System.out.println();
+        System.out.println(Panel.rule("{W}{*}" + title + "{/}", 'c'));
+    }
+
+    /** Prints a menu option, e.g. {@code [1] Bedroom}. */
+    public static void option(String key, String label) {
+        System.out.println(Style.render("  " + Panel.option(key, label)));
+    }
+
+    /** Prints a menu option with a greyed-out hint after it. */
+    public static void option(String key, String label, String hint) {
+        System.out.println(Style.render("  " + Panel.option(key, label, hint)));
+    }
+
+    /**
+     * Flushes pending log messages, then prints a prompt (no newline).
+     * Prompts ending in {@code >} get a styled arrow; "Press ENTER" prompts
+     * are shown subtly.
      */
     public static void prompt(String message) {
         SimulationLogger.getInstance().flushAndPrint();
-        System.out.print(message);
+        System.out.print(Style.render(stylePrompt(message)));
+        System.out.flush();
+    }
+
+    private static String stylePrompt(String message) {
+        int start = 0;
+        while (start < message.length() && message.charAt(start) == '\n') {
+            start++;
+        }
+        String leading = message.substring(0, start);
+        String text = message.substring(start);
+        if (text.contains("Press ENTER")) {
+            return leading + "  {k}" + text.trim() + "{/} ";
+        }
+        String trimmed = text.stripTrailing();
+        if (trimmed.endsWith(">")) {
+            trimmed = trimmed.substring(0, trimmed.length() - 1).stripTrailing() + " " + Panel.ARROW;
+        }
+        return leading + "  {C}{*}" + trimmed + "{/} ";
     }
 
     /**
-     * Prints the final statistics when all Sims in the household have died.
-     * 
-     * @param totalTicks the total timeframe survived
-     * @param totalMoney the total cash earned across the session
-     * @param totalItems the total items purchased across the session
+     * Prints the end-of-game summary.
+     *
+     * @param totalTicks hours survived.
+     * @param totalMoney money earned across the household.
+     * @param totalItems items bought across the household.
      */
     public static void printGameOverStats(int totalTicks, int totalMoney, int totalItems) {
-        System.out.println("\n*** GAME OVER ***");
-        System.out.println("All your Sims have passed away.");
-        System.out.println("--- WORLD STATS ---");
-        System.out.println("Total Ticks Survived: " + totalTicks);
-        System.out.println("Total Money Earned: $" + totalMoney);
-        System.out.println("Total Items Bought: " + totalItems);
-        System.out.println("-------------------------");
+        int days = totalTicks / 24;
+        System.out.println();
+        System.out.println(Panel.box("{R}{*}GAME OVER{/}", 'r',
+                "",
+                "{W}All of your Sims have passed away.{/}",
+                "",
+                "{k}Time survived{/}    " + days + " days, " + (totalTicks % 24) + " hours  {k}(" + totalTicks + " ticks){/}",
+                "{k}Money earned{/}     {G}$" + totalMoney + "{/}",
+                "{k}Items bought{/}     " + totalItems,
+                ""));
     }
 }

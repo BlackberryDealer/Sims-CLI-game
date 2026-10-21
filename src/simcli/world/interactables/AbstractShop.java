@@ -3,6 +3,7 @@ package simcli.world.interactables;
 import java.util.List;
 import java.util.Scanner;
 
+import simcli.engine.ActionCancelledException;
 import simcli.engine.SimulationException;
 import simcli.engine.TimeManager;
 import simcli.entities.items.Item;
@@ -31,19 +32,27 @@ public abstract class AbstractShop implements Interactable {
     public void interact(Sim sim, Scanner scanner, TimeManager timeManager) throws SimulationException {
         List<Item> catalog = getCatalog(sim);
 
-        MenuPagination.displayPaginatedMenu(shopName + " Catalog", catalog, "Buy Action", scanner, (item, realIndex) -> {
+        String title = shopName.replace(" Register", "") + " - what would you like?";
+        boolean[] boughtSomething = {false};
+        MenuPagination.displayPaginatedMenu(title, catalog, "Buy", scanner, (item, realIndex) -> {
             if (sim.getInventory().size() >= sim.getInventoryCapacity()) {
-                UIManager.printMessage("Inventory full! Cannot carry more items.");
+                UIManager.error("Inventory full! Cannot carry more items.");
             } else if (sim.getMoney() >= item.getPrice()) {
                 sim.setMoney(sim.getMoney() - item.getPrice());
                 sim.addTotalItemsBought(1);
                 sim.getInventory().add(item.copyItem());
-                UIManager.printMessage("Purchased " + item.getObjectName() + " for $" + item.getPrice() + "!");
-                UIManager.printMessage("You are now left with $" + sim.getMoney() + "!");
+                boughtSomething[0] = true;
+                UIManager.success("Purchased " + item.getObjectName() + " for $" + item.getPrice() + "!");
             } else {
-                UIManager.printMessage("Not enough money for " + item.getObjectName() + ".");
+                UIManager.error("Not enough money for " + item.getObjectName() + ".");
             }
-        });
+        }, () -> "{k}cash{/} {G}$" + sim.getMoney() + "{/}   {k}bag{/} " + sim.getInventory().size()
+                + "/" + sim.getInventoryCapacity());
+
+        if (!boughtSomething[0]) {
+            // just browsing — no time passes
+            throw new ActionCancelledException();
+        }
     }
 
     @Override

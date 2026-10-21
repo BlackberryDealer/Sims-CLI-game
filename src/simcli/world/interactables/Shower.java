@@ -22,10 +22,10 @@ public class Shower implements Interactable {
 
     @Override
     public void interact(Sim sim, Scanner scanner, TimeManager timeManager) throws SimulationException {
-        sim.setCurrentAction(ActionState.PLAYING); // closest match for a refreshing activity
-        UIManager.printMessage(sim.getName() + " takes a long, refreshing shower.");
+        sim.setCurrentAction(ActionState.BATHING);
+        UIManager.displayActionAnimation(sim);
         sim.getHygiene().increase(50);
-        UIManager.printMessage(
-                "Hygiene is now " + sim.getHygiene().getValue() + " / " + Need.MAX_VALUE);
+        UIManager.success(sim.getName() + " takes a long, refreshing shower.  {G}+50 hygiene{/} {k}(now "
+                + sim.getHygiene().getValue() + "/" + Need.MAX_VALUE + "){/}");
     }
 }

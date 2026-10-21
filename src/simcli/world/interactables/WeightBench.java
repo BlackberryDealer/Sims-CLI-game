@@ -26,13 +26,14 @@ public class WeightBench implements Interactable {
         }
         if (sim.getHunger().getValue() < 30) {
             throw new SimulationException(
-                    sim.getName() + " lacks the energy for a hypertrophy strength training session.");
+                    sim.getName() + " is too hungry to work out. Eat something first!");
         }
-        sim.setCurrentAction(ActionState.WORKING);
+        sim.setCurrentAction(ActionState.EXERCISING);
         UIManager.displayActionAnimation(sim);
-        UIManager.printMessage(sim.getName() + " hits the gym for a high-intensity full-body workout.");
         sim.getEnergy().decrease(ENERGY_COST);
         sim.getHunger().decrease(HUNGER_COST);
+        UIManager.success(sim.getName() + " finishes a high-intensity full-body workout.  {R}-" + ENERGY_COST
+                + " energy -" + HUNGER_COST + " hunger{/}");
     }
 
     @Override

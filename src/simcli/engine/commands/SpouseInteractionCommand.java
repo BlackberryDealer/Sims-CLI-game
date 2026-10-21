@@ -4,7 +4,9 @@ import simcli.engine.CommandResult;
 import simcli.engine.SimulationException;
 import simcli.entities.actors.Sim;
 import simcli.entities.models.Gender;
+import simcli.entities.models.ActionState;
 import simcli.entities.models.SimState;
+import simcli.ui.Panel;
 import simcli.ui.UIManager;
 import simcli.world.Building;
 import simcli.world.Residential;
@@ -39,23 +41,22 @@ public class SpouseInteractionCommand extends BaseCommand {
         Sim activePlayer = ctx.getActivePlayer();
         Sim spouse = activePlayer.getRelationshipManager().getSpouse();
         
-        if (spouse == null) {
-            UIManager.printMessage("You are not married. Find someone special at the park first!");
-            pause();
-            return CommandResult.NO_TICK;
-        }
-
         // Check for any baby (non-playable child) in household
         boolean hasBabies = hasBabiesInHousehold();
+
+        UIManager.title("Family");
 
         // Dating and having a baby need a living spouse at home;
         // feeding the babies is always possible.
         boolean spouseAvailable = true;
-        if (spouse.getState() == SimState.DEAD) {
-            UIManager.printMessage(spouse.getName() + " has passed away. Their memory lives on.");
+        if (spouse == null) {
+            UIManager.info("You are not married. Find someone special at the park first!");
+            spouseAvailable = false;
+        } else if (spouse.getState() == SimState.DEAD) {
+            UIManager.info(spouse.getName() + " has passed away. Their memory lives on.");
             spouseAvailable = false;
         } else if (!ctx.getNeighborhood().contains(spouse)) {
-            UIManager.printMessage(spouse.getName() + " is currently busy and not at home.");
+            UIManager.info(spouse.getName() + " is currently busy and not at home.");
             spouseAvailable = false;
         }
 
@@ -64,21 +65,23 @@ public class SpouseInteractionCommand extends BaseCommand {
             return CommandResult.NO_TICK;
         }
 
-        UIManager.printMessage("\n=== Marriage Options ===");
         if (spouseAvailable) {
-            UIManager.printMessage("[1] Interact with Spouse (Date)");
-            UIManager.printMessage("[2] Have a Baby");
+            int bond = activePlayer.getRelationshipManager().getRelationship(spouse);
+            UIManager.printMessage("  {M}" + Panel.HEART + "{/} Married to {W}" + spouse.getName() + "{/}  "
+                    + Panel.bar(bond, 10) + "\n");
+            UIManager.option("1", "Go on a date", "+fun +social for you both");
+            UIManager.option("2", "Try for a baby", "50% chance - takes an hour either way");
         }
         if (hasBabies) {
-            UIManager.printMessage("[3] Feed Babies");
+            UIManager.option("3", "Feed the babies", "+50 hunger each");
         }
 
-        UIManager.printMessage("[0] Back");
-        UIManager.prompt("Select action> ");
+        UIManager.option("0", "Back");
+        UIManager.prompt("\nFamily> ");
 
         try {
             String input = ctx.getScanner().nextLine().trim();
-            if (input.equals("0")) return CommandResult.NO_TICK;
+            if (input.equals("0") || input.isEmpty()) return CommandResult.NO_TICK;
 
             int choice = Integer.parseInt(input);
             if (choice == 1 && spouseAvailable) {
@@ -91,7 +94,8 @@ public class SpouseInteractionCommand extends BaseCommand {
                 return CommandResult.TICK_FORWARD;
             }
         } catch (NumberFormatException e) {
-            UIManager.printWarning("Invalid selection.");
+            UIManager.error("Invalid selection.");
+            pause();
         }
 
         return CommandResult.NO_TICK;
@@ -115,6 +119,8 @@ public class SpouseInteractionCommand extends BaseCommand {
      * @param spouse the spouse Sim.
      */
     private void handleDate(Sim sim, Sim spouse) {
+        sim.setCurrentAction(ActionState.SOCIALIZING);
+        ctx.getLogger().logAnimation(sim);
         ctx.getLogger().log(sim.getName() + " and " + spouse.getName() + " spent a lovely time together on a date!");
         sim.getHappiness().increase(30);
         sim.getSocial().increase(50);
@@ -154,7 +160,7 @@ public class SpouseInteractionCommand extends BaseCommand {
                 Gender babyGender = sim.getRelationshipManager().attemptPregnancy();
                 if (babyGender != null) {
                     UIManager.prompt("Enter a name for the new " + babyGender + " baby: ");
-                    String babyName = ctx.getScanner().nextLine().trim();
+                    String babyName = simcli.ui.MainMenu.cleanName(ctx.getScanner().nextLine());
                     if (babyName.isEmpty()) babyName = "Baby " + sim.getName();
 
                     Sim child = sim.getRelationshipManager().finalizeBaby(babyName, babyGender);

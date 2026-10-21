@@ -4,6 +4,7 @@ import simcli.entities.items.Item;
 
 import java.util.List;
 import java.util.Scanner;
+import java.util.function.Supplier;
 
 /**
  * Reusable paginated menu utility for displaying lists of Items.
@@ -27,6 +28,17 @@ public class MenuPagination {
      */
     public static void displayPaginatedMenu(String title, List<? extends Item> catalog,
             String actionPrompt, Scanner scanner, MenuAction action) {
+        displayPaginatedMenu(title, catalog, actionPrompt, scanner, action, null);
+    }
+
+    /**
+     * Displays a paginated menu of items with a status line (e.g. the
+     * player's cash) shown under the title and refreshed after every choice.
+     *
+     * @param status supplies the status line, or {@code null} for none
+     */
+    public static void displayPaginatedMenu(String title, List<? extends Item> catalog,
+            String actionPrompt, Scanner scanner, MenuAction action, Supplier<String> status) {
         int pageSize = 10;
         int currentPage = 0;
         boolean inMenu = true;
@@ -36,28 +48,37 @@ public class MenuPagination {
             if (totalPages == 0) totalPages = 1;
             if (currentPage >= totalPages) currentPage = totalPages - 1;
 
-            UIManager.printMessage("\n=== " + title + " (Page " + (currentPage + 1) + " of " + totalPages + ") ===");
-            
+            String pages = totalPages > 1 ? "  {k}page " + (currentPage + 1) + "/" + totalPages + "{/}" : "";
+            UIManager.title(title + pages);
+            if (status != null) {
+                UIManager.printMessage("  " + status.get() + "\n");
+            }
+
             if (catalog.isEmpty()) {
-                UIManager.printMessage("Nothing to display here.");
+                UIManager.info("Nothing to display here.");
             } else {
                 int startIdx = currentPage * pageSize;
                 int endIdx = Math.min(startIdx + pageSize, catalog.size());
 
                 for (int i = startIdx; i < endIdx; i++) {
                     Item item = catalog.get(i);
-                    UIManager.printMessage("[" + (i - startIdx + 1) + "] " + item.getObjectName() + 
-                                     (item.getPrice() > 0 ? " - $" + item.getPrice() : ""));
+                    String price = item.getPrice() > 0 ? "{G}$" + item.getPrice() + "{/}" : "";
+                    UIManager.option(String.valueOf(i - startIdx + 1),
+                            Style.fit(item.getObjectName(), 18) + Style.fit(price, 7) + ItemInfo.describe(item));
                 }
             }
 
-            UIManager.printMessage("\n[N] Next Page   [P] Previous Page");
-            UIManager.printMessage("[0] Back / Exit");
-            UIManager.prompt(actionPrompt + "> ");
+            System.out.println();
+            if (totalPages > 1) {
+                UIManager.option("N", "Next page");
+                UIManager.option("P", "Previous page");
+            }
+            UIManager.option("0", "Done");
+            UIManager.prompt("\n" + actionPrompt + "> ");
 
             String input = scanner.nextLine().trim().toUpperCase();
 
-            if (input.equals("0")) {
+            if (input.equals("0") || input.isEmpty()) {
                 inMenu = false;
             } else if (input.equals("N")) {
                 if (currentPage < totalPages - 1) currentPage++;
@@ -68,16 +89,16 @@ public class MenuPagination {
                     int choice = Integer.parseInt(input);
                     int startIdx = currentPage * pageSize;
                     int maxChoice = Math.min(pageSize, catalog.size() - startIdx);
-                    
+
                     if (choice > 0 && choice <= maxChoice) {
                         int realIndex = startIdx + choice - 1;
                         Item target = catalog.get(realIndex);
                         action.onSelect(target, realIndex);
                     } else {
-                        UIManager.printMessage("Invalid selection.");
+                        UIManager.error("Invalid selection.");
                     }
                 } catch (NumberFormatException e) {
-                    UIManager.printMessage("Invalid input. Use numbers or N/P.");
+                    UIManager.error("Invalid input. Use numbers or N/P.");
                 }
             }
         }

@@ -1,6 +1,7 @@
 package simcli;
 
 import simcli.ui.MainMenu;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 /**
@@ -16,10 +17,16 @@ public class Main {
      */
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        
+
         MainMenu menu = new MainMenu(scanner);
-        menu.display();
-        
+        try {
+            menu.display();
+        } catch (NoSuchElementException e) {
+            // Input was closed (Ctrl+D / Ctrl+Z, or a piped script ran out):
+            // leave quietly instead of crashing with a stack trace.
+            System.out.println("\nInput closed - goodbye!");
+        }
+
         scanner.close();
     }
 }

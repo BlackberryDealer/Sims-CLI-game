@@ -28,5 +28,11 @@ public enum ActionState {
     PLAYING,
 
     /** The Sim is socializing with another Sim. */
-    SOCIALIZING
+    SOCIALIZING,
+
+    /** The Sim is working out (e.g. on the weight bench). */
+    EXERCISING,
+
+    /** The Sim is showering. */
+    BATHING
 }

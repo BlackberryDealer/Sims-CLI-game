@@ -21,7 +21,8 @@ public class Hygiene extends Need {
      */
     @Override
     public void calculateDecay(Sim sim, double multiplier) {
-        if (sim.getCurrentAction() == ActionState.WORKING) {
+        if (sim.getCurrentAction() == ActionState.WORKING
+                || sim.getCurrentAction() == ActionState.EXERCISING) {
             this.decrease((int) Math.round((this.getBaseDecayRate() + GameConstants.HYGIENE_ACCELERATED_DECAY_RATE) * multiplier));
         } else {
             this.decrease((int) Math.round(this.getBaseDecayRate() * multiplier));

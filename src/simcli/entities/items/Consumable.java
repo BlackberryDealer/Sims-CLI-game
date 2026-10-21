@@ -5,6 +5,7 @@ import simcli.entities.actors.Sim;
 
 import simcli.engine.SimulationException;
 import simcli.entities.models.ActionState;
+import simcli.ui.ItemInfo;
 import simcli.ui.UIManager;
 
 import java.util.Scanner;
@@ -73,17 +74,23 @@ public class Consumable extends Item {
     }
 
     /**
-     * Consumes this item: sets the Sim's action to EATING, plays the
-     * eating animation, and calls {@link Sim#eat(Consumable)} to apply
-     * the stat effects and remove the item from inventory.
+     * Consumes this item: plays the eating animation for food (or the
+     * leisure animation for things like books and perfume), then calls
+     * {@link Sim#eat(Consumable)} to apply the stat effects and remove the
+     * item from inventory.
      *
      * {@inheritDoc}
      */
     @Override
     public void interact(Sim sim, Scanner scanner, TimeManager timeManager) throws SimulationException {
-        sim.setCurrentAction(ActionState.EATING);
+        boolean food = satiationValue > 0;
+        sim.setCurrentAction(food ? ActionState.EATING : ActionState.PLAYING);
         UIManager.displayActionAnimation(sim);
-        UIManager.printMessage(sim.getName() + " consumes the " + getObjectName() + ".");
+        if (food) {
+            UIManager.success(sim.getName() + " eats the " + getObjectName() + ".  " + ItemInfo.describe(this));
+        } else {
+            UIManager.success(sim.getName() + " enjoys the " + getObjectName() + ".  " + ItemInfo.describe(this));
+        }
         sim.eat(this);
     }
 

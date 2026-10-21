@@ -24,12 +24,13 @@ public class Park extends Building {
     
     @Override
     public void enter(Sim sim) {
-        UIManager.printMessage(sim.getName() + " has arrived at " + getName() + ".");
-        StringBuilder names = new StringBuilder("People currently here: ");
+        UIManager.info(sim.getName() + " has arrived at " + getName() + ".");
+        StringBuilder names = new StringBuilder();
         List<NPCSim> visitors = getVisitors();
         for (NPCSim npc : visitors) {
-            names.append(npc.getName()).append(" ");
+            if (names.length() > 0) names.append(", ");
+            names.append(npc.getName());
         }
-        UIManager.printMessage(names.toString().trim());
+        UIManager.info("People here today: {W}" + names + "{/}");
     }
 }

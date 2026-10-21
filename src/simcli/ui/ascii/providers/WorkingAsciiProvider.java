@@ -3,37 +3,45 @@ package simcli.ui.ascii.providers;
 import simcli.entities.actors.Sim;
 import simcli.world.Building;
 import simcli.ui.ascii.IAsciiProvider;
+import simcli.ui.ascii.Sprites;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * WorkingAsciiProvider — 2D side-view of a stickman Sim typing at a desk.
- *
- * Visual: monitor on desk, stickman seated and typing, career title shown on
- * screen.
- * Art style: simple 2D terminal ASCII, designed to fit ~50 columns.
+ * Working scene: the Sim types away at a laptop while a progress bar fills.
  */
 public class WorkingAsciiProvider implements IAsciiProvider {
 
+    private static final int STEPS = 6;
+
     @Override
     public String getAsciiArt(Sim player, Building location) {
-        String job = player.getCareer().getTitle();
-        return "          __    __\n" +
-            "         /  \\ /| |'-.\n" +
-            "        .\\__/ || |   |\n" +
-            "     _ /  `._ \\|_|_.-'\n" +
-            "    | /  \\__.`=._) (_\n" +
-            "    |/ ._/  |\"\"\"\"\"\"\"\"\"|\n" +
-            "    |'.  `\\ |         |\n" +
-            "    ;\"\"\"/ / |         |\n" +
-            "     ) /_/| |.-------.|\n" +
-            "    '  `-`' \"         \"" +
-                "   \" " + player.getName() + " is working! \"";
+        return scene(player, STEPS);
     }
 
-    /** Pads or trims a string to a fixed width, centering the text. */
-    private String padCenter(String text, int width) {
-        if (text.length() >= width)
-            return text.substring(0, width);
-        int pad = (width - text.length()) / 2;
-        return " ".repeat(pad) + text + " ".repeat(width - text.length() - pad);
+    @Override
+    public List<String> getFrames(Sim player, Building location) {
+        List<String> frames = new ArrayList<>();
+        for (int step = 0; step <= STEPS; step++) {
+            frames.add(scene(player, step));
+        }
+        return frames;
+    }
+
+    private String scene(Sim player, int step) {
+        String bar = "[" + "#".repeat(step) + " ".repeat(STEPS - step) + "]";
+        String status = step >= STEPS ? "{G} Shift done! {/}" : "{G} working...  {/}";
+        String laptop = "\n"
+                + "  {k}.-------------.{/}\n"
+                + "  {k}|{/}{G} $ ./work.sh {/}{k}|{/}\n"
+                + "  {k}|{/}{G}  " + bar + "   {/}{k}|{/}\n"
+                + "  {k}|{/}" + status + "{k}|{/}\n"
+                + "  {k}|_____________|{/}\n"
+                + " {k}/_______________\\{/}";
+        String face = Sprites.head(player, 'o', step % 2 == 0 ? "---" : "-o-");
+        return Sprites.indent(Sprites.beside(face, laptop, 2), 4)
+                + Sprites.caption("{W}" + player.getName() + "{/} is on shift as a "
+                        + player.getCareer().getTitle());
     }
 }

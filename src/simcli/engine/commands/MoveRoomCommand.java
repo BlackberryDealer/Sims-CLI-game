@@ -2,6 +2,8 @@ package simcli.engine.commands;
 
 import simcli.engine.CommandResult;
 import simcli.entities.actors.Sim;
+import simcli.ui.Panel;
+import simcli.ui.Style;
 import simcli.ui.UIManager;
 import simcli.world.Building;
 import simcli.world.Residential;
@@ -38,31 +40,39 @@ public class MoveRoomCommand extends BaseCommand {
 
         if (currentLocation.isResidential()) {
             Residential res = (Residential) currentLocation;
-            UIManager.printMessage("\n=== MOVE ROOM ===");
+            UIManager.title("Go to which room?");
             List<Room> rooms = res.getRooms();
             for (int i = 0; i < rooms.size(); i++) {
                 Room room = rooms.get(i);
-                String currentTag = (room == activePlayer.getCurrentRoom()) ? " (Current)" : "";
-                UIManager.printMessage("[" + (i + 1) + "] " + room.getName() + currentTag);
+                String contents = HouseInfoCommand.contents(room);
+                String here = (room == activePlayer.getCurrentRoom()) ? "  {G}" + Panel.ARROW + " you are here{/}" : "";
+                UIManager.option(String.valueOf(i + 1), Style.fit(room.getName(), 18) + contents + here);
             }
-            UIManager.printMessage("[0] Cancel");
-            UIManager.prompt("Select Room> ");
+            UIManager.option("0", "Stay here");
+            UIManager.prompt("\nRoom> ");
             try {
-                int rChoice = Integer.parseInt(ctx.getScanner().nextLine().trim());
+                String input = ctx.getScanner().nextLine().trim();
+                if (input.isEmpty() || input.equals("0")) {
+                    return CommandResult.NO_TICK;
+                }
+                int rChoice = Integer.parseInt(input);
                 if (rChoice > 0 && rChoice <= rooms.size()) {
                     Room selectedRoom = rooms.get(rChoice - 1);
                     if (selectedRoom == activePlayer.getCurrentRoom()) {
-                        UIManager.printMessage("You are already in " + selectedRoom.getName() + "!");
+                        UIManager.info("You are already in the " + selectedRoom.getName() + "!");
                     } else {
+                        // moving is instant; the next screen shows the new room
                         activePlayer.setCurrentRoom(selectedRoom);
-                        UIManager.printMessage("Moved to " + activePlayer.getCurrentRoom().getName() + ".");
+                        return CommandResult.NO_TICK;
                     }
+                } else {
+                    UIManager.error("Invalid room.");
                 }
             } catch (NumberFormatException e) {
-                UIManager.printMessage("Invalid input.");
+                UIManager.error("Invalid input.");
             }
         } else {
-            UIManager.printMessage("You can only move between rooms at home!");
+            UIManager.info("You can only move between rooms at home!");
         }
         pause();
         return CommandResult.NO_TICK;

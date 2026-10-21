@@ -115,13 +115,16 @@ public class InputHandler implements IInputHandler {
             // exceptions become results — keeps the game loop clean
         } catch (SleepEventException e) {
             return CommandResult.SLEEP_EVENT;
+        } catch (ActionCancelledException e) {
+            // the player backed out without doing anything — no time passes
+            return CommandResult.NO_TICK;
         } catch (SimulationException e) {
-            UIManager.printWarning("ACTION REJECTED: " + e.getMessage());
+            UIManager.printWarning("Can't do that: " + e.getMessage());
             UIManager.prompt("\nPress ENTER to return...");
             scanner.nextLine();
             return CommandResult.NO_TICK;
         } catch (NumberFormatException e) {
-            UIManager.printWarning("Invalid input.");
+            UIManager.printWarning("Invalid input. Type a number or one of the letters from the menu.");
             UIManager.prompt("\nPress ENTER to return...");
             scanner.nextLine();
             return CommandResult.NO_TICK;

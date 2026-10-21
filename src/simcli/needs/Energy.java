@@ -23,7 +23,8 @@ public class Energy extends Need {
     public void calculateDecay(Sim sim, double multiplier) {
         if (sim.getCurrentAction() == ActionState.SLEEPING) {
             this.increase(GameConstants.ENERGY_SLEEP_ADDED_AMOUNT); // Refresh when sleeping
-        } else if (sim.getCurrentAction() == ActionState.WORKING) {
+        } else if (sim.getCurrentAction() == ActionState.WORKING
+                || sim.getCurrentAction() == ActionState.EXERCISING) {
             this.decrease((int) Math.round((this.getBaseDecayRate() + GameConstants.ENERGY_WORK_DECAY_AMOUNT) * multiplier));
         } else {
             this.decrease((int) Math.round(this.getBaseDecayRate() * multiplier));

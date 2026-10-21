@@ -2,7 +2,10 @@ package simcli.engine.commands;
 
 import simcli.engine.CommandResult;
 import simcli.entities.actors.Sim;
+import simcli.ui.Panel;
+import simcli.ui.Style;
 import simcli.ui.UIManager;
+import simcli.ui.ascii.Sprites;
 
 import java.util.List;
 import simcli.entities.models.SimState;
@@ -32,55 +35,61 @@ public class SwitchSimCommand extends BaseCommand {
         List<Sim> neighborhood = ctx.getNeighborhood();
         Sim activePlayer = ctx.getActivePlayer();
 
-        UIManager.printMessage("\n=== Switch Sim ===");
+        UIManager.title("Who do you want to play as?");
         if (neighborhood.size() <= 1) {
-            UIManager.printMessage("There is no one else in your household to switch to.");
+            UIManager.info("There is no one else in your household to switch to.");
             pause();
             return CommandResult.NO_TICK;
         }
 
-        UIManager.printMessage("Current Household:");
         for (int i = 0; i < neighborhood.size(); i++) {
             Sim s = neighborhood.get(i);
-            String status = s.getState() == SimState.DEAD ? "[DEAD]" : 
-                           (!s.isPlayable() ? "[NOT PLAYABLE - Age: " + s.getAge() + "]" : "[Alive]");
-            String marker = (s == activePlayer) ? " (Current)" : "";
-            UIManager.printMessage("[" + (i + 1) + "] " + s.getName() + " " + status + marker);
+            String status;
+            if (s.getState() == SimState.DEAD) {
+                status = "{k}" + Panel.CROSS + " passed away{/}";
+            } else if (!s.isPlayable()) {
+                status = "{k}baby, age " + s.getAge() + " - playable at 13{/}";
+            } else {
+                status = "{" + Sprites.moodColor(s) + "}" + Panel.STAR + "{/} {k}" + s.getAge() + ", "
+                        + s.getCareer().getTitle() + ", " + Panel.HEART + " " + s.getHealth() + "{/}";
+            }
+            String marker = (s == activePlayer) ? "  {G}" + Panel.ARROW + " playing now{/}" : "";
+            UIManager.option(String.valueOf(i + 1), Style.fit(s.getName(), 16) + status + marker);
         }
-        UIManager.printMessage("[0] Cancel");
-        UIManager.prompt("Select Sim to control> ");
+        UIManager.option("0", "Cancel");
+        UIManager.prompt("\nPlay as> ");
 
         try {
-            int target = Integer.parseInt(ctx.getScanner().nextLine().trim());
+            String input = ctx.getScanner().nextLine().trim();
+            if (input.isEmpty()) return CommandResult.NO_TICK;
+            int target = Integer.parseInt(input);
             if (target == 0) return CommandResult.NO_TICK;
-            
+
             if (target > 0 && target <= neighborhood.size()) {
                 Sim chosen = neighborhood.get(target - 1);
                 if (chosen.getState() == SimState.DEAD) {
-                    UIManager.printMessage(chosen.getName() + " is deceased. Let them rest.");
+                    UIManager.info(chosen.getName() + " is deceased. Let them rest.");
                     pause();
                     return CommandResult.NO_TICK;
                 }
                 if (!chosen.isPlayable()) {
-                    UIManager.printMessage(chosen.getName() + " is too young to be controlled. They must reach the teen stage (age 13) first.");
+                    UIManager.info(chosen.getName() + " is too young to be controlled. They must reach the teen stage (age 13) first.");
                     pause();
                     return CommandResult.NO_TICK;
                 }
-                
-                // callback fires back into GameEngine.setActivePlayer
+
+                // callback fires back into GameEngine.setActivePlayer;
+                // the next screen shows the newly selected Sim
                 ctx.switchActivePlayer(chosen);
-                UIManager.printMessage("Switched control to " + chosen.getName() + ".");
-                pause();
-                
                 return CommandResult.NO_TICK;
             } else {
-                UIManager.printWarning("Invalid selection.");
+                UIManager.error("Invalid selection.");
                 pause();
                 return CommandResult.NO_TICK;
             }
 
         } catch (NumberFormatException e) {
-             UIManager.printWarning("Invalid input.");
+             UIManager.error("Invalid input.");
              pause();
              return CommandResult.NO_TICK;
         }

@@ -57,12 +57,13 @@ public class GameEngineTest {
         }
 
         @Test
-        @DisplayName("New game starts at tick 1")
-        void testNewGameStartsAtTickOne() {
+        @DisplayName("New game starts on Monday morning (08:00)")
+        void testNewGameStartsOnMondayMorning() {
             Sim sim = new Sim("Bob", 25, Gender.MALE, Job.UNEMPLOYED);
             GameEngine engine = new GameEngine("World1", Arrays.asList(sim));
 
-            assertEquals(1, engine.getCurrentTick(), "New game should start at tick 1");
+            assertEquals(simcli.utils.GameConstants.MORNING_HOUR, engine.getCurrentTick(),
+                    "New game should start at 08:00 on day 1");
         }
 
         @Test

@@ -83,7 +83,17 @@ Each tick has a 5% chance to trigger one of six events:
 
 ### 🎨 ASCII Art Rendering
 - Dynamic ASCII art driven by an extensible provider system
-- Contextual rendering based on location and Sim action state
+- Contextual rendering based on location and Sim action state: every building and every activity
+  (sleeping, eating, working, studying, socializing, working out, showering, having fun) has its own scene
+- A Sims-style **plumbob** above your Sim's head that turns green, yellow or red with their mood
+- Short **animations** when your Sim acts, travels, or sleeps through the night
+- A colour-coded HUD: date and time banner, need bars, household summary, and an action menu grouped by purpose
+
+### 🖥️ Display settings
+- Colours and animations can be toggled from **Settings** in the main menu
+- Colours are detected automatically (Windows Terminal, VS Code, most Linux/macOS terminals);
+  force them with the environment variable `SIMCLI_COLOR=always` or `SIMCLI_COLOR=never` (`NO_COLOR` is honoured too)
+- On consoles that can't show box-drawing characters, the UI falls back to plain ASCII
 
 ---
 
@@ -127,10 +137,11 @@ This generates the full API documentation into the `docs/` directory. Open `docs
 
 ### Main Menu
 ```
-[1] Create New World    — Start a new game with a fresh household
-[2] Load Existing World — Resume a previously saved game
-[3] Delete Saved World  — Permanently remove a save file
-[4] Exit Game           — Quit the application
+[1] New world     — Start a new game with a fresh household
+[2] Load world    — Resume a saved game (pick it by number or name)
+[3] Delete world  — Permanently remove a save file
+[4] Settings      — Turn colours and animations on or off
+[0] Quit          — Quit the application
 ```
 
 ### In-Game Commands
@@ -145,12 +156,15 @@ This generates the full API documentation into the `docs/` directory. Open `docs
 | `V` | Open inventory (eat food, use/drop items) |
 | `U` | Upgrade room storage capacity ($500) |
 | `K` | Switch active Sim to another household member |
-| `L` | Spouse interactions (gift, reproduce) |
+| `L` | Family: date your spouse, try for a baby, feed the babies |
 | `S` | Save and exit to main menu |
-| `1-9` | Interact with numbered objects in the current location |
+| `1-9` | Use the numbered things listed under **HERE** (bed, fridge, shop, park bench...) |
+
+Every sub-menu uses `0` to go back. Backing out of a shop, the fridge, a storage chest or the park
+without doing anything costs no time.
 
 ### Gameplay Tips
-- **Keep hunger above 20** — dropping to zero starts a 3-tick death countdown
+- **Keep hunger above 20** — hunger at zero drains health faster every hour until your Sim dies
 - **Sleep regularly** — sleeping fast-forwards time to 8 AM and restores energy
 - **Socialize at the park** — the Socialite trait gives bonus relationship and happiness gains
 - **Save up for the Bungalow** ($5,000) — it comes with a Computer for extra interactions

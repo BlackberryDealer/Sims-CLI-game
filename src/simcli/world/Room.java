@@ -82,9 +82,9 @@ public class Room {
         if (sim.getMoney() >= cost) {
             sim.setMoney(sim.getMoney() - cost);
             this.maxCapacity += extraSpace;
-            UIManager.printMessage("Success! " + this.name + " upgraded. New capacity: " + this.maxCapacity);
+            UIManager.success("The " + this.name + " has been upgraded! It now holds " + this.maxCapacity + " space.");
         } else {
-            UIManager.printMessage("Not enough money! Upgrade costs $" + cost);
+            UIManager.error("Not enough money! Upgrade costs $" + cost);
         }
     }
 }

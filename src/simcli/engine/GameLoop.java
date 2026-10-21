@@ -98,9 +98,9 @@ public class GameLoop {
      * @param dayNumber the day that has just begun.
      */
     private void processDayBoundary(int dayNumber) {
-        simcli.ui.UIManager.printMessage(
-                "\n*** A new day has begun! (Day "
-                + dayNumber + ") ***");
+        simcli.ui.UIManager.printEvent(
+                "*** A new day has begun! Day " + dayNumber + ", "
+                + TimeManager.dayOfWeekName(dayNumber) + " ***");
 
         boolean endedDayWasWorkday = !TimeManager.isWeekend(dayNumber - 1);
         for (Sim s : neighborhood) {

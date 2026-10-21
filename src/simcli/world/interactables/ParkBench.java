@@ -3,8 +3,12 @@ package simcli.world.interactables;
 import java.util.List;
 import java.util.Scanner;
 
+import simcli.engine.ActionCancelledException;
 import simcli.engine.SimulationException;
 import simcli.engine.SimulationLogger;
+import simcli.ui.Panel;
+import simcli.ui.Style;
+import simcli.ui.UIManager;
 import simcli.engine.TimeManager;
 import simcli.entities.actors.NPCSim;
 import simcli.entities.actors.Sim;
@@ -52,21 +56,18 @@ public class ParkBench implements Interactable {
 
     @Override
     public void interact(Sim sim, Scanner scanner, TimeManager timeManager) throws SimulationException {
-        sim.setCurrentAction(ActionState.SOCIALIZING);
-        SimulationLogger.getInstance().logAnimation(sim);
-
         List<NPCSim> visitors = npcManager.getActiveNPCs();
 
-        SimulationLogger.getInstance().prompt("\n=== Socialize at the Park ===\n");
+        UIManager.title("City Park - who do you want to talk to?");
         for (int i = 0; i < visitors.size(); i++) {
             NPCSim npc = visitors.get(i);
             int relScore = sim.getRelationshipManager().getRelationship(npc);
-            String spouseTag = (sim.getRelationshipManager().getSpouse() == npc) ? " [SPOUSE]" : "";
-            SimulationLogger.getInstance().prompt("[" + (i + 1) + "] " + npc.getName()
-                    + ", " + npc.getAge() + ", " + npc.getCareer().getTitle()
-                    + " (Relationship: " + relScore + "/100)" + spouseTag + "\n");
+            String who = Style.fit(npc.getName(), 9) + Style.fit("{k}" + npc.getAge() + ", "
+                    + npc.getCareer().getTitle() + "{/}", 28);
+            UIManager.option(String.valueOf(i + 1), who + Panel.bar(relScore, 10) + "  " + bond(relScore));
         }
-        SimulationLogger.getInstance().prompt("[0] Go back\nSelect person> ");
+        UIManager.option("0", "Go back");
+        UIManager.prompt("\nTalk to> ");
         try {
             int choice = Integer.parseInt(scanner.nextLine().trim());
             if (choice > 0 && choice <= visitors.size()) {
@@ -74,8 +75,10 @@ public class ParkBench implements Interactable {
                 int relScore = sim.getRelationshipManager().getRelationship(target);
 
                 SocialAction[] actions = {SocialAction.CHAT, SocialAction.JOKE, SocialAction.ARGUE};
+                String[] hints = {"safe and friendly", "big boost if it lands", "why would you?"};
+                UIManager.title("Talking to " + target.getName());
                 for (int i = 0; i < actions.length; i++) {
-                    SimulationLogger.getInstance().prompt("[" + (i + 1) + "] " + actions[i].getDisplayName() + "\n");
+                    UIManager.option(String.valueOf(i + 1), Style.fit(actions[i].getDisplayName(), 10), hints[i]);
                 }
 
                 boolean canPropose = relScore >= GameConstants.MARRIAGE_THRESHOLD
@@ -83,13 +86,21 @@ public class ParkBench implements Interactable {
                         && target.getRelationshipManager().getSpouse() == null;
                 int proposeChoice = actions.length + 1;
                 if (canPropose) {
-                    SimulationLogger.getInstance().prompt("[" + proposeChoice + "] Propose Marriage\n");
+                    UIManager.option(String.valueOf(proposeChoice), "{M}" + Panel.HEART + " Propose marriage{/}");
+                } else if (relScore >= GameConstants.MARRIAGE_THRESHOLD - 20) {
+                    UIManager.printMessage("  {k}(" + target.getName() + " seems to like you a lot...){/}");
+                }
+                UIManager.option("0", "Never mind");
+
+                UIManager.prompt("\nSay> ");
+                int actionChoice = Integer.parseInt(scanner.nextLine().trim());
+                if (actionChoice == 0) {
+                    throw new ActionCancelledException();
                 }
 
-                SimulationLogger.getInstance().prompt("Select action> ");
-                int actionChoice = Integer.parseInt(scanner.nextLine().trim());
-
                 if (actionChoice > 0 && actionChoice <= actions.length) {
+                    sim.setCurrentAction(ActionState.SOCIALIZING);
+                    SimulationLogger.getInstance().logAnimation(sim);
                     SocialAction selectedAction = actions[actionChoice - 1];
                     boolean isSocialite = sim.hasTrait(Trait.SOCIALITE);
                     double multiplier = isSocialite ? GameConstants.BONUS_TIMES : 1.0;
@@ -108,15 +119,30 @@ public class ParkBench implements Interactable {
                 } else if (actionChoice == proposeChoice && canPropose) {
                     handleProposal(sim, target);
                 } else {
-                    SimulationLogger.getInstance().logWarning("Invalid action selection.");
-                    return;
+                    UIManager.error("Invalid action selection.");
+                    throw new ActionCancelledException();
                 }
-                
-                SimulationLogger.getInstance().log("Relationship with " + target.getName() + " is now " + sim.getRelationshipManager().getRelationship(target) + "/100.");
+
+                int now = sim.getRelationshipManager().getRelationship(target);
+                SimulationLogger.getInstance().log("Relationship with " + target.getName() + " is now "
+                        + now + "/100 (" + Style.plain(bond(now)) + ").");
+            } else {
+                // went back (or picked nobody) — no time passes
+                throw new ActionCancelledException();
             }
         } catch (NumberFormatException e) {
-            SimulationLogger.getInstance().logWarning("Invalid selection.");
+            UIManager.error("Invalid selection.");
+            throw new ActionCancelledException();
         }
+    }
+
+    /** Friendly label for a relationship score. */
+    private static String bond(int score) {
+        if (score >= GameConstants.MARRIAGE_THRESHOLD) return "{M}" + Panel.HEART + " soulmate{/}";
+        if (score >= 80) return "{M}close friend{/}";
+        if (score >= 50) return "{G}friend{/}";
+        if (score >= 20) return "{Y}acquaintance{/}";
+        return "{k}stranger{/}";
     }
 
     /**

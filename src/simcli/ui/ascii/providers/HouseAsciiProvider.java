@@ -5,32 +5,22 @@ import simcli.world.Building;
 import simcli.ui.ascii.IAsciiProvider;
 
 /**
- * HouseAsciiProvider — 2D front-view of a residential home.
- *
- * Single authoritative source of house ASCII art.
- * Replaces the duplicate printHouse() that existed in AsciiArt.java.
- * Art style: simple 2D terminal ASCII, designed to fit ~50 columns.
+ * The Shared Dorm: a cosy brick block with a smoking chimney.
  */
 public class HouseAsciiProvider implements IAsciiProvider {
 
     @Override
     public String getAsciiArt(Sim player, Building location) {
-        String locName = (location != null) ? location.getName() : "Home";
-        return "    ) )        /\\\n" +
-            "   =====      /  \\\n" +
-            "  _|___|_____/ __ \\____________\n" +
-            " |::::::::::/ |  | \\:::::::::::|\n" +
-            " |:::::::::/  ====  \\::::::::::|\n" +
-            " |::::::::/__________\\:::::::::|\n" +
-            " |_________|  ____  |__________|\n" +
-            "  | ______ | / || \\ | _______ |\n" +
-            "  ||  |   || ====== ||   |   ||\n" +
-            "  ||--+---|| |    | ||---+---||\n" +
-            "  ||__|___|| |   o| ||___|___||\n" +
-            "  |========| |____| |=========|\n" +
-            " (^^-^^^^^-|________|-^^^--^^^)\n" +
-            " (,, , ,, ,/________\\,,,, ,, ,)\n" +
-            "','',,,,' /__________\\,,,',',;;"+
-                "   [ " + locName + " ]";
+        return ""
+                + "            {k}(  )  (  ){/}\n"
+                + "             {k}){/}{r}||{/}    {r}||{/}\n"
+                + "        {r}______||____||___________________{/}\n"
+                + "       {r}/                                /|{/}\n"
+                + "      {r}/   {Y}~ T H E   D O R M ~{r}          / |{/}\n"
+                + "     {r}/________________________________/  |{/}\n"
+                + "     {r}|  {C}[##]  [##]{r}   {y}____{r}   {C}[##]  [##]{r}|  |{/}\n"
+                + "     {r}|  {C}[##]  [##]{r}  {y}|    |{r}  {C}[##]  [##]{r}|  /{/}\n"
+                + "     {r}|______________{y}|   o|{r}____________| /{/}\n"
+                + "   {G},,'',,,'',,,,'',,,,,'',,,,'',,,,'',,,'',,{/}";
     }
 }

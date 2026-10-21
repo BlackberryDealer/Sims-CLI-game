@@ -100,7 +100,7 @@ public class SimulationLogger {
      */
     public void prompt(String message) {
         flushAndPrint();
-        System.out.print(message);
+        UIManager.prompt(message);
     }
 
     /**
@@ -108,13 +108,17 @@ public class SimulationLogger {
      * action animation. Clears the buffer afterwards.
      */
     public void flushAndPrint() {
-        for(String s : logs) {
-            System.out.println(s);
-        }
-        logs.clear();
+        // Animate first: the animation clears the screen, so printing the
+        // messages before it would wipe them before the player could read them.
         if (simToAnimate != null) {
-            UIManager.displayActionAnimation(simToAnimate);
+            Sim animated = simToAnimate;
             simToAnimate = null;
+            UIManager.displayActionAnimation(animated);
+        }
+        List<String> pending = new ArrayList<>(logs);
+        logs.clear();
+        for (String s : pending) {
+            UIManager.printEvent(s);
         }
     }
 

@@ -93,7 +93,8 @@ public class GameEngine {
         this.npcManager.replenishNPCs(simcli.utils.GameConstants.MAX_NPCS);
         this.activePlayer = startingNeighborhood.get(0);
 
-        initCore(new TimeManager(1, GameConstants.TICKS_PER_DAY), renderer);
+        // A new world starts on Monday morning rather than at 01:00.
+        initCore(new TimeManager(GameConstants.MORNING_HOUR, GameConstants.TICKS_PER_DAY), renderer);
     }
 
     /**
@@ -235,15 +236,10 @@ public class GameEngine {
             syncActivePlayerToLocation();
             renderFrame();
 
-            if (tickForward) {
-                Sim activePlayer = this.activePlayer;
-                if (activePlayer.getState() == SimState.DEAD) {
-                    running = handleDeadActivePlayer(scanner);
-                    tickForward = true;
-                    continue;
-                } else if (activePlayer.getState() == SimState.HUNGRY) {
-                    UIManager.printMessage("\n[WARNING] " + activePlayer.getName() + " is HUNGRY! Feed them!");
-                }
+            if (tickForward && this.activePlayer.getState() == SimState.DEAD) {
+                running = handleDeadActivePlayer(scanner);
+                tickForward = true;
+                continue;
             }
 
             tickForward = true;
@@ -251,9 +247,9 @@ public class GameEngine {
             renderActionMenu();
 
             this.logger.flushAndPrint();
-            UIManager.prompt("\nCOMMAND> ");
+            UIManager.prompt("\nYour choice> ");
 
-            String input = scanner.nextLine().toUpperCase();
+            String input = scanner.nextLine().trim().toUpperCase();
             CommandResult result = inputHandler.handle(input, this.activePlayer, scanner);
 
             int ticksToAdvance = 1;
@@ -276,18 +272,22 @@ public class GameEngine {
                     break;
                 case SAVE_AND_EXIT:
                     running = false;
-                    UIManager.printMessage("Saving game...");
+                    UIManager.info("Saving " + this.worldName + "...");
                     SaveManager.saveGame(this, this.worldName);
-                    UIManager.printMessage("Game Saved! Returning to Main Menu...\n");
-                    UIManager.prompt("Press ENTER to exit...");
+                    UIManager.success("Game saved! See you soon.");
+                    UIManager.prompt("\nPress ENTER to return to the main menu...");
                     scanner.nextLine();
                     continue;
             }
 
             if (running && tickForward) {
                 gameLoop.processTick(this.activePlayer, ticksToAdvance);
+                if (result == CommandResult.SLEEP_EVENT) {
+                    // it's morning — the Sim is awake now, so show the room, not the bed
+                    this.activePlayer.setCurrentAction(ActionState.IDLE);
+                }
                 maybeAutosave();
-                UIManager.prompt("\nPress ENTER to continue to the next turn...");
+                UIManager.prompt("\nPress ENTER to continue...");
                 scanner.nextLine();
             }
         }
@@ -332,12 +332,12 @@ public class GameEngine {
     }
 
     /**
-     * Renders the full game frame: clear screen, hint, HUD, and household dashboard.
+     * Renders the top of the game frame: clear screen, date/location banner
+     * with scene art, the active Sim's needs, and the rest of the household.
      */
     private void renderFrame() {
         Sim activePlayer = this.activePlayer;
         renderer.clear();
-        renderer.printHint();
 
         boolean inRoom = this.worldManager.getCurrentLocation() instanceof Residential
                 && activePlayer.getCurrentRoom() != null;
@@ -347,20 +347,20 @@ public class GameEngine {
                 timeManager.getCurrentDay(), timeManager.getFormattedTime(),
                 timeManager.getTimeOfDay(), inRoom, roomName);
 
+        if (activePlayer.getState() != SimState.DEAD) {
+            renderer.renderActiveSimStats(activePlayer, this.neighborhood);
+        }
         renderer.renderHouseholdDashboard(this.neighborhood, activePlayer);
     }
 
     /**
-     * Renders the active Sim's detailed stats and the action menu.
+     * Renders the action menu and a gameplay tip.
      */
     private void renderActionMenu() {
         Sim activePlayer = this.activePlayer;
         boolean inRoom = this.worldManager.getCurrentLocation() instanceof Residential
                 && activePlayer.getCurrentRoom() != null;
 
-        renderer.renderActiveSimStats(activePlayer, this.neighborhood);
-
-        UIManager.printMessage("Inventory Logs: " + activePlayer.getInventory().size() + " items");
         List<Interactable> items;
         if (inRoom) {
             items = activePlayer.getCurrentRoom().getInteractables();
@@ -370,6 +370,7 @@ public class GameEngine {
 
         renderer.renderActions(activePlayer, items,
                 this.worldManager.getCurrentLocation() instanceof Residential);
+        renderer.printHint();
     }
 
     /**
@@ -398,7 +399,8 @@ public class GameEngine {
         }
 
         Sim activePlayer = this.activePlayer;
-        UIManager.printMessage("Switching control to " + activePlayer.getName() + ".");
+        System.out.println();
+        UIManager.info("Life goes on. You now control {W}" + activePlayer.getName() + "{/}.");
         this.worldManager.getCurrentLocation().enter(activePlayer);
         UIManager.prompt("\nPress ENTER to continue...");
         scanner.nextLine();
@@ -406,24 +408,14 @@ public class GameEngine {
     }
 
     /**
-     * Handles the sleep event: fast-forwards the clock to the next morning.
+     * Handles the sleep event: plays the night-time animation and works out
+     * how many ticks remain until 08:00 (morning).
      *
-     * <p>Re-renders the HUD so the player sees the updated time, then
-     * calculates ticks to 08:00 (morning).</p>
-     * 
      * @return the number of ticks required to reach the target morning hour
      */
     private int handleSleepEvent() {
         Sim activePlayer = this.activePlayer;
         renderer.clear();
-
-        boolean inRoom = this.worldManager.getCurrentLocation() instanceof Residential
-                && activePlayer.getCurrentRoom() != null;
-        String roomName = inRoom ? activePlayer.getCurrentRoom().getName() : "";
-
-        renderer.renderHUD(activePlayer, this.worldManager.getCurrentLocation(),
-                timeManager.getCurrentDay(), timeManager.getFormattedTime(),
-                timeManager.getTimeOfDay(), inRoom, roomName);
 
         int currentInDay = timeManager.getCurrentTick() % GameConstants.TICKS_PER_DAY;
         int ticksToMorning = (GameConstants.TICKS_PER_DAY - currentInDay + GameConstants.MORNING_HOUR) % GameConstants.TICKS_PER_DAY;
@@ -431,12 +423,10 @@ public class GameEngine {
             ticksToMorning = GameConstants.TICKS_PER_DAY;
         }
 
-        UIManager.printMessage("\n" + activePlayer.getName() + " sleeps deeply in the bed for "
-                + ticksToMorning + " hours.");
-        UIManager.sleepAnimation();
+        System.out.println();
+        UIManager.sleepAnimation(activePlayer.getName(), ticksToMorning);
 
-        // renderHUD() resets the action to IDLE; the Sim must stay asleep
-        // while GameLoop simulates the night hour by hour.
+        // The Sim must stay asleep while GameLoop simulates the night hour by hour.
         activePlayer.setCurrentAction(ActionState.SLEEPING);
 
         return ticksToMorning;

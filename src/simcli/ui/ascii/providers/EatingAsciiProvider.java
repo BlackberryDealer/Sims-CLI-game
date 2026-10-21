@@ -3,26 +3,41 @@ package simcli.ui.ascii.providers;
 import simcli.entities.actors.Sim;
 import simcli.world.Building;
 import simcli.ui.ascii.IAsciiProvider;
+import simcli.ui.ascii.Sprites;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * EatingAsciiProvider — 2D side-view of a stickman Sim at a dining table.
- *
- * Visual: stickman seated at a table with a bowl of food and fork.
- * Art style: simple 2D terminal ASCII, designed to fit ~50 columns.
+ * Eating scene: the Sim chomps away at a burger.
  */
 public class EatingAsciiProvider implements IAsciiProvider {
 
     @Override
     public String getAsciiArt(Sim player, Building location) {
-        return "              ,-------------------.\n" +
-            "             ( Yummy!! )\n" +
-            "        munch `-v-----------------'\n" +
-            " ,---'. --------'\n" +
-            " C.^o^|   munch\n" +
-            " (_,-_)\n" +
-            ",--`|-.\n" +
-            "|\\    ]\\__n_\n" +
-            "||`   '---E/   " +
-                "   \" " + player.getName() + " is eating \"";
+        return scene(player, false);
+    }
+
+    @Override
+    public List<String> getFrames(Sim player, Building location) {
+        List<String> frames = new ArrayList<>();
+        for (int i = 0; i < 6; i++) {
+            frames.add(scene(player, i % 2 == 0));
+        }
+        frames.add(scene(player, false));
+        return frames;
+    }
+
+    private String scene(Sim player, boolean mouthOpen) {
+        String burger = "\n"
+                + "   {y}.-'''''-.{/}\n"
+                + "  {y}/ {W}.  .  .{y} \\{/}\n"
+                + "  {G}~~~~~~~~~~~{/}\n"
+                + "  {r}###########{/}\n"
+                + "  {y}'---------'{/}\n"
+                + (mouthOpen ? "    {Y}munch!{/}" : "     {Y}nom~{/}");
+        String face = Sprites.head(player, '^', mouthOpen ? "(O)" : "~~~");
+        return Sprites.indent(Sprites.beside(face, burger, 3), 4)
+                + Sprites.caption("{W}" + player.getName() + "{/} is enjoying a meal");
     }
 }

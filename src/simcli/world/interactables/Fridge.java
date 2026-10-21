@@ -4,8 +4,10 @@ import simcli.engine.TimeManager;
 import simcli.entities.actors.Sim;
 import simcli.entities.items.Item;
 import simcli.entities.items.Food;
+import simcli.engine.ActionCancelledException;
 import simcli.engine.SimulationException;
-import simcli.entities.models.ActionState;
+import simcli.ui.ItemInfo;
+import simcli.ui.Style;
 import simcli.ui.UIManager;
 
 import java.util.ArrayList;
@@ -14,7 +16,7 @@ import java.util.Scanner;
 
 /**
  * A kitchen interactable that restores hunger when used.
- * Sims can prepare meals here.
+ * Sims can store food here and eat it later.
  */
 public class Fridge implements Interactable, Container {
     private List<Item> storedFood = new ArrayList<>();
@@ -40,78 +42,95 @@ public class Fridge implements Interactable, Container {
     @Override
     public void interact(Sim sim, Scanner scanner, TimeManager timeManager) throws SimulationException {
         boolean open = true;
+        boolean didSomething = false;
         while (open) {
             UIManager.clearScreen();
-            UIManager.printMessage("\n=== FRIDGE INVENTORY ===");
+            UIManager.title("Fridge  " + storedFood.size() + (storedFood.size() == 1 ? " item" : " items"));
             if (storedFood.isEmpty()) {
-                UIManager.printMessage("The fridge is completely empty!");
+                UIManager.info("The fridge is completely empty! {k}Buy food at the Supermarket.{/}");
             } else {
                 for (int i = 0; i < storedFood.size(); i++) {
-                    UIManager.printMessage("[" + (i + 1) + "] " + storedFood.get(i).getObjectName());
+                    Item food = storedFood.get(i);
+                    UIManager.option(String.valueOf(i + 1), Style.fit("Eat " + food.getObjectName(), 18)
+                            + ItemInfo.describe(food));
                 }
             }
-            UIManager.printMessage("\n[S] Store Food from Your Personal Inventory");
-            UIManager.printMessage("[0] Close Fridge");
-            UIManager.prompt("Action (number to EAT, S to store)> ");
+            System.out.println();
+            UIManager.option("S", "Store food from your bag");
+            UIManager.option("0", "Close the fridge");
+            UIManager.prompt("\nFridge> ");
 
             String choice = scanner.nextLine().trim().toUpperCase();
 
-            if (choice.equals("0")) {
+            if (choice.equals("0") || choice.isEmpty()) {
                 open = false;
             } else if (choice.equals("S")) {
-                UIManager.printMessage("Select a food item from your inventory to store:");
-                List<Item> inv = sim.getInventory();
-                List<Integer> foodIndices = new ArrayList<>();
-                for (int i = 0; i < inv.size(); i++) {
-                    if (inv.get(i) instanceof Food) {
-                        UIManager.printMessage("[" + (i + 1) + "] " + inv.get(i).getObjectName());
-                        foodIndices.add(i);
-                    }
-                }
-                if (foodIndices.isEmpty()) {
-                    UIManager.printMessage("No food in your personal inventory!");
-                } else {
-                    UIManager.prompt("Item to store (0 to cancel)> ");
-                    try {
-                        int st = Integer.parseInt(scanner.nextLine().trim());
-                        if (st > 0 && st <= inv.size() && foodIndices.contains(st - 1)) {
-                            Item item = inv.get(st - 1);
-                            inv.remove(item);
-                            storeItem(item);
-                            UIManager.printMessage("Stored " + item.getObjectName() + " in the fridge.");
-                        } else if (st != 0) {
-                            UIManager.printMessage("Invalid selection.");
-                        }
-                    } catch (Exception e) {
-                        UIManager.printMessage("Invalid input.");
-                    }
-                }
-                UIManager.prompt("Press ENTER to return...");
-                scanner.nextLine();
+                didSomething |= storeFromBag(sim, scanner);
             } else {
                 try {
                     int c = Integer.parseInt(choice);
                     if (c > 0 && c <= storedFood.size()) {
                         Item food = retrieveItem(c - 1);
-                        sim.setCurrentAction(ActionState.EATING);
-                        UIManager.displayActionAnimation(sim);
-                        UIManager.printMessage(
-                                sim.getName() + " takes " + food.getObjectName() + " from the fridge and eats it.");
                         food.interact(sim, scanner, timeManager);
-                        UIManager.prompt("Press ENTER to continue...");
-                        scanner.nextLine();
+                        didSomething = true;
                     } else {
-                        UIManager.printMessage("Invalid choice.");
-                        UIManager.prompt("Press ENTER to continue...");
-                        scanner.nextLine();
+                        UIManager.error("Invalid choice.");
                     }
-                } catch (Exception e) {
-                    UIManager.printMessage("Invalid input.");
-                    UIManager.prompt("Press ENTER to continue...");
-                    scanner.nextLine();
+                } catch (NumberFormatException e) {
+                    UIManager.error("Invalid input.");
                 }
+                UIManager.prompt("\nPress ENTER to continue...");
+                scanner.nextLine();
             }
         }
+        if (!didSomething) {
+            // just looked inside — no time passes
+            throw new ActionCancelledException();
+        }
+    }
+
+    /**
+     * Lets the player move a food item from their bag into the fridge.
+     *
+     * @return {@code true} if something was stored.
+     */
+    private boolean storeFromBag(Sim sim, Scanner scanner) {
+        boolean stored = false;
+        List<Item> inv = sim.getInventory();
+        List<Item> foods = new ArrayList<>();
+        for (Item item : inv) {
+            if (item instanceof Food) {
+                foods.add(item);
+            }
+        }
+        if (foods.isEmpty()) {
+            UIManager.info("No food in your bag!");
+        } else {
+            UIManager.title("Store which food?");
+            for (int i = 0; i < foods.size(); i++) {
+                UIManager.option(String.valueOf(i + 1), Style.fit(foods.get(i).getObjectName(), 18)
+                        + ItemInfo.describe(foods.get(i)));
+            }
+            UIManager.option("0", "Cancel");
+            UIManager.prompt("\nStore> ");
+            try {
+                int st = Integer.parseInt(scanner.nextLine().trim());
+                if (st > 0 && st <= foods.size()) {
+                    Item item = foods.get(st - 1);
+                    inv.remove(item);
+                    storeItem(item);
+                    stored = true;
+                    UIManager.success("Stored " + item.getObjectName() + " in the fridge.");
+                } else if (st != 0) {
+                    UIManager.error("Invalid selection.");
+                }
+            } catch (NumberFormatException e) {
+                UIManager.error("Invalid input.");
+            }
+        }
+        UIManager.prompt("\nPress ENTER to return...");
+        scanner.nextLine();
+        return stored;
     }
 
     @Override

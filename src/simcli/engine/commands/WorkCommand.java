@@ -37,12 +37,12 @@ public class WorkCommand extends BaseCommand {
         Sim activePlayer = ctx.getActivePlayer();
 
         if (!activePlayer.canWork()) {
-            UIManager.printMessage(activePlayer.getName() + " is in the " + activePlayer.getCurrentStageName() + " stage and cannot work!");
+            UIManager.info(activePlayer.getName() + " is in the " + activePlayer.getCurrentStageName() + " stage and cannot work!");
             pause();
             return CommandResult.NO_TICK;
         }
         if (activePlayer.getCareer() == Job.UNEMPLOYED) {
-            UIManager.printMessage(activePlayer.getName() + " is unemployed and cannot work!");
+            UIManager.info(activePlayer.getName() + " is unemployed and cannot work! {k}Find a job with [J].{/}");
             pause();
             return CommandResult.NO_TICK;
         }
@@ -65,7 +65,7 @@ public class WorkCommand extends BaseCommand {
         String dayStr = ctx.getTimeManager().getDayOfWeek();
         if (dayStr.equals("Saturday") || dayStr.equals("Sunday")) {
             UIManager.printWarning("The office is closed on " + dayStr + "s! You cannot work on the weekend.");
-            UIManager.printMessage("Spend the weekend socializing, studying, or upgrading your house.");
+            UIManager.info("Spend the weekend socializing, studying, or upgrading your house.");
             pause();
             return CommandResult.NO_TICK;
         }
@@ -77,7 +77,7 @@ public class WorkCommand extends BaseCommand {
             String conf = ctx.getScanner().nextLine().trim();
             activePlayer.setWarnedAboutOverwork(true);
             if (!conf.equalsIgnoreCase("Y")) {
-                UIManager.printMessage("Work action cancelled.");
+                UIManager.info("Work action cancelled.");
                 pause();
                 return CommandResult.NO_TICK;
             }
@@ -90,9 +90,11 @@ public class WorkCommand extends BaseCommand {
         WorkResult result = activePlayer.performWork();
 
         if (result.isSuccess()) {
-            UIManager.printMessage(activePlayer.getName() + " works a shift as a " + activePlayer.getCareer().getTitle() + " and earns $" + result.getEarnings() + "!");
+            UIManager.success(activePlayer.getName() + " works a " + activePlayer.getCareer().getWorkingHours()
+                    + "-hour shift as a " + activePlayer.getCareer().getTitle() + " and earns {G}$"
+                    + result.getEarnings() + "{/}!");
             if (result.isOverworked()) {
-                UIManager.printMessage(activePlayer.getName() + " feels the heavy strain of overworking!");
+                UIManager.printWarning(activePlayer.getName() + " feels the heavy strain of overworking!");
             }
         }
 

@@ -3,14 +3,17 @@ package simcli.engine.commands;
 import simcli.engine.CommandResult;
 import simcli.entities.models.Job;
 import simcli.entities.actors.Sim;
+import simcli.ui.Panel;
+import simcli.ui.Style;
 import simcli.ui.UIManager;
 
 /**
  * Command that opens the job market menu for the active Sim.
  *
- * <p>Displays all available jobs with salary and age-range information.
- * The player can switch careers or retire (become unemployed). Children
- * and teens cannot access the professional job market.</p>
+ * <p>Displays all available jobs with salary, hours and age-range
+ * information. The player can switch careers or quit their job (become
+ * unemployed). Children and teens cannot access the professional job
+ * market.</p>
  */
 public class JobMarketCommand extends BaseCommand {
 
@@ -32,57 +35,78 @@ public class JobMarketCommand extends BaseCommand {
     protected CommandResult run() {
         Sim activePlayer = ctx.getActivePlayer();
 
-        if (activePlayer.canWork()) {
-            UIManager.printMessage("\n=== JOB MARKET ===");
-            UIManager.printMessage("Active Sim: " + activePlayer.getName() + " (Age: " + activePlayer.getAge() + ")");
-            UIManager.printMessage("Current Job: " + activePlayer.getCareer().getTitle());
-            UIManager.printMessage("[0] Retire / Become Unemployed");
-
-            Job[] allJobs = Job.values();
-            for (int i = 1; i < allJobs.length; i++) {
-                Job j = allJobs[i];
-                UIManager.printMessage("[" + i + "] " + j.getTitle() + 
-                    " | Pay: $" + j.getBaseSalary() + 
-                    " | Age: " + j.getMinAge() + "-" + j.getMaxAge());
-            }
-            UIManager.printMessage("[-1] Back");
-            UIManager.prompt("Select Option> ");
-
-            try {
-                int jChoice = Integer.parseInt(ctx.getScanner().nextLine().trim());
-                if (jChoice == -1) return CommandResult.NO_TICK;
-
-                if (jChoice == 0) {
-                    if (activePlayer.getCareer() == Job.UNEMPLOYED) {
-                        UIManager.printMessage("You are already unemployed.");
-                    } else {
-                        activePlayer.getCareerManager().changeJob(Job.UNEMPLOYED, activePlayer.getName());
-                        UIManager.printMessage("You have successfully retired.");
-                    }
-                    pause();
-                } else if (jChoice > 0 && jChoice < allJobs.length) {
-                    Job targetJob = allJobs[jChoice];
-
-                    if (targetJob == activePlayer.getCareer()) {
-                        UIManager.printMessage("You already have this job.");
-                    } else if (activePlayer.getAge() < targetJob.getMinAge()) {
-                        UIManager.printMessage("Sorry, you are too young for this position.");
-                    } else if (activePlayer.getAge() > targetJob.getMaxAge()) {
-                        UIManager.printMessage("Sorry, you are past the maximum age (" + targetJob.getMaxAge() + ") for this career.");
-                    } else {
-                        activePlayer.getCareerManager().changeJob(targetJob, activePlayer.getName());
-                        UIManager.printMessage("Congratulations on your new career as a " + targetJob.getTitle() + "!");
-                    }
-                    pause();
-                }
-            } catch (NumberFormatException e) {
-                UIManager.printMessage("Invalid selection.");
-                pause();
-            }
-        } else {
-            UIManager.printMessage("Children and Teens cannot access the professional job market.");
+        if (!activePlayer.canWork()) {
+            UIManager.info("Children and Teens cannot access the professional job market.");
             pause();
+            return CommandResult.NO_TICK;
         }
+
+        UIManager.title("Job Market");
+        UIManager.printMessage("  {k}" + activePlayer.getName() + ", age " + activePlayer.getAge()
+                + " " + Panel.DOT + " currently: {/}{W}" + activePlayer.getCareer().getTitle() + "{/}\n");
+        UIManager.printMessage("  {k}     " + Style.fit("Career", 24) + Style.fit("Pay", 10)
+                + Style.fit("Hours", 8) + "Ages{/}");
+
+        Job[] allJobs = Job.values();
+        for (int i = 1; i < allJobs.length; i++) {
+            Job j = allJobs[i];
+            String row = Style.fit(j.getTitle(), 24)
+                    + Style.fit("{G}$" + j.getBaseSalary() + "{/}", 10)
+                    + Style.fit(j.getWorkingHours() + "h", 8)
+                    + Style.fit(j.getMinAge() + "-" + j.getMaxAge(), 8);
+            if (j == activePlayer.getCareer()) {
+                row += "{C}" + Panel.ARROW + " your job{/}";
+            } else if (activePlayer.getAge() < j.getMinAge() || activePlayer.getAge() > j.getMaxAge()) {
+                row += "{k}not eligible{/}";
+            }
+            UIManager.option(String.valueOf(i), row);
+        }
+        System.out.println();
+        if (activePlayer.getCareer() != Job.UNEMPLOYED) {
+            UIManager.option("R", "Quit job / retire");
+        }
+        UIManager.option("0", "Back");
+        UIManager.prompt("\nApply for> ");
+
+        String input = ctx.getScanner().nextLine().trim();
+        if (input.isEmpty() || input.equals("0")) {
+            return CommandResult.NO_TICK;
+        }
+
+        if (input.equalsIgnoreCase("R")) {
+            if (activePlayer.getCareer() == Job.UNEMPLOYED) {
+                UIManager.info("You are already unemployed.");
+            } else {
+                activePlayer.getCareerManager().changeJob(Job.UNEMPLOYED, activePlayer.getName());
+                UIManager.success("You have left your job. Enjoy the free time!");
+            }
+            pause();
+            return CommandResult.NO_TICK;
+        }
+
+        try {
+            int jChoice = Integer.parseInt(input);
+            if (jChoice > 0 && jChoice < allJobs.length) {
+                Job targetJob = allJobs[jChoice];
+
+                if (targetJob == activePlayer.getCareer()) {
+                    UIManager.info("You already have this job.");
+                } else if (activePlayer.getAge() < targetJob.getMinAge()) {
+                    UIManager.error("Sorry, you are too young for this position.");
+                } else if (activePlayer.getAge() > targetJob.getMaxAge()) {
+                    UIManager.error("Sorry, you are past the maximum age (" + targetJob.getMaxAge() + ") for this career.");
+                } else {
+                    activePlayer.getCareerManager().changeJob(targetJob, activePlayer.getName());
+                    UIManager.success("Congratulations on your new career as a {W}" + targetJob.getTitle() + "{/}!");
+                    UIManager.info("Shifts are " + targetJob.getWorkingHours() + " hours, Monday to Friday. Press [W] to work.");
+                }
+            } else {
+                UIManager.error("Invalid selection.");
+            }
+        } catch (NumberFormatException e) {
+            UIManager.error("Invalid selection.");
+        }
+        pause();
         return CommandResult.NO_TICK;
     }
 }

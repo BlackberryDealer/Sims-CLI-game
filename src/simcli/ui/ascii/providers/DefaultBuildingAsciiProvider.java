@@ -1,43 +1,40 @@
 package simcli.ui.ascii.providers;
 
 import simcli.entities.actors.Sim;
+import simcli.ui.Style;
 import simcli.world.Building;
 import simcli.ui.ascii.IAsciiProvider;
 
 /**
- * DefaultBuildingAsciiProvider — 2D generic building for any location
- * that doesn't have its own dedicated provider.
- *
- * Visual: simple rectangular building front-view with location name on a sign.
- * Art style: simple 2D terminal ASCII, designed to fit ~50 columns.
+ * Fallback scene for any building without its own art: a plain building
+ * whose sign is sized to fit the building's name.
  */
 public class DefaultBuildingAsciiProvider implements IAsciiProvider {
 
+    /** The facade rows are all exactly this wide so they stay aligned. */
+    private static final String[] FACADE = {
+            "[##]   ______   [##]",
+            "       |    |       ",
+            "_______|___o|_______",
+    };
+
     @Override
     public String getAsciiArt(Sim player, Building location) {
-        String locName = (location != null) ? location.getName().toUpperCase() : "UNKNOWN";
-        return "^             ^               ^!^\n" +
-            "   ^ _______________________________\n" +
-            "    [=U=U=U=U=U=U=U=U=U=U=U=U=U=U=U=]\n" +
-            "    |.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.|\n" +
-            "    |        +-+-+-+-+-+-+-+        |\n" + 
-            "    |        | " + locName + " |        |\n" +
-            "    |        +-+-+-+-+-+-+-+        |\n" +
-            "    |.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.|\n" +
-            "    |  _________  __ __  _________  |\n" +
-            "  _ | |___   _  ||[]|[]||  _      | | _\n" +
-            " (!)||OPEN|_(!)_|| ,| ,||_(!)_____| |(!)\n" +
-            ".T~T|:.....:T~T.:|__|__|:.T~T.:....:|T~T.\n" +
-            "||_||||||||||_|||||||||||||_||||||||||_||\n" +
-            "~\\=/~~~~~~~~\\=/~~~~~~~~~~~\\=/~~~~~~~~\\=/~\n" +
-            "  | -------- | ----------- | -------- |\n" +
-            "~ |~^ ^~~^ ~~| ~^  ~~ ^~^~ |~ ^~^ ~~^ |^~";
-    }
+        String name = (location != null) ? location.getName().toUpperCase() : "SOMEWHERE";
+        if (name.length() > 40) {
+            name = name.substring(0, 40);
+        }
+        int inner = Math.max(name.length() + 6, FACADE[0].length() + 4);
+        int left = (inner - FACADE[0].length()) / 2;
+        int right = inner - FACADE[0].length() - left;
 
-    /** Pads or trims a string to a fixed display width. */
-    private String padOrTrim(String s, int width) {
-        if (s.length() >= width)
-            return s.substring(0, width);
-        return s + " ".repeat(width - s.length());
+        return ""
+                + "    {w}." + "-".repeat(inner) + ".{/}\n"
+                + "    {w}|{Y}" + Style.center(name, inner) + "{w}|{/}\n"
+                + "    {w}|" + "_".repeat(inner) + "|{/}\n"
+                + "    {w}|" + " ".repeat(left) + "{C}" + FACADE[0] + "{w}" + " ".repeat(right) + "|{/}\n"
+                + "    {w}|" + " ".repeat(left) + FACADE[1] + " ".repeat(right) + "|{/}\n"
+                + "    {w}|" + "_".repeat(left) + FACADE[2] + "_".repeat(right) + "|{/}\n"
+                + "  {k}" + "~".repeat(inner + 6) + "{/}";
     }
 }

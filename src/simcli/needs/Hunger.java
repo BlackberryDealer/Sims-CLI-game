@@ -24,7 +24,8 @@ public class Hunger extends Need {
     @Override
     public void calculateDecay(Sim sim, double multiplier) {
         int decayAmt = this.getBaseDecayRate();
-        if (sim.getCurrentAction() == ActionState.WORKING || sim.getCurrentAction() == ActionState.PLAYING) {
+        if (sim.getCurrentAction() == ActionState.WORKING || sim.getCurrentAction() == ActionState.PLAYING
+                || sim.getCurrentAction() == ActionState.EXERCISING) {
             decayAmt += GameConstants.HUNGER_ACCELERATED_DECAY_RATE; // Accelerated decay
         } else if (sim.getCurrentAction() == ActionState.SLEEPING) {
             // Muted decay — never negative, so sleeping can't refill hunger.
