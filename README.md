@@ -109,6 +109,9 @@ Each tick has a 5% chance to trigger one of six events:
 ```bash
 run.bat
 ```
+The scripts find a JDK automatically: `JAVA_HOME` first, then `javac` on the `PATH`, then the JDK bundled
+with VS Code's Java extension, then the usual install folders. If none is found, install one
+(e.g. `winget install EclipseAdoptium.Temurin.21.JDK`) or set `JAVA_HOME`.
 
 **Option 2 — Manual compilation:**
 ```bash
