@@ -60,8 +60,28 @@ public class CareerManager {
      * @param simName the Sim's display name (used in log messages).
      */
     public void checkTruancy(String simName) {
-        if (this.career == Job.UNEMPLOYED)
+        checkTruancy(simName, true);
+    }
+
+    /**
+     * Checks attendance for the day that just ended.
+     *
+     * <p>Weekend days never count as missed, and a day on which the Sim
+     * worked at least one shift resets the counter instead of
+     * incrementing it. Must be called <em>before</em> {@link #resetDaily}
+     * zeroes the shift counter.</p>
+     *
+     * @param simName          the Sim's display name (used in log messages).
+     * @param endedDayWasWorkday {@code false} if the day that ended was a
+     *                         Saturday or Sunday.
+     */
+    public void checkTruancy(String simName, boolean endedDayWasWorkday) {
+        if (this.career == Job.UNEMPLOYED || !endedDayWasWorkday)
             return;
+        if (this.shiftsWorkedToday > 0) {
+            this.consecutiveDaysMissed = 0;
+            return;
+        }
         this.consecutiveDaysMissed++;
         if (this.consecutiveDaysMissed > 3) {
             SimulationLogger.getInstance()
@@ -188,6 +208,15 @@ public class CareerManager {
      */
     public void incrementShiftsWorkedToday() {
         this.shiftsWorkedToday++;
+    }
+
+    /**
+     * Sets the shifts-worked-today counter directly. Used for save/load restoration.
+     *
+     * @param shifts the number of shifts worked today.
+     */
+    public void setShiftsWorkedToday(int shifts) {
+        this.shiftsWorkedToday = shifts;
     }
 
     /**

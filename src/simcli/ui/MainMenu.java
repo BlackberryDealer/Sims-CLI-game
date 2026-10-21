@@ -188,6 +188,11 @@ public class MainMenu {
                 UIManager.prompt("\nPress ENTER to resume game...");
                 scanner.nextLine();
                 loadedGame.run(scanner);
+            } else {
+                // loadGame() printed either the final stats of a finished game
+                // or why the save couldn't be read — keep it on screen.
+                UIManager.prompt("\nPress ENTER to return...");
+                scanner.nextLine();
             }
         } else {
             UIManager.printMessage("Error: World '" + loadName + "' does not exist.\n");

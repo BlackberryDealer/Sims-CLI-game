@@ -10,7 +10,7 @@ import simcli.entities.models.WorkResult;
 import simcli.ui.UIManager;
 
 // Validates a chain of preconditions before letting the Sim work.
-// Order matters: life-stage → employment → hunger state → overwork → weekday.
+// Order matters: life-stage → employment → hunger/tired state → weekday → overwork.
 // Any failure short-circuits with NO_TICK (no time passes).
 public class WorkCommand extends BaseCommand {
 
@@ -24,10 +24,11 @@ public class WorkCommand extends BaseCommand {
     }
 
     /**
-     * Validates work preconditions (employment, age, hunger, weekday) and
-     * executes a work shift. Advances the clock by the job's working hours.
+     * Validates work preconditions (life stage, employment, state, weekday,
+     * overwork) and executes a work shift. Does not touch the clock itself:
+     * the engine advances time by the job's working hours.
      *
-     * @return {@link CommandResult#TICK_FORWARD} on success,
+     * @return {@link CommandResult#WORK_SHIFT} on success,
      *         {@link CommandResult#NO_TICK} if any precondition fails.
      * @throws SimulationException if an unexpected simulation rule is violated.
      */
@@ -37,16 +38,34 @@ public class WorkCommand extends BaseCommand {
 
         if (!activePlayer.canWork()) {
             UIManager.printMessage(activePlayer.getName() + " is in the " + activePlayer.getCurrentStageName() + " stage and cannot work!");
+            pause();
             return CommandResult.NO_TICK;
         }
         if (activePlayer.getCareer() == Job.UNEMPLOYED) {
             UIManager.printMessage(activePlayer.getName() + " is unemployed and cannot work!");
+            pause();
             return CommandResult.NO_TICK;
         }
 
         // hunger gating — Sim must eat before they can focus on work
         if (activePlayer.getState() == SimState.HUNGRY) {
             UIManager.printWarning(activePlayer.getName() + " is too hungry to focus on work! Eat something first.");
+            pause();
+            return CommandResult.NO_TICK;
+        }
+        // TIRED (and DEAD) states don't permit work
+        if (!activePlayer.getState().canWork()) {
+            UIManager.printWarning(activePlayer.getName() + " is too exhausted to work! Get some sleep first.");
+            pause();
+            return CommandResult.NO_TICK;
+        }
+
+        // Weekday check (Time Expansion feature) — before the overwork prompt,
+        // so the player isn't asked to confirm a shift that can't happen.
+        String dayStr = ctx.getTimeManager().getDayOfWeek();
+        if (dayStr.equals("Saturday") || dayStr.equals("Sunday")) {
+            UIManager.printWarning("The office is closed on " + dayStr + "s! You cannot work on the weekend.");
+            UIManager.printMessage("Spend the weekend socializing, studying, or upgrading your house.");
             pause();
             return CommandResult.NO_TICK;
         }
@@ -59,17 +78,9 @@ public class WorkCommand extends BaseCommand {
             activePlayer.setWarnedAboutOverwork(true);
             if (!conf.equalsIgnoreCase("Y")) {
                 UIManager.printMessage("Work action cancelled.");
+                pause();
                 return CommandResult.NO_TICK;
             }
-        }
-
-        // Weekday check (Time Expansion feature)
-        String dayStr = ctx.getTimeManager().getDayOfWeek();
-        if (dayStr.equals("Saturday") || dayStr.equals("Sunday")) {
-            UIManager.printWarning("The office is closed on " + dayStr + "s! You cannot work on the weekend.");
-            UIManager.printMessage("Spend the weekend socializing, studying, or upgrading your house.");
-            pause();
-            return CommandResult.NO_TICK;
         }
 
         // all preconditions passed — actually perform the shift
@@ -77,7 +88,7 @@ public class WorkCommand extends BaseCommand {
         UIManager.displayActionAnimation(activePlayer);
 
         WorkResult result = activePlayer.performWork();
-        
+
         if (result.isSuccess()) {
             UIManager.printMessage(activePlayer.getName() + " works a shift as a " + activePlayer.getCareer().getTitle() + " and earns $" + result.getEarnings() + "!");
             if (result.isOverworked()) {
@@ -85,8 +96,11 @@ public class WorkCommand extends BaseCommand {
             }
         }
 
-        ctx.getTimeManager().advanceTicks(activePlayer.getCareer().getWorkingHours() - 1);
-        
-        return CommandResult.TICK_FORWARD;
+        // performWork() already applied the shift's need costs, so the shift's
+        // hours tick at the normal (idle) rate rather than charging them twice.
+        activePlayer.setCurrentAction(ActionState.IDLE);
+
+        // the engine advances the clock by the job's working hours
+        return CommandResult.WORK_SHIFT;
     }
 }

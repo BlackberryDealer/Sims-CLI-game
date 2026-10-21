@@ -5,6 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import simcli.entities.models.Gender;
 import simcli.entities.models.Job;
+import simcli.entities.models.SimState;
 import simcli.engine.TimeManager;
 import simcli.engine.CommandResult;
 import simcli.entities.actors.Sim;
@@ -45,7 +46,7 @@ public class WorkCommandTest {
     }
 
     @Test
-    @DisplayName("Working on Monday advances ticks")
+    @DisplayName("Working on Monday returns WORK_SHIFT and leaves the clock to the engine")
     void testWorkOnMonday() throws Exception {
         // Day 1 is Monday.
         TimeManager tm = new TimeManager(1, 24);
@@ -56,8 +57,40 @@ public class WorkCommandTest {
 
         CommandResult result = command.execute();
 
-        assertEquals(CommandResult.TICK_FORWARD, result, "Should successfully work on Monday and return TICK_FORWARD");
+        assertEquals(CommandResult.WORK_SHIFT, result, "Should successfully work on Monday and return WORK_SHIFT");
         assertEquals(1, adultSim.getShiftsWorkedToday(), "Shifts worked should increase");
+        assertEquals(1, tm.getCurrentTick(),
+                "WorkCommand must not advance the clock itself — GameLoop does, so day boundaries are processed");
+    }
+
+    @Test
+    @DisplayName("A TIRED Sim cannot work")
+    void testTiredSimCannotWork() throws Exception {
+        TimeManager tm = new TimeManager(1, 24);
+        adultSim.getEnergy().setValue(5);
+        adultSim.updateState();
+        assertEquals(SimState.TIRED, adultSim.getState());
+
+        Scanner mockScanner = new Scanner(new ByteArrayInputStream("\n".getBytes()));
+        CommandResult result = new WorkCommand(buildCtx(adultSim, mockScanner, tm)).execute();
+
+        assertEquals(CommandResult.NO_TICK, result);
+        assertEquals(0, adultSim.getShiftsWorkedToday());
+    }
+
+    @Test
+    @DisplayName("Weekend is rejected before the overwork prompt is shown")
+    void testWeekendCheckedBeforeOverworkPrompt() throws Exception {
+        TimeManager tm = new TimeManager(121, 24); // Saturday
+        adultSim.incrementShiftsWorkedToday();     // would trigger the overwork prompt
+
+        // Only one line of input: the pause(). If the overwork prompt were shown
+        // first, it would consume this line and pause() would hit end-of-input.
+        Scanner mockScanner = new Scanner(new ByteArrayInputStream("\n".getBytes()));
+        CommandResult result = new WorkCommand(buildCtx(adultSim, mockScanner, tm)).execute();
+
+        assertEquals(CommandResult.NO_TICK, result);
+        assertFalse(adultSim.hasWarnedAboutOverwork(), "Overwork prompt should not have been shown on a weekend");
     }
 
     @Test

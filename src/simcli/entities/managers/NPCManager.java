@@ -24,7 +24,7 @@ public class NPCManager implements NPCProvider {
 
     /** Pool of male NPC names. */
     private static final String[] MALE_NAMES = {
-        "Bob", "Charlie", "Edward", "George", "Ian", "Julia", "Kevin", "Mike", "Oscar", "Quincy", "Steve", "Victor", "Xander", "Zack"
+        "Bob", "Charlie", "Edward", "George", "Ian", "Henry", "Kevin", "Mike", "Oscar", "Quincy", "Steve", "Victor", "Xander", "Zack"
     };
 
     /** Pool of female NPC names. */
@@ -56,12 +56,7 @@ public class NPCManager implements NPCProvider {
      */
     public NPCSim generateRandomNPC() {
         Gender gender = GameRandom.RANDOM.nextBoolean() ? Gender.MALE : Gender.FEMALE;
-        String name;
-        if (gender == Gender.MALE) {
-            name = MALE_NAMES[GameRandom.RANDOM.nextInt(MALE_NAMES.length)];
-        } else {
-            name = FEMALE_NAMES[GameRandom.RANDOM.nextInt(FEMALE_NAMES.length)];
-        }
+        String name = pickUnusedName(gender == Gender.MALE ? MALE_NAMES : FEMALE_NAMES);
 
         int age = 18 + GameRandom.RANDOM.nextInt(50); // Age 18 to 68
 
@@ -69,6 +64,31 @@ public class NPCManager implements NPCProvider {
         Job job = jobs[GameRandom.RANDOM.nextInt(jobs.length)];
 
         return new NPCSim(name, age, gender, job);
+    }
+
+    /**
+     * Picks a random name from the pool that no active NPC is using, so the
+     * park never shows two visitors with the same name. Falls back to any
+     * name if every name in the pool is taken.
+     */
+    private String pickUnusedName(String[] pool) {
+        List<String> free = new ArrayList<>();
+        for (String candidate : pool) {
+            boolean taken = false;
+            for (NPCSim npc : activeNPCs) {
+                if (npc.getName().equals(candidate)) {
+                    taken = true;
+                    break;
+                }
+            }
+            if (!taken) {
+                free.add(candidate);
+            }
+        }
+        if (free.isEmpty()) {
+            return pool[GameRandom.RANDOM.nextInt(pool.length)];
+        }
+        return free.get(GameRandom.RANDOM.nextInt(free.size()));
     }
 
     /**

@@ -117,12 +117,12 @@ public class InputHandlerTest {
     // -----------------------------------------------------------------------
 
     @Test
-    @DisplayName("'W' on a weekday routes to WorkCommand and returns TICK_FORWARD")
+    @DisplayName("'W' on a weekday routes to WorkCommand and returns WORK_SHIFT")
     void testWorkCommandRouting() {
         // Day 1 is Monday (weekday)
         CommandResult result = handler.handle("W", activePlayer, mockScanner("\n"));
-        assertEquals(CommandResult.TICK_FORWARD, result,
-                "'W' on a weekday should route to WorkCommand and return TICK_FORWARD");
+        assertEquals(CommandResult.WORK_SHIFT, result,
+                "'W' on a weekday should route to WorkCommand and return WORK_SHIFT");
         assertEquals(1, activePlayer.getShiftsWorkedToday(),
                 "Sim should have worked 1 shift");
     }

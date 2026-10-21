@@ -43,7 +43,7 @@ public abstract class Need {
      * @param amount The integer amount to decrease by.
      */
     public void decrease(int amount) {
-        this.value = Math.max(this.value - amount, 0);
+        this.value = Math.max(0, Math.min(this.value - amount, MAX_VALUE));
     }
 
     /**

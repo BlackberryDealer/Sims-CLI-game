@@ -18,12 +18,14 @@ public class Room {
     private int maxCapacity;
     private int currentCapacityUsed;
     private List<Interactable> interactablesList;
+    private List<Integer> spaceScores; // parallel to interactablesList
 
     public Room(String name, int maxCapacity) {
         this.name = name;
         this.maxCapacity = maxCapacity;
         this.currentCapacityUsed = 0;
         this.interactablesList = new ArrayList<>();
+        this.spaceScores = new ArrayList<>();
     }
 
     public String getName() {
@@ -52,7 +54,28 @@ public class Room {
 
     public void placeFurniture(Interactable interactableInstance, int spaceScore) {
         interactablesList.add(interactableInstance);
+        spaceScores.add(spaceScore);
         currentCapacityUsed += spaceScore;
+    }
+
+    /**
+     * Returns the space score the furniture at {@code index} was placed with.
+     *
+     * @param index position in {@link #getInteractables()}.
+     * @return the space it occupies.
+     */
+    public int getSpaceScore(int index) {
+        return spaceScores.get(index);
+    }
+
+    /**
+     * Removes all furniture from the room and frees its capacity.
+     * Used when restoring a saved layout.
+     */
+    public void clearFurniture() {
+        interactablesList.clear();
+        spaceScores.clear();
+        currentCapacityUsed = 0;
     }
 
     public void upgradeCapacity(Sim sim, int extraSpace, int cost) {

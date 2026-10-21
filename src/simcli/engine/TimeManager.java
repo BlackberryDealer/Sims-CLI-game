@@ -107,8 +107,29 @@ public class TimeManager {
      * @return the day-of-week name.
      */
     public String getDayOfWeek() {
-        int day = getCurrentDay();
-        int dayOfWeek = (day - 1) % 7; 
+        return dayOfWeekName(getCurrentDay());
+    }
+
+    /**
+     * Returns {@code true} if the given (1-indexed) day number falls on a
+     * Saturday or Sunday.
+     *
+     * @param day the day number (day 1 is a Monday).
+     * @return whether the day is a weekend day.
+     */
+    public static boolean isWeekend(int day) {
+        int dayOfWeek = (day - 1) % 7;
+        return dayOfWeek == 5 || dayOfWeek == 6;
+    }
+
+    /**
+     * Returns the day-of-week name for an arbitrary (1-indexed) day number.
+     *
+     * @param day the day number (day 1 is a Monday).
+     * @return the day-of-week name.
+     */
+    public static String dayOfWeekName(int day) {
+        int dayOfWeek = (day - 1) % 7;
         switch (dayOfWeek) {
             case 0: return "Monday";
             case 1: return "Tuesday";

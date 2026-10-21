@@ -1,6 +1,8 @@
 package simcli.engine;
 
 import simcli.entities.actors.Sim;
+import simcli.entities.models.ActionState;
+import simcli.entities.models.SimState;
 import simcli.utils.GameConstants;
 
 import java.util.List;
@@ -41,58 +43,74 @@ public class GameLoop {
     }
 
     /**
-     * Processes one simulation tick.
+     * Processes one player turn, advancing the clock by {@code ticksToAdvance}
+     * hours.
      *
+     * <p>Each hour is simulated individually:</p>
      * <ol>
      *     <li>Decays needs for every Sim via {@link Sim#tick()}.</li>
      *     <li>Advances the simulation clock by one tick.</li>
-     *     <li>Triggers any random events.</li>
      *     <li>If a new day has started, delegates to
      *         {@link #processDayBoundary(int)}.</li>
      * </ol>
+     * <p>A random event is rolled once per turn, after the clock has moved.</p>
      *
-     * @param activePlayer the currently controlled Sim (passed to the event
-     *                     manager for targeted events).
+     * <p>Sims other than the active player are reset to
+     * {@link ActionState#IDLE} first, so an action they performed while they
+     * were last controlled (e.g. sleeping) does not keep affecting their
+     * need decay forever.</p>
+     *
+     * @param activePlayer   the currently controlled Sim (passed to the event
+     *                       manager for targeted events).
+     * @param ticksToAdvance the number of hours this turn takes.
      */
     public void processTick(Sim activePlayer, int ticksToAdvance) {
-        int previousDay = timeManager.getCurrentDay();
-
         for (Sim sim : neighborhood) {
-            sim.tick();
+            if (sim != activePlayer) {
+                sim.setCurrentAction(ActionState.IDLE);
+            }
         }
 
-        timeManager.advanceTicks(ticksToAdvance);
+        for (int i = 0; i < ticksToAdvance; i++) {
+            int previousDay = timeManager.getCurrentDay();
+
+            for (Sim sim : neighborhood) {
+                sim.tick();
+            }
+            timeManager.advanceTick();
+
+            if (timeManager.getCurrentDay() != previousDay) {
+                processDayBoundary(timeManager.getCurrentDay());
+            }
+        }
+
         eventManager.trigger(activePlayer, timeManager);
-
-        int currentDay = timeManager.getCurrentDay();
-        int daysCrossed = currentDay - previousDay;
-        
-        for (int i = 0; i < daysCrossed; i++) {
-            processDayBoundary(previousDay + 1 + i);
-        }
     }
 
     /**
      * Processes a day boundary.
      *
-     * <p>Prints a new-day message, then delegates all lifecycle processing
-     * (aging, death, retirement, truancy checks) to the
-     * {@link LifecycleManager}. This keeps the GameLoop thin — it only
-     * coordinates; the lifecycle rules live in their own class.</p>
+     * <p>Prints a new-day message, runs truancy checks for the day that just
+     * ended, then delegates lifecycle processing (aging, death, retirement)
+     * to the {@link LifecycleManager}. Truancy must run first because the
+     * lifecycle step resets each Sim's shifts-worked-today counter.</p>
+     *
+     * @param dayNumber the day that has just begun.
      */
     private void processDayBoundary(int dayNumber) {
         simcli.ui.UIManager.printMessage(
                 "\n*** A new day has begun! (Day "
                 + dayNumber + ") ***");
 
+        boolean endedDayWasWorkday = !TimeManager.isWeekend(dayNumber - 1);
+        for (Sim s : neighborhood) {
+            if (s.getState() != SimState.DEAD) {
+                s.getCareerManager().checkTruancy(s.getName(), endedDayWasWorkday);
+            }
+        }
+
         // Delegate aging/death/retirement to LifecycleManager (SRP).
         lifecycleManager.processDayForAll(neighborhood);
-
-        // Truancy checks remain here since CareerManager is already
-        // reset inside LifecycleManager.processDay().
-        for (Sim s : neighborhood) {
-            s.getCareerManager().checkTruancy(s.getName());
-        }
     }
 
     /** Returns the event manager owned by this loop. */

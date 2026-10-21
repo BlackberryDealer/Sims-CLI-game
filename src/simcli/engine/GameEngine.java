@@ -4,13 +4,16 @@ import java.util.List;
 import java.util.Scanner;
 import simcli.entities.actors.Sim;
 import simcli.entities.managers.NPCManager;
+import simcli.entities.models.ActionState;
 import simcli.entities.models.SimState;
 import simcli.persistence.SaveManager;
 import simcli.ui.IRenderer;
 import simcli.ui.TerminalRenderer;
 import simcli.ui.UIManager;
 import simcli.utils.GameConstants;
+import simcli.world.Building;
 import simcli.world.Residential;
+import simcli.world.Room;
 import simcli.world.interactables.Interactable;
 
 /**
@@ -229,6 +232,7 @@ public class GameEngine {
         placeSimsInWorld();
 
         while (running) {
+            syncActivePlayerToLocation();
             renderFrame();
 
             if (tickForward) {
@@ -266,6 +270,10 @@ public class GameEngine {
                     ticksToAdvance = handleSleepEvent();
                     tickForward = true;
                     break;
+                case WORK_SHIFT:
+                    ticksToAdvance = Math.max(1, this.activePlayer.getCareer().getWorkingHours());
+                    tickForward = true;
+                    break;
                 case SAVE_AND_EXIT:
                     running = false;
                     UIManager.printMessage("Saving game...");
@@ -297,6 +305,28 @@ public class GameEngine {
         for (Sim sim : this.neighborhood) {
             if (sim.getCurrentRoom() == null && sim.getState() != SimState.DEAD) {
                 this.worldManager.getCurrentLocation().enter(sim);
+            }
+        }
+    }
+
+    /**
+     * Keeps the active Sim's room consistent with the household's current
+     * location.
+     *
+     * <p>The household shares one current location, but each Sim remembers
+     * its own room. After a switch to another Sim, a marriage, or a birth,
+     * the active Sim may hold a room in a different building (or none), so
+     * it is moved into the first room of the current residential building.</p>
+     */
+    void syncActivePlayerToLocation() {
+        if (this.activePlayer.getState() == SimState.DEAD) {
+            return;
+        }
+        Building location = this.worldManager.getCurrentLocation();
+        if (location instanceof Residential) {
+            List<Room> rooms = ((Residential) location).getRooms();
+            if (!rooms.isEmpty() && !rooms.contains(this.activePlayer.getCurrentRoom())) {
+                this.activePlayer.setCurrentRoom(rooms.get(0));
             }
         }
     }
@@ -404,6 +434,10 @@ public class GameEngine {
         UIManager.printMessage("\n" + activePlayer.getName() + " sleeps deeply in the bed for "
                 + ticksToMorning + " hours.");
         UIManager.sleepAnimation();
+
+        // renderHUD() resets the action to IDLE; the Sim must stay asleep
+        // while GameLoop simulates the night hour by hour.
+        activePlayer.setCurrentAction(ActionState.SLEEPING);
 
         return ticksToMorning;
     }

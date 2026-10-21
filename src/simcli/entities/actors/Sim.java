@@ -520,9 +520,8 @@ public class Sim implements ISimBehaviour {
         }
 
         if (this.isChildSim && !this.isPlayable()) {
-            // Babys/Infants only have hunger decay
-            this.getHunger().calculateDecay(this, ageMultiplier);
-            this.updateState();
+            // Babies/Infants only have hunger decay — but they can still starve
+            needsTracker.tickInfant(this, ageMultiplier, this.name);
         } else {
             needsTracker.tick(this, ageMultiplier, stageEnergyModifier * traitEnergyMod, this.name);
         }
@@ -692,6 +691,24 @@ public class Sim implements ISimBehaviour {
      */
     public void addTotalMoneyEarned(int amount) {
         this.totalMoneyEarned += amount;
+    }
+
+    /**
+     * Sets the cumulative money-earned tracker. Used for newborns and save/load restoration.
+     *
+     * @param amount the cumulative earnings.
+     */
+    public void setTotalMoneyEarned(int amount) {
+        this.totalMoneyEarned = amount;
+    }
+
+    /**
+     * Sets the cumulative items-bought tracker. Used for save/load restoration.
+     *
+     * @param amount the cumulative item purchase count.
+     */
+    public void setTotalItemsBought(int amount) {
+        this.totalItemsBought = amount;
     }
 
     /**

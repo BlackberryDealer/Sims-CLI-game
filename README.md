@@ -31,7 +31,7 @@ The project emphasises clean OOP architecture, making heavy use of established d
 - Create up to **4 Sims** per household with custom names, ages, and genders
 - Each Sim is assigned a **random personality trait** (Active, Lazy, Socialite) that modifies gameplay
 - **5 decaying needs**: Hunger, Energy, Hygiene, Happiness, Social — each with unique decay rules and cross-penalties
-- **Health system**: needs reaching critical levels cause health damage; starvation for 3+ consecutive ticks is fatal
+- **Health system**: low hunger slowly drains health; starving (hunger at 0) drains it faster every consecutive hour, and a Sim dies when health reaches 0 — infants included
 
 ### 💼 Career System
 - **4 careers**: Software Engineer, Hardware Technician, Freelance Photographer, Personal Trainer

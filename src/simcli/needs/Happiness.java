@@ -1,6 +1,7 @@
 package simcli.needs;
 
 import simcli.entities.actors.Sim;
+import simcli.entities.models.ActionState;
 import simcli.utils.GameConstants;
 
 /**
@@ -18,6 +19,9 @@ public class Happiness extends Need {
      */
     @Override
     public void calculateDecay(Sim sim, double multiplier) {
+        if (sim.getCurrentAction() == ActionState.SLEEPING) {
+            return; // Sleeping Sims don't get bored.
+        }
         this.decrease((int) Math.round(this.getBaseDecayRate() * multiplier));
     }
 }

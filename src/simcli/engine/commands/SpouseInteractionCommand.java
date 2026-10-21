@@ -4,6 +4,7 @@ import simcli.engine.CommandResult;
 import simcli.engine.SimulationException;
 import simcli.entities.actors.Sim;
 import simcli.entities.models.Gender;
+import simcli.entities.models.SimState;
 import simcli.ui.UIManager;
 import simcli.world.Building;
 import simcli.world.Residential;
@@ -44,23 +45,34 @@ public class SpouseInteractionCommand extends BaseCommand {
             return CommandResult.NO_TICK;
         }
 
-        // Check if spouse is in the household
-        if (!ctx.getNeighborhood().contains(spouse)) {
+        // Check for any baby (non-playable child) in household
+        boolean hasBabies = hasBabiesInHousehold();
+
+        // Dating and having a baby need a living spouse at home;
+        // feeding the babies is always possible.
+        boolean spouseAvailable = true;
+        if (spouse.getState() == SimState.DEAD) {
+            UIManager.printMessage(spouse.getName() + " has passed away. Their memory lives on.");
+            spouseAvailable = false;
+        } else if (!ctx.getNeighborhood().contains(spouse)) {
             UIManager.printMessage(spouse.getName() + " is currently busy and not at home.");
+            spouseAvailable = false;
+        }
+
+        if (!spouseAvailable && !hasBabies) {
             pause();
             return CommandResult.NO_TICK;
         }
 
         UIManager.printMessage("\n=== Marriage Options ===");
-        UIManager.printMessage("[1] Interact with Spouse (Date)");
-        UIManager.printMessage("[2] Have a Baby");
-        
-        // Check for any baby (non-playable child) in household
-        boolean hasBabies = hasBabiesInHousehold();
+        if (spouseAvailable) {
+            UIManager.printMessage("[1] Interact with Spouse (Date)");
+            UIManager.printMessage("[2] Have a Baby");
+        }
         if (hasBabies) {
             UIManager.printMessage("[3] Feed Babies");
         }
-        
+
         UIManager.printMessage("[0] Back");
         UIManager.prompt("Select action> ");
 
@@ -69,10 +81,10 @@ public class SpouseInteractionCommand extends BaseCommand {
             if (input.equals("0")) return CommandResult.NO_TICK;
 
             int choice = Integer.parseInt(input);
-            if (choice == 1) {
+            if (choice == 1 && spouseAvailable) {
                 handleDate(activePlayer, spouse);
                 return CommandResult.TICK_FORWARD;
-            } else if (choice == 2) {
+            } else if (choice == 2 && spouseAvailable) {
                 return handleHaveBaby(activePlayer);
             } else if (choice == 3 && hasBabies) {
                 handleFeedBabies(activePlayer);
@@ -118,48 +130,68 @@ public class SpouseInteractionCommand extends BaseCommand {
      * attempts pregnancy via the relationship manager.
      *
      * @param sim the active player Sim.
-     * @return {@link CommandResult#TICK_FORWARD} if a baby is born,
-     *         {@link CommandResult#NO_TICK} otherwise.
+     * @return {@link CommandResult#TICK_FORWARD} after any attempt (successful or not),
+     *         {@link CommandResult#NO_TICK} if the couple cannot try at all.
      */
     private CommandResult handleHaveBaby(Sim sim) {
-        // Teleport both to the first residential building (Home)
-        Building home = null;
-        for (Building b : ctx.getWorldManager().getCityMap()) {
-            if (b instanceof Residential) {
-                home = b;
-                break;
-            }
-        }
+        Residential home = findHome();
 
-        if (home != null) {
-            ctx.getWorldManager().setCurrentLocation(home);
-            sim.setCurrentRoom(((Residential) home).getRooms().get(0));
-            
+        if (home != null && !home.getRooms().isEmpty()) {
+            if (ctx.getWorldManager().getCurrentLocation() != home) {
+                ctx.getWorldManager().setCurrentLocation(home);
+                ctx.getLogger().log("Teleported home to " + home.getName() + " to try for a baby...");
+            }
+            if (!home.getRooms().contains(sim.getCurrentRoom())) {
+                sim.setCurrentRoom(home.getRooms().get(0));
+            }
+
             Sim spouse = sim.getRelationshipManager().getSpouse();
             if (spouse != null) {
                 spouse.setCurrentRoom(sim.getCurrentRoom());
             }
-            
-            ctx.getLogger().log("Teleported home to " + home.getName() + " to try for a baby...");
-            
+
             try {
-                Gender babyGender = sim.getRelationshipManager().attemptPregnancy(); 
+                Gender babyGender = sim.getRelationshipManager().attemptPregnancy();
                 if (babyGender != null) {
                     UIManager.prompt("Enter a name for the new " + babyGender + " baby: ");
                     String babyName = ctx.getScanner().nextLine().trim();
                     if (babyName.isEmpty()) babyName = "Baby " + sim.getName();
-                    
+
                     Sim child = sim.getRelationshipManager().finalizeBaby(babyName, babyGender);
 
                     ctx.getNeighborhood().add(child);
                     ctx.getLogger().log(child.getName() + " has been added to your household!");
-                    return CommandResult.TICK_FORWARD;
                 }
+                // An attempt takes time whether or not it succeeds — otherwise
+                // the player could retry for free until it works.
+                return CommandResult.TICK_FORWARD;
             } catch (SimulationException e) {
                 ctx.getLogger().logWarning(e.getMessage());
             }
         }
         return CommandResult.NO_TICK;
+    }
+
+    /**
+     * Picks where the couple goes to try for a baby: the current building if
+     * it is a home, otherwise the most valuable residential property the
+     * household owns.
+     */
+    private Residential findHome() {
+        Building current = ctx.getWorldManager().getCurrentLocation();
+        if (current instanceof Residential && ((Residential) current).isOwned()) {
+            return (Residential) current;
+        }
+        Residential best = null;
+        for (Building b : ctx.getWorldManager().getCityMap()) {
+            if (b instanceof Residential) {
+                Residential res = (Residential) b;
+                if (res.isOwned() && (best == null || res.getPurchasePrice() > best.getPurchasePrice())) {
+                    best = res;
+                }
+            }
+        }
+        return best;
     }
 
     /**

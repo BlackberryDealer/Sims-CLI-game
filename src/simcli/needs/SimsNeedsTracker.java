@@ -57,6 +57,23 @@ public class SimsNeedsTracker {
         this.updateState();
     }
 
+    /**
+     * Advances one tick for a non-playable infant: only hunger decays, but
+     * an unfed infant loses health (and can die) like any other Sim.
+     *
+     * @param sim           the infant Sim.
+     * @param ageMultiplier decay multiplier.
+     * @param simName       the infant's name (for warnings).
+     */
+    public void tickInfant(Sim sim, double ageMultiplier, String simName) {
+        if (this.state == SimState.DEAD)
+            return;
+
+        this.hunger.calculateDecay(sim, ageMultiplier);
+        this.applyHealthDrain(simName);
+        this.updateState();
+    }
+
     private void applyCrossPenalties() {
         if (this.hygiene.getValue() <= GameConstants.HYGIENE_PENALTY_THRESHOLD) {
             this.social.decrease(GameConstants.HYGIENE_SOCIAL_PENALTY_AMOUNT);

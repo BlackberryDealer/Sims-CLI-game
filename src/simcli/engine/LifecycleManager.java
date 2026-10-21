@@ -127,6 +127,7 @@ public class LifecycleManager {
                 logger.log(
                         "\n*** " + sim.getName()
                         + " has passed away of old age. ***");
+                return;
             }
 
             // Pension for retired elders.

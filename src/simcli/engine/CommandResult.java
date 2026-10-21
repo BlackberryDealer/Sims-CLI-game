@@ -21,6 +21,13 @@ public enum CommandResult {
      */
     SLEEP_EVENT,
 
+    /**
+     * The Sim worked a shift — GameEngine should advance the clock by the
+     * job's working hours, one tick at a time, so that day boundaries
+     * crossed during the shift are processed.
+     */
+    WORK_SHIFT,
+
     /** The player chose to save and exit to the main menu. */
     SAVE_AND_EXIT
 }

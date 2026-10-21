@@ -23,6 +23,8 @@ public class Social extends Need {
     public void calculateDecay(Sim sim, double multiplier) {
         if (sim.getCurrentAction() == ActionState.SOCIALIZING) {
             this.increase(GameConstants.SOCIAL_ADDED_AMOUNT);
+        } else if (sim.getCurrentAction() == ActionState.SLEEPING) {
+            // Sleeping Sims don't get lonely.
         } else {
             this.decrease((int) Math.round(this.getBaseDecayRate() * multiplier));
         }

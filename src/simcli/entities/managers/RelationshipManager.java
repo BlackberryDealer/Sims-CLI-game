@@ -279,6 +279,9 @@ public class RelationshipManager {
     public Sim finalizeBaby(String childName, Gender childGender) {
         Sim child = new Sim(childName, 0, childGender);
         child.setChildSim(true);
+        // Newborns don't come with the adult starting cash.
+        child.setMoney(0);
+        child.setTotalMoneyEarned(0);
 
         this.addChild(child);
         spouse.getRelationshipManager().addChild(child);
