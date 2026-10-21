@@ -176,12 +176,15 @@ public class UpkeepManagerTest {
     @DisplayName("Idle Sims cook ingredients instead of eating them raw")
     void testAutonomyCooks() {
         Sim active = rich;
-        dormFridge().storeItem(new Ingredient("Groceries", 15, 10, "Home-cooked Meal", 55, 6));
+        Fridge fridge = dormFridge();
+        fridge.storeItem(new Ingredient("Groceries", 15, 10, "Home-cooked Meal", 55, 6));
         poor.getHunger().setValue(20);
 
-        new GameLoop(new TimeManager(12, 24), household, new SimulationLogger(), world).processTick(active, 1);
+        // straight to the autonomy step, so no random household event can stock or spoil the fridge
+        new AutonomyManager(world, new SimulationLogger()).act(active, household, false);
 
-        assertTrue(poor.getHunger().getValue() >= 70, "Should have eaten the cooked meal, not raw groceries");
+        assertTrue(fridge.getStoredItems().isEmpty(), "The groceries should be used");
+        assertEquals(75, poor.getHunger().getValue(), "Should have eaten the cooked meal (+55), not raw groceries (+10)");
     }
 
     @Test

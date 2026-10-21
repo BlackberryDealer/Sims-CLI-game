@@ -43,8 +43,22 @@ public class AutonomyManagerTest {
         world.setupWorld();
     }
 
-    private GameLoop loop(int startHour) {
-        return new GameLoop(new TimeManager(startHour, 24), household, new SimulationLogger(), world);
+    /**
+     * Plays a turn hour by hour exactly as {@link GameLoop#processTick} does,
+     * but without its random events: a household event (a neighbour's pie in
+     * the fridge, a flu draining energy) would otherwise make exact results
+     * flaky.
+     */
+    private void playTurn(int hours) {
+        AutonomyManager autonomy = new AutonomyManager(world, new SimulationLogger());
+        autonomy.startTurn(active, household);
+        boolean bedtime = active.getCurrentAction() == ActionState.SLEEPING;
+        for (int i = 0; i < hours; i++) {
+            autonomy.act(active, household, bedtime);
+            for (Sim sim : household) {
+                sim.tick();
+            }
+        }
     }
 
     private Fridge dormFridge() {
@@ -72,7 +86,7 @@ public class AutonomyManagerTest {
         fridge.storeItem(meal);
         idle.getHunger().setValue(20);
 
-        loop(12).processTick(active, 1);
+        playTurn(1);
 
         assertFalse(fridge.getStoredItems().contains(meal), "The lasagna should be eaten");
         assertTrue(fridge.getStoredItems().contains(snack), "Only one item is eaten");
@@ -85,7 +99,7 @@ public class AutonomyManagerTest {
         Fridge fridge = dormFridge();
         fridge.storeItem(new Food("Apple", 5, 15, 0));
 
-        loop(12).processTick(active, 1);
+        playTurn(1);
 
         assertEquals(1, fridge.getStoredItems().size());
     }
@@ -98,7 +112,7 @@ public class AutonomyManagerTest {
         active.getHunger().setValue(10);
         active.getEnergy().setValue(10);
 
-        loop(12).processTick(active, 1);
+        playTurn(1);
 
         assertEquals(1, fridge.getStoredItems().size());
         assertEquals(ActionState.IDLE, active.getCurrentAction());
@@ -110,7 +124,7 @@ public class AutonomyManagerTest {
         idle.getEnergy().setValue(40);
         active.setCurrentAction(ActionState.SLEEPING);
 
-        loop(22).processTick(active, 10);
+        playTurn(10);
 
         assertEquals(ActionState.SLEEPING, idle.getCurrentAction());
         assertTrue(idle.getEnergy().getValue() > 90, "A night in bed should restore energy");
@@ -120,14 +134,13 @@ public class AutonomyManagerTest {
     @DisplayName("An exhausted idle Sim naps, then gets up once rested")
     void testTiredSimSleepsAndWakes() {
         idle.getEnergy().setValue(10);
-        GameLoop loop = loop(12);
 
-        loop.processTick(active, 1);
+        playTurn(1);
         assertEquals(ActionState.SLEEPING, idle.getCurrentAction());
 
-        loop.processTick(active, 10);
+        playTurn(10);
         assertEquals(ActionState.IDLE, idle.getCurrentAction(), "Should be awake again after resting");
-        // woke at the threshold, then a couple of awake hours (and maybe a random cold) took some off
+        // woke at the threshold, then a couple of awake hours took some off
         assertTrue(idle.getEnergy().getValue() >= GameConstants.AUTONOMY_WAKE_THRESHOLD - 20);
     }
 
@@ -136,7 +149,7 @@ public class AutonomyManagerTest {
     void testDirtySimShowers() {
         idle.getHygiene().setValue(10);
 
-        loop(12).processTick(active, 1);
+        playTurn(1);
 
         assertTrue(idle.getHygiene().getValue() >= 50);
     }
@@ -150,7 +163,7 @@ public class AutonomyManagerTest {
         household.add(baby);
         baby.getHunger().setValue(10);
 
-        loop(12).processTick(active, 1);
+        playTurn(1);
 
         assertTrue(baby.getHunger().getValue() >= 50, "The baby should have been fed");
     }
