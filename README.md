@@ -1,448 +1,338 @@
-# 🏠 SimCLI — A Sims-Inspired CLI Simulation Game
+# SimCLI
 
-> A turn-based life simulation game built entirely in Java, played through the terminal. Manage a household of Sims — feed them, find them careers, build relationships, raise children, and try to keep everyone alive.
+**Live, work and love — right in your terminal.**
 
----
+[![Tests](https://github.com/BlackberryDealer/Sims-CLI-game/actions/workflows/tests.yml/badge.svg)](https://github.com/BlackberryDealer/Sims-CLI-game/actions/workflows/tests.yml)
+![Java 17+](https://img.shields.io/badge/Java-17%2B-blue)
+![No dependencies](https://img.shields.io/badge/runtime%20dependencies-none-brightgreen)
 
-## 📖 Table of Contents
+SimCLI is a life simulation game inspired by *The Sims*, written in plain Java and played entirely in the terminal. You run a household of up to four Sims: keep them fed, rested and happy, find them careers, make friends at the park, fall in love, raise children, and see them through to old age. Every Sim has a life goal, and when the whole household has fulfilled theirs, you've won.
 
-- [Overview](#overview)
-- [Features](#features)
-- [Getting Started](#getting-started)
-- [How to Play](#how-to-play)
-- [Architecture & Design Patterns](#architecture--design-patterns)
-- [Project Structure](#project-structure)
-- [Testing](#testing)
+```
+╔════════════════════════════════════════════════════════════════════════════╗
+║ DAY 1  Monday  ☼ 08:00 Morning                   The Shared Dorm ► Bedroom ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+            (  )  (  )
+             )||    ||
+        ______||____||___________________
+       /                                /|
+      /   ~ T H E   D O R M ~          / |
+     /________________________________/  |
+     |  [##]  [##]   ____   [##]  [##]|  |
+     |  [##]  [##]  |    |  [##]  [##]|  /
+     |______________|   o|____________| /
+   ,,'',,,'',,,,'',,,,,'',,,,'',,,,'',,,'',,
+
+┌─ ★ ANN  27 · Adult · Unemployed ───────────────────────────────────────────┐
+│ Hunger   ██████████████████ 100     Energy   ██████████████████ 100        │
+│ Hygiene  ██████████████████ 100     Fun      ██████████████████ 100        │
+│ Social   ██████████████████ 100     Health   ██████████████████ 100        │
+│ $500   bag 0/10   traits Lazy   feeling fine                               │
+└────────────────────────────────────────────────────────────────────────────┘
+┌─ Household ────────────────────────────────────────────────────────────────┐
+│ ★ Bob  ♥ 100                                                               │
+└────────────────────────────────────────────────────────────────────────────┘
+┌─ What should Ann do? ──────────────────────────────────────────────────────┐
+│ HERE  [1] Sleep till 08:00                                                 │
+│ OUT   [W] Work        [T] Travel (1h) [J] Jobs                             │
+│ HOME  [M] Move room   [H] House info  [U] Upgrade room                     │
+│ SIM   [I] Status      [V] Inventory   [K] Switch Sim  [G] Goals            │
+│ GAME  [?] Help        [S] Save & quit to menu                              │
+│ Using things here takes 1 hour; menus and info screens are free.           │
+└────────────────────────────────────────────────────────────────────────────┘
+```
+
+## Contents
+
+- [Quick start](#quick-start)
+- [Your first day](#your-first-day)
+- [Controls](#controls)
+- [Game guide](#game-guide)
+- [Adding content](#adding-content)
+- [Building and testing](#building-and-testing)
+- [Architecture](#architecture)
 - [Contributors](#contributors)
 
----
+## Quick start
 
-## Overview
+You need **Java 17 or newer**. The game has no runtime dependencies.
 
-**SimCLI** is a Java Object-Oriented Programming project that recreates the core loop of *The Sims* as a command-line experience. Players create a household of up to 4 Sims, navigate a small city (home, shops, park), manage five decaying needs, pursue careers with promotions, build relationships with NPCs, get married, have children, and watch their Sims age through four life stages — all rendered via ASCII art in the terminal.
+**Any OS, with Maven:**
 
-The project emphasises clean OOP architecture, making heavy use of established design patterns including **Command**, **State**, **Facade**, **Builder**, and **Strategy**.
-
----
-
-## Features
-
-### 🧑 Sim Management
-- Create up to **4 Sims** per household with custom names, ages, and genders
-- Each Sim is assigned a **random personality trait** (Active, Lazy, Socialite) that modifies gameplay
-- **5 decaying needs**: Hunger, Energy, Hygiene, Happiness, Social — each with unique decay rules and cross-penalties
-- **Health system**: low hunger slowly drains health; starving (hunger at 0) drains it faster every consecutive hour, and a Sim dies when health reaches 0 — infants included
-- **Autonomy**: household members you aren't controlling look after themselves. They eat the most filling food in a fridge at home when hungry, shower when filthy, nap when exhausted, go to bed when you do, and feed hungry babies. If the fridge is empty, they'll tell you.
-
-### 🎯 Skills
-| Skill | Trained by | Pays off |
-|---|---|---|
-| Fitness | Working out on the Weight Bench (Active Sims learn 50% faster) | Cheaper workouts; Personal Trainer pay and promotions |
-| Logic | Studying at a Computer | Software Engineer and Hardware Technician pay and promotions |
-| Charisma | Chatting, joking, flirting, dates (Socialites learn 50% faster) | Jokes and flirts land more often; relationships grow faster; Photographer pay and promotions |
-
-- Skills go from level 0 to 10, and working a shift trains your career's skill a little
-- Each level of your career's skill adds **+5% pay** and **+5% promotion chance**
-- Promotion past tier 2 needs skill: tier 3 needs level 2, tier 4 needs level 4, tier 5 needs level 6
-- See every skill's level and progress on the status screen (`I`)
-
-### 🎯 Goals
-- Every Sim has a **life aspiration**: Career Star (top tier of a career), Big Family (3 children), Homeowner (buy the Bungalow), Master of One (a skill at level 10) or Social Butterfly (5 friends at 50+). You pick it when creating a Sim; babies and spouses get a random one
-- Fulfilling an aspiration pays **$1,000** and a big mood boost
-- **Legacy complete**: once every playable Sim in the household has fulfilled their aspiration, you've won. You can keep playing afterwards
-- **12 achievements** for household milestones (first job, wedding, first baby, Bungalow, $10,000 saved, ...)
-- Press `G` to see everyone's progress and the achievements list
-
-### 💼 Career System
-- **4 careers**: Software Engineer, Hardware Technician, Freelance Photographer, Personal Trainer
-- **3 part-time jobs open to teens**: Barista, Lifeguard, Library Assistant
-- Each job has unique salary, energy drain, working hours, age limits, and up to **5 promotion tiers**
-- Each career rewards one **skill**: promotion chance starts at 25% per shift and rises with that skill (up to 75%), and pay scales with both tier and skill
-- Overwork penalties and forced retirement when a Sim exceeds the job's maximum age
-
-### 🏙️ World & Locations
-| Location | Type | Interactables |
-|---|---|---|
-| The Shared Dorm | Residential (free) | Bed, Fridge, Shower, Weight Bench |
-| The Bungalow | Residential ($5,000) | Bed, Fridge, Shower, Computer |
-| Town Supermarket | Commercial | Grocery Shelf (ready food, raw ingredients, furniture) |
-| The Bookshop | Commercial | Bookshop Shelf (buy books) |
-| City Park | Park | Park Bench (socialize with NPCs) |
-
-- **Room system** — residential buildings contain rooms (Bedroom, Kitchen, Garage, Bathroom), each with furniture capacity
-- **Room upgrades** — expand storage capacity for $500
-- **Property purchasing** — buy the Bungalow to upgrade your living situation
-
-### 💸 Money & Food
-- **Weekly bills** every Monday for each home you own: $100 for the Dorm, $250 for the Bungalow. The richest Sim pays first. If the household can't cover the bill, everyone loses happiness. `H` shows what's due
-- **Cooking**: raw Groceries ($15) and Raw Steak ($35) barely fill you up raw, but cooked at a fridge (`C`) they make a Home-cooked Meal (+55 hunger) or a Steak Dinner (+80). Ready food like Microwave Dinners costs more for less
-- **Spoilage**: food stays fresh for a few days and loses 1 day of freshness per day in a fridge, 2 per day in a bag or chest. Food that runs out of freshness is thrown away
-
-### 💕 Relationships & Family
-- **Social actions**: Chat (always safe), Joke (60% to land), Flirt (adults who know each other, 40%+ to land, best relationship boost) and Argue. The menu shows each action's odds. Charisma raises them, and a flop costs a little relationship and happiness
-- **Relationship progression**: Stranger → Acquaintance → Friend → Romantic → Married
-- **Marriage** at 100 relationship score; the Family menu (`L`) lets you go on dates, try for a baby, feed the babies and **give gifts** from your bag (pricier gifts build more relationship)
-- **Children**: 50% conception chance, born as non-playable infants who grow a year every day and become playable at 13. Teens go to **school** on weekdays (+Logic) and can take **part-time jobs**
-- **A living park**: 8 visitors a day, drawn from a town that remembers who you've met. Each morning 3 visitors leave and others arrive, either old acquaintances or new faces. Townsfolk age, move away at 80, and have personalities shown in the park list. Socialites are easier to win over (+15% on jokes and flirts) and Lazy Sims harder (−10%)
-
-### 🎂 Lifecycle & Aging
-- **4 life stages** via the State Pattern: Child → Teen (13) → Adult (18) → Elder (65)
-- Children age 1 year **every day**; teens, adults and elders age 1 year every **3 in-game days**
-- **Elder penalties**: increased energy decay, forced job retirement
-- **Retirement pension**: $100/age-tick for unemployed elders
-- **Death by old age** at 90 years
-
-### 🎲 Random Events
-Each tick has a 5% chance to trigger one of six events:
-- 💰 Found money (+$50)
-- 🦶 Stubbed toe (happiness −15)
-- 💡 Stroke of inspiration (energy +20)
-- 🤧 Mild cold (all needs −10)
-- 🔥 Stove fire (hunger −20, energy −25, health −10)
-- 🎰 Lottery win (+$100–500, happiness +30)
-
-Separately, each turn has a 4% chance of a **household event** that hits everyone, picked from those that fit the time:
-- ☀️ Sunny morning (06:00–11:00): happiness +10
-- 🥧 Neighbour's pie (12:00–17:00): social +10, and a pie in the fridge
-- 🎉 Weekend party (Sat/Sun evenings): social +25, happiness +15, energy −10 for everyone awake
-- 🌩️ Power cut (21:00–05:00): hygiene −10, and fridge food loses 2 days of freshness
-- 🤒 Flu (any time): energy −15, happiness −10
-
-### 💾 Save System
-- **Text-based persistence** — saves to `saves/<worldName>.txt`
-- Full state serialization: Sim stats, inventory, relationships, spouses, children, building ownership, room states, world position
-- **Autosave** every 10 ticks
-- Create, load, and delete saves from the main menu
-
-### 🎨 ASCII Art Rendering
-- Dynamic ASCII art driven by an extensible provider system
-- Contextual rendering based on location and Sim action state: every building and every activity
-  (sleeping, eating, working, studying, socializing, working out, showering, having fun) has its own scene
-- A Sims-style **plumbob** above your Sim's head that turns green, yellow or red with their mood
-- Short **animations** when your Sim acts, travels, or sleeps through the night
-- A colour-coded HUD: date and time banner, need bars, household summary, and an action menu grouped by purpose
-
-### 🧭 Quality of Life
-- **Costs up front**: the action menu shows how long things take, e.g. `Work (4h)`, `Travel (1h)`, `Sleep till 08:00`
-- **What changed**: after a shift or a night's sleep, a panel lists how each need, health and money moved (e.g. `Hunger 72 → 49`)
-- **Danger alerts**: warnings under the household panel when someone else is in trouble, like a starving baby, low health or going hungry
-- **Risky choices**: going to bed very hungry asks you to confirm first, and says how hungry the Sim will be by morning
-- **Help** (`?`): every key, how long things take, and the main rules
-
-### 🖥️ Display settings
-- Colours and animations can be toggled from **Settings** in the main menu
-- Colours are detected automatically (Windows Terminal, VS Code, most Linux/macOS terminals);
-  force them with the environment variable `SIMCLI_COLOR=always` or `SIMCLI_COLOR=never` (`NO_COLOR` is honoured too)
-- On consoles that can't show box-drawing characters, the UI falls back to plain ASCII
-
----
-
-## Getting Started
-
-### Prerequisites
-- **Java JDK 17+**
-- **Maven 3.6+** to build on any OS (Windows, macOS, Linux). On Windows you can use the batch scripts instead, which need only a JDK
-
-### Run the Game
-
-**Option 1 — Maven (any OS):**
 ```bash
+git clone https://github.com/BlackberryDealer/Sims-CLI-game.git
+cd Sims-CLI-game
 mvn package
 java -jar target/sims-cli-game.jar
 ```
-`mvn package` compiles the game, runs the tests and builds a runnable jar. Add `-DskipTests` to skip the tests.
 
-**Option 2 — Windows batch script:**
-```bash
-run.bat
-```
-The scripts find a JDK automatically: `JAVA_HOME` first, then `javac` on the `PATH`, then the JDK bundled
-with VS Code's Java extension, then the usual install folders. If none is found, install one
-(e.g. `winget install EclipseAdoptium.Temurin.21.JDK`) or set `JAVA_HOME`.
+**Windows, without Maven:** double-click `run.bat`, or run it from a terminal. It finds a JDK by itself: `JAVA_HOME` first, then `javac` on your `PATH`, then the JDK bundled with VS Code's Java extension, then the usual install folders. If it can't find one, install one with `winget install EclipseAdoptium.Temurin.21.JDK`.
 
-**Option 3 — Manual compilation:**
-```bash
-# Compile
-javac -d bin -sourcepath src src/simcli/Main.java
+> **Tip:** use a terminal that supports colour and Unicode, such as Windows Terminal, the VS Code terminal, or any macOS or Linux terminal. Older consoles still work, with plain ASCII boxes instead.
 
-# Run (resources/ holds the game's data files; use ':' instead of ';' on macOS/Linux)
-java -cp "bin;resources" simcli.Main
-```
+## Your first day
 
-### Run Tests
-```bash
-mvn test
-```
-On Windows, `run-tests.bat` does the same without Maven, using the standalone JUnit Platform Console launcher in `lib/`.
-GitHub Actions runs the tests on Windows, macOS and Linux for every push and pull request (`.github/workflows/tests.yml`).
+1. **Make a household.** Choose **New world**, name it, and create up to four Sims. Each Sim gets a random personality (Active, Lazy or Socialite), and you pick their **life aspiration**, the goal that wins you the game.
+2. **Get a job.** Press `J` and pick a career you're old enough for. Each career rewards one skill, so pick one you can train. Press `W` to work a shift; the office is closed at weekends.
+3. **Buy food.** Press `T` to travel to the **Town Supermarket**. Ready meals are convenient, but raw **Groceries** are far cheaper per bite. Bring them home and open the fridge: `C` cooks a meal, `S` stores food so it stays fresh longer.
+4. **Meet people.** Travel to the **City Park** and chat with the visitors. Chats always land; jokes and flirts are riskier. Keep talking to someone and you'll become friends, and maybe more.
+5. **Go to bed.** Sleeping skips to 08:00 and the whole household goes to bed with you. In the morning you'll see what changed overnight, e.g. `Hunger 72 → 49`.
+6. **Plan for Monday.** Bills for every home you own are due each Monday.
 
-### Adding content
-Shops, their stock and the city's buildings are defined in JSON under `resources/simcli/data/`, so you can add them without changing code:
-- `shops.json` — each shop's items (food, raw ingredients, books and other consumables, furniture), with optional `availableIf` conditions such as a minimum age or money
-- `buildings.json` — the travel map in order: homes with their price, weekly bill, rooms and furniture, shops (by shop id) and the park
+The Sims you aren't controlling look after themselves: they eat from the fridge, shower and nap. Press `K` to switch to one of them. Press `?` in game for help at any time.
 
-Each file starts with a comment block describing its fields. Add new buildings at the end of the list, because saves refer to buildings by position.
+## Controls
 
-### Generate Javadoc
-```bash
-javadoc -d docs -sourcepath src -subpackages simcli
-```
-This generates the full API documentation into the `docs/` directory. Open `docs/index.html` in a browser to browse the Javadoc.
+| Key | Action | Time |
+|---|---|---|
+| `1`–`9` | Use what's listed under **HERE**: bed, fridge, shower, shop, park… | 1 hour (sleep lasts until 08:00) |
+| `W` | Work a shift (weekdays only) | the shift's length |
+| `T` | Travel somewhere, or buy a home | 1 hour |
+| `J` | Job market: take a job, change career, or quit | free |
+| `M` / `H` / `U` | Move room / house info and bills / upgrade a room ($500) | free |
+| `I` | Status: needs, job, skills, family, friends | free |
+| `V` | Inventory: eat, use or drop items | free |
+| `K` | Switch to another Sim in the household | free |
+| `L` | Family: date your spouse, try for a baby, feed the babies, give a gift | 1 hour |
+| `G` | Goals: aspirations and achievements | free |
+| `?` | Help | free |
+| `S` | Save and quit to the main menu | free |
 
----
+`0` goes back in every menu. Backing out of a shop, the fridge or the park without doing anything costs no time.
 
-## How to Play
+## Game guide
 
-### Main Menu
-```
-[1] New world     — Start a new game with a fresh household
-[2] Load world    — Resume a saved game (pick it by number or name)
-[3] Delete world  — Permanently remove a save file
-[4] Settings      — Turn colours and animations on or off
-[0] Quit          — Quit the application
-```
+The full rules, for when you want the details. Click a section to open it.
 
-### In-Game Commands
-| Key | Action |
-|-----|--------|
-| `W` | Go to work (earn money, risk overwork) |
-| `J` | Browse the job market / change career |
-| `T` | Travel to another location |
-| `M` | Move to a different room (residential only) |
-| `H` | View house info and room details |
-| `I` | View character status and detailed stats |
-| `G` | Goals: aspirations and achievements |
-| `?` | Help: every key, how long things take, and the main rules |
-| `V` | Open inventory (eat food, use/drop items) |
-| `U` | Upgrade room storage capacity ($500) |
-| `K` | Switch active Sim to another household member |
-| `L` | Family: date your spouse, try for a baby, feed the babies, give a gift |
-| `S` | Save and exit to main menu |
-| `1-9` | Use the numbered things listed under **HERE** (bed, fridge, shop, park bench...) |
+<details>
+<summary><b>Needs, health and death</b></summary>
 
-Every sub-menu uses `0` to go back. Backing out of a shop, the fridge, a storage chest or the park
-without doing anything costs no time.
+Every Sim has five needs from 0 to 100: **Hunger**, **Energy**, **Hygiene**, **Fun** and **Social**. They fall every hour, faster when working or exercising, and faster for older Sims. Low needs drag each other down: poor hygiene hurts social, and low fun and loneliness drain energy.
 
-### Gameplay Tips
-- **Keep hunger above 20** — hunger at zero drains health faster every hour until your Sim dies
-- **Cook instead of buying ready meals** — raw ingredients cooked at the fridge are the cheapest way to stay fed
-- **Keep money aside for Monday** — unpaid bills make the whole household miserable
-- **Sleep regularly** — sleeping fast-forwards time to 8 AM and restores energy
-- **Socialize at the park** — the Socialite trait gives bonus relationship and happiness gains
-- **Train your career's skill** — without it you'll stall at tier 2 (check `I` to see what the next promotion needs)
-- **Keep the fridge stocked** — idle household members feed themselves (and the babies) from it
-- **Save up for the Bungalow** ($5,000) — it comes with a Computer for studying Logic
-- **Watch your Sim's age** — elders are forced into retirement and have increased energy decay
+- **Health** regenerates while a Sim is fed, drains slowly while they're hungry (hunger 20 or below), and drains faster every hour they're starving at 0. A Sim dies when health reaches 0, and that includes babies.
+- **Tired** Sims (energy 20 or below) can't work or exercise. **Hungry** Sims can't work.
+- **Personality** matters: Active Sims tire 20% slower and Lazy Sims 50% faster. Socialites get 50% more out of chats, jokes and flirts, and learn Charisma faster.
 
----
+</details>
 
-## Architecture & Design Patterns
+<details>
+<summary><b>Careers and skills</b></summary>
 
-### 🏗️ Design Patterns Used
+| Job | Pay per shift | Hours | Ages | Tiers | Skill |
+|---|---|---|---|---|---|
+| Software Engineer | $150 | 4 | 18–65 | 5 | Logic |
+| Hardware Technician | $120 | 5 | 18–55 | 4 | Logic |
+| Freelance Photographer | $80 | 2 | 18–80 | 3 | Charisma |
+| Personal Trainer | $90 | 3 | 18–40 | 3 | Fitness |
+| Barista *(part-time)* | $45 | 3 | 13–75 | 3 | Charisma |
+| Lifeguard *(part-time)* | $50 | 3 | 13–45 | 3 | Fitness |
+| Library Assistant *(part-time)* | $40 | 3 | 13–80 | 3 | Logic |
 
-| Pattern | Where | Purpose |
-|---------|-------|---------|
-| **Command** | `engine/commands/` | Each player action (Work, Travel, Interact, etc.) is encapsulated as an `ICommand` object, dispatched polymorphically by `InputHandler` |
-| **State** | `entities/lifecycle/` | `LifeStage` interface with `ChildStage`, `TeenStage`, `AdultStage`, `ElderStage` — Sims swap behaviour on age-up transitions |
-| **Facade** | `GameEngine` | Single entry point for the game loop, hiding subsystem complexity (TimeManager, WorldManager, GameLoop, etc.) |
-| **Builder** | `CommandContext.Builder` | Fluent construction of the shared context object passed to all commands — validates required fields at build time |
-| **Strategy** | `Need` subclasses | Each need type (Hunger, Energy, Hygiene, etc.) defines its own `calculateDecay()` algorithm via abstract method override |
-| **Template Method** | `BaseCommand` | Provides shared validation and execution scaffolding, with subclasses overriding specific steps |
-| **Factory** | `InteractableFactory` | Creates interactable objects for rooms and buildings |
-| **Dependency Injection** | Throughout | `IRenderer`, `IWorldManager`, `IInputHandler` interfaces allow constructor injection of mocks for testing |
+Pay is the tier-1 rate and rises with each promotion.
 
-### 🧩 Key Architectural Decisions
-- **No circular dependencies** — commands receive a `CommandContext` instead of a `GameEngine` reference; engine mutations are handled via `Consumer<Sim>` callbacks
-- **Separation of Concerns** — lifecycle aging lives in `LifecycleManager`, needs tracking in `SimsNeedsTracker`, career logic in `CareerManager`, relationships in `RelationshipManager`
-- **Centralized constants** — all magic numbers are consolidated in `GameConstants` for easy tuning
+- **Promotions** have a 25% chance per shift, plus 5% per level of the job's skill (up to 75%). Past tier 2 the skill is required: tier 3 needs level 2, tier 4 needs level 4, and tier 5 needs level 6.
+- **Skill pays:** each level of the job's skill adds 5% to every paycheck.
+- **Overwork:** extra shifts in one day cost more energy, hunger and hygiene each time (double, then triple), and the game asks you to confirm the first one.
+- **Attendance:** missing more than three weekdays in a row gets a Sim fired. Weekends never count.
+- **Retirement:** Sims past a job's maximum age are retired from it. Unemployed elders collect a $100 pension on each birthday.
 
----
+| Skill (0–10) | How to train it | What it does |
+|---|---|---|
+| Fitness | Weight Bench (Active Sims learn 50% faster) | Cheaper workouts; pay and promotions for fitness jobs |
+| Logic | Computer; teens also learn it at school | Pay and promotions for logic jobs |
+| Charisma | Chatting, joking, flirting and dates (Socialites learn 50% faster) | Jokes and flirts land more often and build relationships faster |
 
-## Project Structure
+Working a shift trains the job's skill a little too. The status screen (`I`) shows each skill's progress and what the next promotion needs.
 
-```
-Sims-CLI-game/
-├── run.bat                          # Compile and run the game
-├── run-tests.bat                    # Compile and run JUnit 5 tests (Windows, no Maven)
-├── pom.xml                          # Maven build: mvn package / mvn test
-├── .github/workflows/tests.yml      # CI: tests on Windows, macOS and Linux
-├── resources/simcli/data/           # Game content: shops.json, buildings.json
-├── docs/                            # Generated Javadoc (javadoc -d docs ...)
-├── lib/                             # JUnit 5 standalone JAR
-├── saves/                           # Persistent save files (auto-created)
-├── src/simcli/
-│   ├── Main.java                    # Entry point
-│   ├── engine/                      # Core game engine
-│   │   ├── GameEngine.java          # Facade — main game coordinator
-│   │   ├── GameLoop.java            # Per-tick simulation processing
-│   │   ├── AutonomyManager.java     # Idle Sims eat, sleep, shower, feed babies
-│   │   ├── InputHandler.java        # Maps input → Command objects
-│   │   ├── TimeManager.java         # Tick/day/time-of-day tracking
-│   │   ├── WorldManager.java        # City map and location management
-│   │   ├── LifecycleManager.java    # Aging, death, retirement
-│   │   ├── RandomEventManager.java  # Random and household-wide events
-│   │   ├── UpkeepManager.java       # Weekly bills, food spoilage
-│   │   ├── GoalManager.java         # Aspirations, achievements, legacy
-│   │   ├── SimulationLogger.java    # Buffered message logging
-│   │   ├── CommandResult.java       # Enum result type for commands
-│   │   ├── IInputHandler.java       # Input handler interface
-│   │   ├── IWorldManager.java       # World manager interface
-│   │   └── commands/                # Command pattern implementations
-│   │       ├── ICommand.java        # Command interface
-│   │       ├── BaseCommand.java     # Template base class
-│   │       ├── CommandContext.java   # Builder-pattern context object
-│   │       ├── WorkCommand.java
-│   │       ├── TravelCommand.java
-│   │       ├── InteractCommand.java
-│   │       ├── InventoryCommand.java
-│   │       ├── MoveRoomCommand.java
-│   │       ├── SwitchSimCommand.java
-│   │       ├── SpouseInteractionCommand.java
-│   │       ├── JobMarketCommand.java
-│   │       ├── HouseInfoCommand.java
-│   │       ├── CharacterStatusCommand.java
-│   │       ├── GoalsCommand.java     # Aspirations and achievements screen
-│   │       ├── HelpCommand.java      # The [?] help screen
-│   │       └── UpgradeRoomCommand.java
-│   ├── entities/                    # Game entities and data models
-│   │   ├── actors/
-│   │   │   ├── Sim.java             # Core Sim entity (player/NPC)
-│   │   │   ├── NPCSim.java          # NPC specialization
-│   │   │   └── ISimBehaviour.java   # Sim behaviour interface
-│   │   ├── items/
-│   │   │   ├── Item.java            # Base item class
-│   │   │   ├── Consumable.java      # Edible items (Food inherits)
-│   │   │   ├── Food.java            # Food item that goes off
-│   │   │   ├── Ingredient.java      # Raw food, cooked into meals
-│   │   │   └── Furniture.java       # Furniture items
-│   │   ├── lifecycle/               # State Pattern — life stages
-│   │   │   ├── LifeStage.java       # Interface
-│   │   │   ├── ChildStage.java
-│   │   │   ├── TeenStage.java
-│   │   │   ├── AdultStage.java
-│   │   │   └── ElderStage.java
-│   │   ├── managers/
-│   │   │   ├── CareerManager.java   # Job, promotions, shifts
-│   │   │   ├── InventoryManager.java
-│   │   │   ├── RelationshipManager.java
-│   │   │   ├── SkillManager.java    # Skill experience and levels
-│   │   │   ├── NPCManager.java      # Park visitors and townsfolk
-│   │   │   └── NPCProvider.java     # NPC access interface
-│   │   └── models/                  # Enums and data classes
-│   │       ├── Job.java             # Career definitions
-│   │       ├── SimState.java        # HEALTHY, HUNGRY, TIRED, DEAD
-│   │       ├── ActionState.java     # IDLE, WORKING, SLEEPING, etc.
-│   │       ├── Gender.java
-│   │       ├── Trait.java           # ACTIVE, LAZY, SOCIALITE
-│   │       ├── SocialAction.java    # CHAT, JOKE, FLIRT, ARGUE
-│   │       ├── SkillType.java       # FITNESS, LOGIC, CHARISMA
-│   │       ├── Aspiration.java      # Life goals
-│   │       ├── Achievement.java     # Household milestones
-│   │       ├── Relationship.java
-│   │       ├── RelationshipStatus.java
-│   │       └── WorkResult.java
-│   ├── needs/                       # Strategy Pattern — need decay
-│   │   ├── Need.java               # Abstract base (0–100 scale)
-│   │   ├── Hunger.java
-│   │   ├── Energy.java
-│   │   ├── Hygiene.java
-│   │   ├── Happiness.java
-│   │   ├── Social.java
-│   │   └── SimsNeedsTracker.java   # Aggregates all needs + cross-penalties
-│   ├── persistence/
-│   │   ├── SaveManager.java        # Text-file serialization/deserialization
-│   │   ├── Savable.java            # Item save/load contract
-│   │   └── GameContent.java        # Loads shops and buildings from JSON
-│   ├── ui/
-│   │   ├── MainMenu.java           # Main menu controller
-│   │   ├── UIManager.java          # Centralized print utilities
-│   │   ├── NeedSummary.java        # "Hunger 72 → 49" after long actions
-│   │   ├── IRenderer.java          # Renderer interface (DI)
-│   │   ├── TerminalRenderer.java   # Terminal-based HUD rendering
-│   │   ├── AsciiArt.java           # Logo and static ASCII art
-│   │   ├── MenuPagination.java     # Paginated list display
-│   │   └── ascii/                  # ASCII art engine and providers
-│   │       ├── AsciiEngine.java
-│   │       ├── IAsciiProvider.java
-│   │       └── providers/
-│   ├── utils/
-│   │   ├── GameConstants.java      # All tunable game parameters
-│   │   ├── GameRandom.java         # Shared Random instance
-│   │   └── Json.java               # Small JSON reader for the data files
-│   └── world/                      # World and location model
-│       ├── Building.java           # Abstract base for all locations
-│       ├── Residential.java        # Homes with rooms
-│       ├── Commercial.java         # Shops
-│       ├── Park.java               # Social areas with NPCs
-│       ├── Room.java               # Rooms inside residential buildings
-│       └── interactables/          # Things Sims can use
-│           ├── Interactable.java   # Interface
-│           ├── AbstractShop.java   # Base shop shelf
-│           ├── Bed.java
-│           ├── Fridge.java
-│           ├── Shower.java
-│           ├── Computer.java
-│           ├── WeightBench.java
-│           ├── ParkBench.java      # NPC social interactions
-│           ├── CatalogShop.java     # Shops whose stock comes from shops.json
-│           ├── StorageChest.java
-│           ├── Container.java
-│           └── InteractableFactory.java
-└── test/simcli/                    # JUnit 5 test suite
-    ├── IntegrationTest.java
-    ├── engine/
-    │   ├── TimeManagerTest.java
-    │   └── commands/
-    ├── entities/
-    │   ├── actors/
-    │   ├── components/
-    │   ├── items/
-    │   └── lifecycle/
-    ├── needs/
-    │   ├── NeedTest.java
-    │   └── SimsNeedsTrackerTest.java
-    ├── persistence/
-    │   └── SaveManagerTest.java
-    └── world/
-        ├── RoomTest.java
-        └── interactables/
+</details>
+
+<details>
+<summary><b>Money, food and bills</b></summary>
+
+- **Starting money:** each Sim you create starts with $500. Every Sim has their own wallet; babies start with nothing.
+- **Bills:** every Monday the household pays the weekly bill for each home it owns: $100 for the Dorm and $250 for the Bungalow. The richest Sim pays first. If the household can't cover it, everyone loses happiness. `H` shows what's due.
+- **Cooking:** raw ingredients barely fill you up raw, but cooked at a fridge (`C`) they become proper meals.
+
+  | Food | Price | Hunger | Notes |
+  |---|---|---|---|
+  | Apple | $10 | +15 | snack |
+  | Microwave Dinner | $30 | +40 | ready to eat |
+  | Groceries | $15 | +10 raw, **+55** cooked | cooks into a Home-cooked Meal |
+  | Raw Steak | $35 | +15 raw, **+80** cooked | cooks into a Steak Dinner |
+
+- **Spoilage:** food stays fresh for a few days. It loses 1 day of freshness a day in a fridge and 2 a day in a bag or storage chest, and is thrown out when it runs out.
+- **The Bookshop** sells books (for fun), a Computer, and Energy Drinks for adults.
+- **The Bungalow** costs $5,000 and comes with its own Computer for studying.
+- **Upgrades:** `U` expands a room's storage for $500.
+
+</details>
+
+<details>
+<summary><b>Relationships, marriage and children</b></summary>
+
+- **Social actions:**
+
+  | Action | Odds | Effect |
+  |---|---|---|
+  | Chat | always lands | small, steady relationship gain |
+  | Joke | 60% | bigger gain if it lands |
+  | Flirt | 40% and up | the biggest gain; adults who already know each other (20+) only |
+  | Argue | always "lands" | hurts the relationship |
+
+  The menu shows the odds for each action. Charisma raises them, a Socialite target is easier to win over (+15%), and a Lazy one is harder (−10%). A flop costs a little relationship and happiness.
+- **Relationship levels:** stranger → acquaintance (20) → friend (50) → romantic (80) → married. At 100 you can propose, and your new spouse joins the household as a playable Sim.
+- **Family menu (`L`):** go on dates, try for a baby (a 50% chance; it takes an hour either way), feed the babies, or give your spouse a gift from your bag. Pricier gifts mean more.
+- **Children** are born as babies who only need feeding. They grow a year every day and become playable at 13. Teens go to school on weekdays (+Logic) and can take part-time jobs.
+- **The park** has eight visitors a day, drawn from a town that remembers who you've met. Each morning three leave and others arrive, either old faces or new ones. Townsfolk age too, and move away at 80.
+
+</details>
+
+<details>
+<summary><b>Ageing and life stages</b></summary>
+
+| Stage | Ages | Notes |
+|---|---|---|
+| Child | 0–12 | ages one year **per day**; babies only need feeding |
+| Teen | 13–17 | playable; school on weekdays; part-time jobs |
+| Adult | 18–64 | every career open |
+| Elder | 65+ | pension when unemployed; dies of old age at 90 |
+
+Teens, adults and elders age one year every 3 in-game days. New households start with Sims aged 18–89.
+
+</details>
+
+<details>
+<summary><b>Goals: aspirations, achievements and winning</b></summary>
+
+Every playable Sim has one **aspiration**. Fulfilling it pays $1,000 and a big mood boost. When every playable Sim in the household has fulfilled theirs, your **legacy is complete** and you've won. You can keep playing afterwards.
+
+| Aspiration | Goal |
+|---|---|
+| Career Star | Reach the top tier of a career |
+| Big Family | Raise a family of 3 children |
+| Homeowner | Buy the Bungalow |
+| Master of One | Reach level 10 in any skill |
+| Social Butterfly | Make 5 good friends (relationship 50+) |
+
+**12 achievements** mark household milestones: Gainfully Employed, Moving Up, Corner Office, Good Friends, Wedding Bells, Bundle of Joy, All Grown Up, Moving On Up, Skilled, Master, Moneybags ($10,000 saved) and Golden Years. `G` shows everyone's progress and which achievements you've unlocked.
+
+</details>
+
+<details>
+<summary><b>Random events</b></summary>
+
+After every turn there's a **5% chance** of an event for the Sim you're playing:
+
+| Event | Effect |
+|---|---|
+| Found money | +$50 |
+| Stubbed toe | −15 fun |
+| Stroke of inspiration | +20 energy |
+| Mild cold | −10 to every need |
+| Stove fire | −20 hunger, −25 energy, −10 health |
+| Lottery win | +$100 to $500, +30 fun |
+
+There's also a separate **4% chance** of a **household event**, chosen from the ones that fit the time:
+
+| Event | When | Effect |
+|---|---|---|
+| Sunny morning | 06:00–11:00 | +10 fun for everyone |
+| Neighbour's pie | 12:00–17:00 | +10 social, and a pie in the fridge |
+| Weekend party | Sat/Sun evenings | +25 social, +15 fun, −10 energy for everyone awake |
+| Power cut | 21:00–05:00 | −10 hygiene; fridge food loses 2 days of freshness |
+| Flu | any time | −15 energy, −10 fun for everyone |
+
+</details>
+
+<details>
+<summary><b>Saving, settings and display</b></summary>
+
+- **Saves** live in `saves/<world name>.txt`, in the folder you run the game from. Pressing `S` saves and quits, and the game also autosaves regularly as you play. You can load or delete worlds from the main menu.
+- **Settings** in the main menu turn colours and animations on or off.
+- **Colour detection** is automatic. Force it with `SIMCLI_COLOR=always` or `SIMCLI_COLOR=never`; `NO_COLOR` is honoured too.
+- **ASCII fallback:** consoles that can't show box-drawing characters fall back to plain ASCII automatically.
+
+</details>
+
+## Adding content
+
+Shops and the city are plain JSON files in [`resources/simcli/data/`](resources/simcli/data). Edit them to add items, shops or buildings, with no Java required. Each file starts with a comment describing its fields.
+
+For example, to sell coffee at the supermarket, add this to the grocery shop's `items` in [`shops.json`](resources/simcli/data/shops.json):
+
+```json
+{ "type": "food", "name": "Iced Coffee", "price": 6, "hunger": 5, "energy": 15 }
 ```
 
----
+- **[`shops.json`](resources/simcli/data/shops.json)** — what each shop sells: food, raw ingredients (with the meal they cook into), consumables like books, and furniture. Items can be restricted with `availableIf`, for example `[{ "minAge": 25 }, { "minMoney": 500 }]`, meaning age 25+ *or* $500+.
+- **[`buildings.json`](resources/simcli/data/buildings.json)** — the travel map, in order: homes (price, weekly bill, rooms and furniture), shops (by shop id) and the park. Add new buildings at the **end** of the list, because saves refer to buildings by position.
 
-## Testing
+Jobs are still defined in code ([`Job.java`](src/simcli/entities/models/Job.java)), because saves and game logic refer to them by name.
 
-The project includes a **JUnit 5** test suite covering:
+## Building and testing
 
-- **Unit tests** — individual components like `TimeManager`, `Need`, `Room`, and `SaveManager`
-- **Integration tests** — end-to-end flows exercising the engine, actors, and world together
-- **Entity tests** — Sim lifecycle, inventory, and career management
+| Task | Command |
+|---|---|
+| Build, test and package | `mvn package` → `target/sims-cli-game.jar` |
+| Run the tests | `mvn test`, or `run-tests.bat` on Windows without Maven |
+| Run without Maven | `javac -d bin -sourcepath src src/simcli/Main.java` then `java -cp "bin;resources" simcli.Main` (use `:` instead of `;` on macOS/Linux) |
+| Generate Javadoc | `javadoc -d docs -sourcepath src -subpackages simcli`, then open `docs/index.html` |
 
-Run all tests:
-```bash
-mvn test
+The suite has about 390 JUnit 5 tests: unit tests for each manager, integration tests that play through commands, save/load round trips, and regression tests for UI and timekeeping bugs. [GitHub Actions](.github/workflows/tests.yml) runs them on **Windows, macOS and Linux** for every push and pull request.
+
+## Architecture
+
+The code is organised around a handful of classic design patterns, chosen to keep each part of the simulation small and testable.
+
+```mermaid
+flowchart LR
+    Player([Player input]) --> IH[InputHandler]
+    IH -->|builds| CMD[Command<br/>Work, Travel, Interact…]
+    CMD -->|time passes| GL[GameLoop]
+    GL --> AM[AutonomyManager<br/>idle Sims]
+    GL --> LM[LifecycleManager<br/>ageing, death]
+    GL --> UM[UpkeepManager<br/>bills, spoilage]
+    GL --> REM[RandomEventManager]
+    GL --> GM[GoalManager<br/>aspirations, achievements]
+    GE[GameEngine<br/>facade] --- IH
+    GE --- GL
+    GE --> R[TerminalRenderer]
 ```
 
-or, on Windows without Maven, `run-tests.bat`, which uses the JUnit Platform Console Standalone JAR (`lib/junit-platform-console-standalone.jar`).
-GitHub Actions runs `mvn package` on Windows, macOS and Linux for every push and pull request.
+Each turn, `GameEngine` renders the screen, and `InputHandler` turns the key you pressed into a **Command**. If the command takes time, `GameLoop` simulates it hour by hour: idle Sims act, needs decay, the clock advances, and at midnight it runs ageing, school, bills, spoilage and the park's daily rotation. After the turn it rolls for random events and checks goals.
 
----
+| Pattern | Where | Why |
+|---|---|---|
+| Command | `engine/commands/` | Every action is an `ICommand`, dispatched by `InputHandler` |
+| State | `entities/lifecycle/` | `ChildStage` → `TeenStage` → `AdultStage` → `ElderStage` change what a Sim can do |
+| Facade | `GameEngine` | One entry point that hides the subsystems |
+| Builder | `CommandContext.Builder` | Commands get a validated context instead of the whole engine |
+| Strategy | `needs/` | Each need defines its own decay rule |
+| Template Method | `BaseCommand` | Shared command flow; subclasses fill in `run()` |
+| Factory | `InteractableFactory` | Furniture is built by name, from saves and JSON |
+| Dependency injection | throughout | `IRenderer`, `IWorldManager` and `IInputHandler` can be swapped for test doubles |
+
+Other decisions: commands never hold a `GameEngine` reference (no circular dependencies), each concern has its own manager class, and tuning numbers live in [`GameConstants`](src/simcli/utils/GameConstants.java). There's a full UML class diagram in [`class-diagram.mmd`](class-diagram.mmd).
+
+### Where things live
+
+| Path | What's there |
+|---|---|
+| `src/simcli/engine/` | Game loop, input, time, world, and the managers for autonomy, lifecycle, upkeep, events and goals |
+| `src/simcli/engine/commands/` | One class per player action |
+| `src/simcli/entities/` | Sims and NPCs, items, life stages, per-Sim managers (career, skills, relationships, inventory) and enums |
+| `src/simcli/needs/` | The five needs and the tracker that ties them to health |
+| `src/simcli/persistence/` | Save files and the JSON content loader |
+| `src/simcli/ui/` | Menus, HUD, panels, colours and ASCII art |
+| `src/simcli/world/` | Buildings, rooms and everything a Sim can interact with |
+| `resources/simcli/data/` | Shops and buildings as JSON |
+| `test/simcli/` | The JUnit 5 suite, mirroring `src/` |
 
 ## Contributors
 
-| Author |
-|--------|
-| AfifLotfi |
-| BlackberryDealer |
-| colossalcap |
-| Dylan Ho Sheng Xue |
-| Johndose-val |
-| lucas |
-| macfreze12 |
-| Muhammad Hasan Bin Suwandi |
-
----
+AfifLotfi · BlackberryDealer · colossalcap · Dylan Ho Sheng Xue · Johndose-val · lucas · macfreze12 · Muhammad Hasan Bin Suwandi
 
 ## License
 
-This project was developed as an academic Object-Oriented Programming assignment.
+Developed as an academic object-oriented programming assignment.
