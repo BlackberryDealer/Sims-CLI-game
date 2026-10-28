@@ -24,14 +24,14 @@ SimCLI is a life simulation game inspired by *The Sims*, written in plain Java a
      |______________|   o|____________| /
    ,,'',,,'',,,,'',,,,,'',,,,'',,,,'',,,'',,
 
-┌─ ★ ANN  27 · Adult · Unemployed ───────────────────────────────────────────┐
+┌─ * ANN  27 · Adult · Unemployed ───────────────────────────────────────────┐
 │ Hunger   ██████████████████ 100     Energy   ██████████████████ 100        │
 │ Hygiene  ██████████████████ 100     Fun      ██████████████████ 100        │
 │ Social   ██████████████████ 100     Health   ██████████████████ 100        │
 │ $500   bag 0/10   traits Lazy   feeling fine                               │
 └────────────────────────────────────────────────────────────────────────────┘
 ┌─ Household ────────────────────────────────────────────────────────────────┐
-│ ★ Bob  ♥ 100                                                               │
+│ * Bob  ♥ 100                                                               │
 └────────────────────────────────────────────────────────────────────────────┘
 ┌─ What should Ann do? ──────────────────────────────────────────────────────┐
 │ HERE  [1] Sleep till 08:00                                                 │
@@ -287,7 +287,9 @@ The code is organised around a handful of classic design patterns, chosen to kee
 
 ```mermaid
 flowchart LR
-    Player([Player input]) --> IH[InputHandler]
+    Player([Player input]) --> GE[GameEngine<br/>facade]
+    GE -->|draws the screen| R[TerminalRenderer]
+    GE --> IH[InputHandler]
     IH -->|builds| CMD[Command<br/>Work, Travel, Interact…]
     CMD -->|time passes| GL[GameLoop]
     GL --> AM[AutonomyManager<br/>idle Sims]
@@ -295,9 +297,6 @@ flowchart LR
     GL --> UM[UpkeepManager<br/>bills, spoilage]
     GL --> REM[RandomEventManager]
     GL --> GM[GoalManager<br/>aspirations, achievements]
-    GE[GameEngine<br/>facade] --- IH
-    GE --- GL
-    GE --> R[TerminalRenderer]
 ```
 
 Each turn, `GameEngine` renders the screen, and `InputHandler` turns the key you pressed into a **Command**. If the command takes time, `GameLoop` simulates it hour by hour: idle Sims act, needs decay, the clock advances, and at midnight it runs ageing, school, bills, spoilage and the park's daily rotation. After the turn it rolls for random events and checks goals.
