@@ -33,6 +33,9 @@ public class CareerManager {
     /** Work performance towards the next promotion, 0–{@link GameConstants#PROMOTION_PERFORMANCE}. */
     private int performance;
 
+    /** Times the Sim has been fired for missing work. */
+    private int timesFired;
+
     /** Shifts worked over the Sim's whole life, in any job. */
     private int totalShiftsWorked;
 
@@ -100,6 +103,7 @@ public class CareerManager {
             this.performance = 0;
             this.consecutiveDaysMissed = 0;
             this.shiftsWorkedToday = 0;
+            this.timesFired++;
         } else if (this.consecutiveDaysMissed > 0) {
             SimulationLogger.getInstance()
                     .logWarning(simName + " missed work! Consecutive days missed: " + this.consecutiveDaysMissed);
@@ -297,5 +301,14 @@ public class CareerManager {
      */
     public void setTotalShiftsWorked(int shifts) {
         this.totalShiftsWorked = shifts;
+    }
+
+    /**
+     * Returns how many times the Sim has been fired for missing work.
+     *
+     * @return times fired.
+     */
+    public int getTimesFired() {
+        return timesFired;
     }
 }

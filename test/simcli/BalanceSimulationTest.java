@@ -19,6 +19,8 @@ import simcli.entities.managers.NPCManager;
 import simcli.entities.models.ActionState;
 import simcli.entities.models.Gender;
 import simcli.entities.models.Job;
+import simcli.entities.models.Memory;
+import simcli.entities.models.Reward;
 import simcli.entities.models.SimState;
 import simcli.entities.models.SkillType;
 import simcli.entities.models.SocialAction;
@@ -77,6 +79,9 @@ public class BalanceSimulationTest {
     private int lowestSocial = 100;
     private int shiftsWorked;
     private int lastShiftDay;
+    private int pointsSpent;
+    private int greatMoodTurns;
+    private int turns;
 
     @BeforeEach
     void setUp() {
@@ -130,6 +135,11 @@ public class BalanceSimulationTest {
         assertNotNull(bungalow, "A steady earner should afford the Bungalow within " + DAYS + " days");
         assertTrue(bungalow >= 20, "The Bungalow should be a midgame goal, not a first-week one (day " + bungalow + ")");
 
+        Integer firstPerk = milestones.get("first reward perk");
+        assertNotNull(firstPerk, "Doing daily wants should earn a perk within " + DAYS + " days");
+        assertTrue(firstPerk >= 3, "The first perk should take a few days of wants (day " + firstPerk + ")");
+        assertFalse(alex.getMemories().isEmpty(), "A life this full should leave memories");
+
         for (StarterGoal goal : List.of(StarterGoal.GET_JOB, StarterGoal.FIRST_SHIFT, StarterGoal.COOK_MEAL,
                 StarterGoal.PAY_BILLS)) {
             assertTrue(goals.isStarterDone(goal), "Starter goal not reached: " + goal);
@@ -148,6 +158,7 @@ public class BalanceSimulationTest {
     private void playOneTurn() {
         int hour = hour();
         int day = time.getCurrentDay();
+        buyPerks();
 
         if (hour >= 22 || hour < 7) {
             sleep();
@@ -211,6 +222,25 @@ public class BalanceSimulationTest {
         advance(1);
     }
 
+    /** Spends satisfaction points on perks as soon as Alex can afford them (takes no time). */
+    private void buyPerks() {
+        for (Reward perk : List.of(Reward.QUICK_LEARNER, Reward.GO_GETTER, Reward.SUNNY_DISPOSITION,
+                Reward.BIG_DREAMER, Reward.SILVER_TONGUE)) {
+            if (!alex.hasPerk(perk)) {
+                if (alex.redeem(perk)) {
+                    pointsSpent += perk.getCost();
+                    if (alex.getWants().getPerks().size() == 1) {
+                        milestone("first reward perk");
+                    }
+                    if (alex.getWants().getPerks().size() == 5) {
+                        milestone("all five perks");
+                    }
+                }
+                return;
+            }
+        }
+    }
+
     /** Eats the most filling food at home, cooking raw ingredients. */
     private boolean eat() {
         Consumable food = HomeSupplies.takeFood(world, true);
@@ -269,6 +299,8 @@ public class BalanceSimulationTest {
         lowestHunger = Math.min(lowestHunger, alex.getHunger().getValue());
         lowestEnergy = Math.min(lowestEnergy, alex.getEnergy().getValue());
         lowestSocial = Math.min(lowestSocial, alex.getSocial().getValue());
+        turns++;
+        if (alex.isInGreatMood()) greatMoodTurns++;
         if (alex.getJobTier() >= 2) milestone("first promotion");
         if (alex.getJobTier() >= alex.getCareer().getMaxTier()) milestone("top of the career");
         if (alex.getSkillLevel(SkillType.LOGIC) >= 5) milestone("Logic level 5");
@@ -298,6 +330,12 @@ public class BalanceSimulationTest {
                 lowestHunger, lowestEnergy, lowestSocial));
         sb.append(String.format("  Legacy score %d, Alex's aspiration %s (%s)%n", goals.getLegacyScore(household),
                 alex.getAspiration().getDisplayName(), alex.isAspirationFulfilled() ? "fulfilled" : "in progress"));
+        sb.append(String.format("  Inner life: %d satisfaction earned, %d perks, great mood %d%% of turns, %d memories%n",
+                pointsSpent + alex.getWants().getPoints(), alex.getWants().getPerks().size(),
+                turns == 0 ? 0 : greatMoodTurns * 100 / turns, alex.getMemories().size()));
+        for (Memory m : alex.getMemories()) {
+            sb.append(String.format("    day %-3d %s%n", m.getDay(), m.getText()));
+        }
         System.out.println(sb);
     }
 }

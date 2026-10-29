@@ -229,6 +229,20 @@ public final class GameConstants {
     /** Legacy points for each generation after the first to come of age. */
     public static final int LEGACY_POINTS_GENERATION = 250;
 
+    // --- Inner Life (wants, fears, rewards) ---
+    /** How many wants each Sim gets every day (one more with the Big Dreamer perk). */
+    public static final int WANTS_PER_DAY = 3;
+    /** Bonus satisfaction points for doing every one of the day's wants. */
+    public static final int ALL_WANTS_BONUS = 100;
+    /** Satisfaction points lost when a Sim's fear comes true. */
+    public static final int FEAR_POINT_PENALTY = 100;
+    /** How much the Quick Learner and Go-Getter perks speed things up (x1.25). */
+    public static final double PERK_BONUS = 1.25;
+    /** Extra success chance for jokes and flirts with the Silver Tongue perk. */
+    public static final int SILVER_TONGUE_BONUS = 10;
+    /** Energy restored by the Second Wind boost. */
+    public static final int SECOND_WIND_ENERGY = 40;
+
     // --- Needs Tracker ---
     /** The number of ticks a Sim can survive at zero hunger before dying. */
     public static final int STARVING_DEATH_THRESHOLD = 3;

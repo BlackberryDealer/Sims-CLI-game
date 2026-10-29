@@ -6,7 +6,7 @@
 ![Java 17+](https://img.shields.io/badge/Java-17%2B-blue)
 ![No dependencies](https://img.shields.io/badge/runtime%20dependencies-none-brightgreen)
 
-SimCLI is a life simulation game inspired by *The Sims*, written in plain Java and played entirely in the terminal. You run a household of up to four Sims: keep them fed, rested and happy, find them careers, make friends at the park, fall in love, raise children, and see them through to old age. Every Sim has a life goal, and when the whole household has fulfilled theirs, you've won.
+SimCLI is a life simulation game inspired by *The Sims*, written in plain Java and played entirely in the terminal. You run a household of up to four Sims: keep them fed, rested and happy, find them careers, make friends at the park, fall in love, raise children, and see them through to old age. Sims have feelings that come and go, small wants and fears each day, and memories you can look back on in the family album. Every Sim has a life goal, and when the whole household has fulfilled theirs, you've won.
 
 ```
 ╔════════════════════════════════════════════════════════════════════════════╗
@@ -28,7 +28,9 @@ SimCLI is a life simulation game inspired by *The Sims*, written in plain Java a
 │ Hunger   ██████████████████ 100     Energy   ██████████████████ 100        │
 │ Hygiene  ██████████████████ 100     Fun      ██████████████████ 100        │
 │ Social   ██████████████████ 100     Health   ██████████████████ 100        │
-│ $500   bag 0/10   traits Lazy   feeling fine                               │
+│ Mood     ██████████████████ 100     great mood (earns & learns more)       │
+│ $500   bag 0/10   traits Lazy   fears going hungry                         │
+│ Wants  · Cook a meal  · Spend time with someone  · Work out                │
 └────────────────────────────────────────────────────────────────────────────┘
 ┌─ Household ────────────────────────────────────────────────────────────────┐
 │ * Bob  ♥ 100                                                               │
@@ -38,6 +40,7 @@ SimCLI is a life simulation game inspired by *The Sims*, written in plain Java a
 │ OUT   [W] Work        [T] Travel (1h) [J] Jobs                             │
 │ HOME  [C] Chat (1h)   [M] Move room   [H] House info  [U] Upgrade room     │
 │ SIM   [I] Status      [V] Inventory   [K] Switch Sim  [G] Goals            │
+│       [R] Rewards     [A] Album                                            │
 │ GAME  [?] Help        [S] Save & quit to menu                              │
 │ Using things here takes 1 hour; menus and info screens are free.           │
 └────────────────────────────────────────────────────────────────────────────┘
@@ -80,7 +83,7 @@ java -jar target/sims-cli-game.jar
 5. **Go to bed.** Sleeping skips to 08:00 and the whole household goes to bed with you. In the morning you'll see what changed overnight, e.g. `Hunger 72 → 49`.
 6. **Plan for Monday.** Bills for every home you own are due each Monday.
 
-The Goals screen (`G`) has a **first steps** checklist that pays a little cash for each of these. The Sims you aren't controlling look after themselves: they eat from the fridge, shower, nap and chat. Press `K` to switch to one of them. Press `?` in game for help at any time.
+The Goals screen (`G`) has a **first steps** checklist that pays a little cash for each of these. Each Sim also has a few small **wants** every day, shown on the HUD: do them for satisfaction points, then spend those in the reward store (`R`). The Sims you aren't controlling look after themselves: they eat from the fridge, shower, nap and chat. Press `K` to switch to one of them. Press `?` in game for help at any time.
 
 ## Controls
 
@@ -97,6 +100,8 @@ The Goals screen (`G`) has a **first steps** checklist that pays a little cash f
 | `K` | Switch to another Sim in the household | free |
 | `L` | Family: date your spouse, try for a baby, feed the babies, give a gift | 1 hour |
 | `G` | Goals: first steps, aspirations, legacy and achievements | free |
+| `R` | Today's wants and fear, and the reward store | free |
+| `A` | Family album: everyone's memories | free |
 | `?` | Help | free |
 | `S` | Save and quit to the main menu | free |
 
@@ -111,10 +116,51 @@ The full rules, for when you want the details. Click a section to open it.
 
 Every Sim has five needs from 0 to 100: **Hunger**, **Energy**, **Hygiene**, **Fun** and **Social**. They fall every hour, faster when working or exercising. Age only matters once a Sim is an elder, and even then needs drain at most 1.3× as fast. Low needs drag each other down: poor hygiene hurts social, and low fun and loneliness drain energy.
 
-- **Mood** is the average of the five needs. A Sim in a **great mood** (80 or more) earns 10% more per shift and learns skills 50% faster. The HUD shows when they're in one.
+- **Mood** is the average of the five needs plus the Sim's **moodlets** (see *Inner life*). A Sim in a **great mood** (80 or more) earns 10% more per shift and learns skills 50% faster. The HUD shows when they're in one.
 - **Health** regenerates while a Sim is fed, drains slowly while they're hungry (hunger 20 or below), and drains faster every hour they're starving at 0. A Sim dies when health reaches 0, and that includes babies.
 - **Tired** Sims (energy 20 or below) can't work or exercise. **Hungry** Sims can't work.
 - **Personality** matters: Active Sims tire 20% slower and Lazy Sims 50% faster. Socialites get 50% more out of chats, jokes and flirts, and learn Charisma faster.
+
+</details>
+
+<details>
+<summary><b>Inner life: moodlets, wants, fears and memories</b></summary>
+
+**Moodlets** are feelings that add to (or take from) a Sim's mood for a while, then wear off. Getting the same one again restarts its timer instead of stacking. The HUD shows the strongest; the status screen (`I`) lists them all with the hours left.
+
+| Good | Mood | Lasts | | Bad | Mood | Lasts |
+|---|---|---|---|---|---|---|
+| Well rested (woke with energy) | +10 | 8h | | Rejected (a joke or flirt flopped) | −10 | 4h |
+| Home cooking | +10 | 6h | | Skipped work | −10 | 12h |
+| Squeaky clean (a shower) | +5 | 4h | | Worst fear (it came true) | −15 | 12h |
+| Had a blast (fun) | +10 | 4h | | Fired | −25 | 24h |
+| Good company (socialising) | +10 | 4h | | Grieving (someone close died) | −25 | 72h |
+| Learned something (skill level) | +5 | 6h | | | | |
+| New friend | +10 | 12h | | | | |
+| Wish come true (a want done) | +10 | 8h | | | | |
+| Birthday | +10 | 12h | | | | |
+| Promoted! | +20 | 24h | | | | |
+| New baby | +20 | 48h | | | | |
+| Newlywed | +25 | 48h | | | | |
+| Living the dream (aspiration fulfilled) | +25 | 48h | | | | |
+
+**Wants and fears:** every morning each playable Sim gets **3 wants** (cook a meal, work a shift, earn $300, level up a skill, work out, study, spend time with someone, make a new friend, buy something, be in a great mood) and **1 fear** (getting fired, missing work, going hungry, running out of energy, going broke, being rejected, losing a loved one). Wants that suit a Sim's aspiration and traits come up more often, and only wants that are possible come up at all. Each want done earns **75–250 satisfaction points**, and doing all of the day's wants earns a 100-point bonus. A fear that comes true costs 100 points and a bad moodlet. The HUD shows today's wants and fear.
+
+**Reward store (`R`):** spend satisfaction points on perks that last a lifetime, or on one-off boosts.
+
+| Reward | Cost | Effect |
+|---|---|---|
+| Sunny Disposition | 1,500 | bad moodlets only count for half |
+| Silver Tongue | 1,500 | jokes and flirts land 10% more often |
+| Quick Learner | 2,000 | skills learn 25% faster |
+| Go-Getter | 2,500 | work performance fills 25% faster |
+| Big Dreamer | 3,000 | one more want every day |
+| Inspiration *(boost)* | 250 | Inspired: +20 mood for 8 hours |
+| Second Wind *(boost)* | 250 | +40 energy right now |
+
+A Sim who does most of their wants earns their first perk in about a week and the last one near the end of the third month.
+
+**Memories:** Sims remember the big moments: their first job, promotions, friendships, weddings, babies, growing up, aspirations fulfilled, moving house, and the people they've lost. Browse them in the **family album** (`A`). When the game ends you get to read each Sim's life story.
 
 </details>
 
@@ -299,7 +345,7 @@ Jobs are still defined in code ([`Job.java`](src/simcli/entities/models/Job.java
 | Run without Maven | `javac -d bin -sourcepath src src/simcli/Main.java` then `java -cp "bin;resources" simcli.Main` (use `:` instead of `;` on macOS/Linux) |
 | Generate Javadoc | `javadoc -d docs -sourcepath src -subpackages simcli`, then open `docs/index.html` |
 
-The suite has about 420 JUnit 5 tests: unit tests for each manager, integration tests that play through commands, save/load round trips, and regression tests for UI and timekeeping bugs. It also includes a **balance bot** ([`BalanceSimulationTest`](test/simcli/BalanceSimulationTest.java)) that plays a household for 90 in-game days, prints a report of money and milestones, and fails if a change makes progress far too fast or too slow. [GitHub Actions](.github/workflows/tests.yml) runs them on **Windows, macOS and Linux** for every push and pull request.
+The suite has about 450 JUnit 5 tests: unit tests for each manager, integration tests that play through commands, save/load round trips, and regression tests for UI and timekeeping bugs. It also includes a **balance bot** ([`BalanceSimulationTest`](test/simcli/BalanceSimulationTest.java)) that plays a household for 90 in-game days, prints a report of money, milestones, perks and memories, and fails if a change makes progress far too fast or too slow. [GitHub Actions](.github/workflows/tests.yml) runs them on **Windows, macOS and Linux** for every push and pull request.
 
 ## Architecture
 
@@ -318,9 +364,10 @@ flowchart LR
     GL --> REM[RandomEventManager]
     GL --> GM[GoalManager<br/>aspirations, achievements]
     GL --> FM[FamilyManager<br/>births, inheritance]
+    GL --> ILM[InnerLifeManager<br/>moodlets, wants, memories]
 ```
 
-Each turn, `GameEngine` renders the screen, and `InputHandler` turns the key you pressed into a **Command**. If the command takes time, `GameLoop` simulates it hour by hour: idle Sims act, needs decay, the clock advances, and at midnight it runs ageing, school, births and mentoring, bills, spoilage and the park's daily rotation. After the turn it rolls for random events and checks goals.
+Each turn, `GameEngine` renders the screen, and `InputHandler` turns the key you pressed into a **Command**. If the command takes time, `GameLoop` simulates it hour by hour: idle Sims act, needs decay, the clock advances, and at midnight it runs ageing, school, births and mentoring, bills, spoilage and the park's daily rotation. After the turn it rolls for random events and checks goals. Then `InnerLifeManager` compares a snapshot of each Sim with the one from the previous turn, so no action has to report what it did. A rise in meals cooked becomes a moodlet, a new spouse becomes a memory, and the same comparison settles wants and fears.
 
 | Pattern | Where | Why |
 |---|---|---|
@@ -339,9 +386,9 @@ Other decisions: commands never hold a `GameEngine` reference (no circular depen
 
 | Path | What's there |
 |---|---|
-| `src/simcli/engine/` | Game loop, input, time, world, and the managers for autonomy, lifecycle, upkeep, events and goals |
+| `src/simcli/engine/` | Game loop, input, time, world, and the managers for autonomy, lifecycle, upkeep, events, goals, family and inner life |
 | `src/simcli/engine/commands/` | One class per player action |
-| `src/simcli/entities/` | Sims and NPCs, items, life stages, per-Sim managers (career, skills, relationships, inventory) and enums |
+| `src/simcli/entities/` | Sims and NPCs, items, life stages, per-Sim managers (career, skills, relationships, inventory, moodlets, wants) and enums |
 | `src/simcli/needs/` | The five needs and the tracker that ties them to health |
 | `src/simcli/persistence/` | Save files and the JSON content loader |
 | `src/simcli/ui/` | Menus, HUD, panels, colours and ASCII art |

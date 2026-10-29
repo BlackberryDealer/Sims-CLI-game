@@ -4,9 +4,15 @@ import simcli.engine.GameEngine;
 import simcli.engine.GoalManager;
 import simcli.engine.Lifespan;
 import simcli.entities.items.Item;
+import simcli.entities.managers.WantsManager;
 import simcli.entities.models.Achievement;
 import simcli.entities.models.Aspiration;
+import simcli.entities.models.Fear;
 import simcli.entities.models.Job;
+import simcli.entities.models.Memory;
+import simcli.entities.models.Moodlet;
+import simcli.entities.models.Reward;
+import simcli.entities.models.Want;
 import simcli.entities.models.SkillType;
 import simcli.entities.models.StarterGoal;
 import simcli.entities.models.Trait;
@@ -261,6 +267,7 @@ public class SaveManager {
                 writer.println("Pregnancy:" + ids.get(sim) + "," + sim.getPregnancyDueDay() + ","
                         + sim.getExpectedBabyGender().name() + "," + encode(sim.getExpectedBabyName()));
             }
+            writeInnerLife(writer, sim, ids.get(sim));
         }
 
         // Park NPCs (today's visitors), then townsfolk who aren't at the park today
@@ -296,6 +303,80 @@ public class SaveManager {
                 }
             }
         }
+    }
+
+    /**
+     * Writes a household Sim's inner life: a {@code Mind:} line (points,
+     * today's wants and fear, perks), one {@code Moodlet:} line per feeling
+     * and one {@code Memory:} line per memory.
+     */
+    private static void writeInnerLife(PrintWriter writer, Sim sim, String id) {
+        WantsManager wants = sim.getWants();
+        List<String> today = new ArrayList<>();
+        List<String> done = new ArrayList<>();
+        for (Want want : wants.getWants()) {
+            today.add(want.name());
+            if (wants.isDone(want)) {
+                done.add(want.name());
+            }
+        }
+        List<String> perks = new ArrayList<>();
+        for (Reward perk : wants.getPerks()) {
+            perks.add(perk.name());
+        }
+        writer.println("Mind:" + id + "," + wants.getPoints() + "," + wants.getDay() + ","
+                + (wants.getFear() == null ? "" : wants.getFear().name()) + "," + wants.hasFearCameTrue() + ","
+                + String.join("|", today) + "," + String.join("|", done) + "," + String.join("|", perks));
+        for (Moodlet m : sim.getMoodlets().getActive()) {
+            writer.println("Moodlet:" + id + "," + m.name() + "," + sim.getMoodlets().getHoursLeft(m));
+        }
+        for (Memory memory : sim.getMemories()) {
+            writer.println("Memory:" + id + "," + memory.getDay() + "," + encode(memory.getText()));
+        }
+    }
+
+    /** Restores what {@link #writeInnerLife} wrote. */
+    private static void restoreInnerLife(SimResolver resolver, List<String[]> mindLines,
+                                         List<String[]> moodletLines, List<String[]> memoryLines) {
+        for (String[] mind : mindLines) {
+            Sim owner = resolver.resolve(mind[0]);
+            if (owner == null) {
+                continue;
+            }
+            WantsManager wants = owner.getWants();
+            wants.setPoints(Integer.parseInt(mind[1]));
+            List<Want> today = new ArrayList<>();
+            for (String name : names(mind[5])) {
+                today.add(Want.valueOf(name));
+            }
+            wants.startDay(Integer.parseInt(mind[2]), today, mind[3].isEmpty() ? null : Fear.valueOf(mind[3]));
+            if (Boolean.parseBoolean(mind[4])) {
+                wants.markFearCameTrue();
+            }
+            for (String name : names(mind[6])) {
+                wants.markDone(Want.valueOf(name));
+            }
+            for (String name : names(mind[7])) {
+                owner.grantPerk(Reward.valueOf(name));
+            }
+        }
+        for (String[] m : moodletLines) {
+            Sim owner = resolver.resolve(m[0]);
+            if (owner != null) {
+                owner.getMoodlets().restore(Moodlet.valueOf(m[1]), Integer.parseInt(m[2]));
+            }
+        }
+        for (String[] m : memoryLines) {
+            Sim owner = resolver.resolve(m[0]);
+            if (owner != null) {
+                owner.remember(Integer.parseInt(m[1]), decode(m[2]));
+            }
+        }
+    }
+
+    /** Splits a {@code |}-separated list of names, which may be empty. */
+    private static String[] names(String field) {
+        return field.isEmpty() ? new String[0] : field.split("\\|");
     }
 
     /** The comma-separated fields of an {@code NPC:} or {@code Townsperson:} line. */
@@ -352,6 +433,9 @@ public class SaveManager {
             List<String[]> lifeLines = new ArrayList<>();
             List<String[]> pregnancyLines = new ArrayList<>();
             List<String> starterLines = new ArrayList<>();
+            List<String[]> mindLines = new ArrayList<>();
+            List<String[]> moodletLines = new ArrayList<>();
+            List<String[]> memoryLines = new ArrayList<>();
             boolean legacyComplete = false;
             Lifespan lifespan = Lifespan.NORMAL;
 
@@ -407,6 +491,12 @@ public class SaveManager {
                     lifeLines.add(line.substring(5).split(",", -1));
                 } else if (line.startsWith("Pregnancy:")) {
                     pregnancyLines.add(line.substring(10).split(","));
+                } else if (line.startsWith("Mind:")) {
+                    mindLines.add(line.substring(5).split(",", -1));
+                } else if (line.startsWith("Moodlet:")) {
+                    moodletLines.add(line.substring(8).split(","));
+                } else if (line.startsWith("Memory:")) {
+                    memoryLines.add(line.substring(7).split(",", 3));
                 } else if (line.startsWith("Townsperson:")) {
                     townsfolkLines.add(line.substring(12).split(",", -1));
                 } else if (line.startsWith("NPC:")) {
@@ -484,6 +574,8 @@ public class SaveManager {
                     mother.startPregnancy(Integer.parseInt(preg[1]), decode(preg[3]), Gender.valueOf(preg[2]));
                 }
             }
+
+            restoreInnerLife(resolver, mindLines, moodletLines, memoryLines);
 
             // Load Inventory
             for (String invLine : inventoryLines) {

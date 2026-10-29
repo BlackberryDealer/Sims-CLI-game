@@ -6,8 +6,10 @@ import simcli.entities.models.*;
 import simcli.needs.SimsNeedsTracker;
 import simcli.entities.managers.CareerManager;
 import simcli.entities.managers.InventoryManager;
+import simcli.entities.managers.MoodletManager;
 import simcli.entities.managers.RelationshipManager;
 import simcli.entities.managers.SkillManager;
+import simcli.entities.managers.WantsManager;
 import simcli.entities.items.Item;
 
 import java.util.ArrayList;
@@ -57,6 +59,11 @@ public class Sim implements ISimBehaviour {
     private List<Trait> traits;
 
     private RelationshipManager relationshipManager;
+
+    // Inner life: feelings, daily wants and fears, and memories
+    private final MoodletManager moodletManager = new MoodletManager();
+    private final WantsManager wantsManager = new WantsManager();
+    private final List<Memory> memories = new ArrayList<>();
 
     // Life goal
     private Aspiration aspiration;
@@ -284,13 +291,102 @@ public class Sim implements ISimBehaviour {
     // -------------------------------------------------------------------------
 
     /**
-     * Returns this Sim's overall mood: the average of their five needs.
+     * Returns this Sim's overall mood: the average of their five needs,
+     * plus or minus whatever their {@link Moodlet}s add.
      *
      * @return the mood, 0–100.
      */
     public int getMood() {
-        return (getHunger().getValue() + getEnergy().getValue() + getHygiene().getValue()
+        int needs = (getHunger().getValue() + getEnergy().getValue() + getHygiene().getValue()
                 + getHappiness().getValue() + getSocial().getValue()) / 5;
+        return Math.max(0, Math.min(100, needs + moodletManager.getTotal()));
+    }
+
+    /**
+     * Returns the feelings this Sim currently carries.
+     *
+     * @return the Sim's {@link MoodletManager}.
+     */
+    public MoodletManager getMoodlets() {
+        return moodletManager;
+    }
+
+    /**
+     * Returns this Sim's wants and fear for today, satisfaction points and perks.
+     *
+     * @return the Sim's {@link WantsManager}.
+     */
+    public WantsManager getWants() {
+        return wantsManager;
+    }
+
+    /**
+     * Returns whether this Sim owns a reward-store perk.
+     *
+     * @param perk the perk.
+     * @return {@code true} if owned.
+     */
+    public boolean hasPerk(Reward perk) {
+        return wantsManager.hasPerk(perk);
+    }
+
+    /**
+     * Gives this Sim a perk without charging for it, switching on any
+     * lasting effect. Used by {@link #redeem(Reward)} and when loading a save.
+     *
+     * @param perk the perk.
+     */
+    public void grantPerk(Reward perk) {
+        wantsManager.addPerk(perk);
+        if (perk == Reward.SUNNY_DISPOSITION) {
+            moodletManager.setSunny(true);
+        }
+    }
+
+    /**
+     * Spends satisfaction points on a reward: a perk is kept for life, a
+     * boost takes effect at once.
+     *
+     * @param reward the reward.
+     * @return {@code true} if bought; {@code false} if the Sim can't afford
+     *         it or already owns the perk.
+     */
+    public boolean redeem(Reward reward) {
+        if (wantsManager.getPoints() < reward.getCost() || (reward.isPerk() && hasPerk(reward))) {
+            return false;
+        }
+        wantsManager.losePoints(reward.getCost());
+        switch (reward) {
+            case INSPIRATION:
+                moodletManager.add(Moodlet.INSPIRED);
+                break;
+            case SECOND_WIND:
+                getEnergy().increase(GameConstants.SECOND_WIND_ENERGY);
+                break;
+            default:
+                grantPerk(reward);
+                break;
+        }
+        return true;
+    }
+
+    /**
+     * Returns everything this Sim remembers, oldest first.
+     *
+     * @return the Sim's memories (mutable, for save/load).
+     */
+    public List<Memory> getMemories() {
+        return memories;
+    }
+
+    /**
+     * Adds a memory.
+     *
+     * @param day  the day it happened.
+     * @param text what happened.
+     */
+    public void remember(int day, String text) {
+        memories.add(new Memory(day, text));
     }
 
     /**
@@ -708,7 +804,8 @@ public class Sim implements ISimBehaviour {
     /**
      * Trains a skill. Active Sims learn Fitness 50% faster and Socialites
      * learn Charisma 50% faster, and any Sim in a great mood
-     * ({@link #isInGreatMood()}) learns 50% faster still.
+     * ({@link #isInGreatMood()}) learns 50% faster still, and the
+     * {@link Reward#QUICK_LEARNER} perk adds another 25%.
      *
      * @param skill  the skill to train, or {@code null} to do nothing.
      * @param points the base experience points earned.
@@ -724,6 +821,9 @@ public class Sim implements ISimBehaviour {
         }
         if (isInGreatMood()) {
             points = (int) (points * GameConstants.GREAT_MOOD_SKILL_MULTIPLIER);
+        }
+        if (hasPerk(Reward.QUICK_LEARNER)) {
+            points = (int) (points * GameConstants.PERK_BONUS);
         }
         return skillManager.addPractice(skill, points, name);
     }
@@ -790,6 +890,7 @@ public class Sim implements ISimBehaviour {
         if (this.getState() == SimState.DEAD) {
             return;
         }
+        moodletManager.tick();
 
         double ageMultiplier = getAgeDecayMultiplier();
         double stageEnergyModifier = (this.currentStage != null) ? this.currentStage.getEnergyDecayModifier() : 1.0;
@@ -1084,7 +1185,11 @@ public class Sim implements ISimBehaviour {
         boolean promoted = false;
         if (getJobTier() < getCareer().getMaxTier()) {
             CareerManager career = getCareerManager();
-            career.addPerformance(getCareer().getPerformanceGain(moodAtStart, skillLevel));
+            int gain = getCareer().getPerformanceGain(moodAtStart, skillLevel);
+            if (hasPerk(Reward.GO_GETTER)) {
+                gain = (int) Math.round(gain * GameConstants.PERK_BONUS);
+            }
+            career.addPerformance(gain);
             if (career.getPerformance() >= GameConstants.PROMOTION_PERFORMANCE && getSkillNeededForPromotion() == 0) {
                 career.promote(getName());
                 promoted = true;

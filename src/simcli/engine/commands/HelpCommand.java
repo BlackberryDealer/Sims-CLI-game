@@ -41,6 +41,8 @@ public class HelpCommand extends BaseCommand {
         lines.add(key("K", "switch to another Sim in the household"));
         lines.add(key("L", "family: dates, babies, gifts"));
         lines.add(key("G", "goals: aspirations and achievements"));
+        lines.add(key("R", "wants, fears and the reward store"));
+        lines.add(key("A", "family album: everyone's memories"));
         lines.add(key("S", "save and quit to the menu"));
         lines.add(key("0", "go back, in any menu"));
         lines.add("{k}Menus and info screens never take any time.{/}");
@@ -51,7 +53,10 @@ public class HelpCommand extends BaseCommand {
         lines.add(rule("Sleep skips to " + String.format("%02d:00", GameConstants.MORNING_HOUR)
                 + "; the whole household goes to bed with you."));
         lines.add(rule("Sims you aren't controlling eat, shower, nap and chat on their own."));
-        lines.add(rule("A great mood (needs averaging 80+) means more pay and faster skills."));
+        lines.add(rule("Mood is your needs plus your moodlets (feelings that wear off)."));
+        lines.add(rule("A great mood (" + GameConstants.GREAT_MOOD_THRESHOLD
+                + "+) means more pay and faster skills."));
+        lines.add(rule("Each day brings new wants (earn points) and a fear (costs points)."));
         lines.add(rule("Good shifts fill your performance meter; a full meter is a promotion."));
         lines.add(rule("Skills can only learn " + GameConstants.SKILL_DAILY_XP_CAP
                 + " points a day, so practise a little daily."));

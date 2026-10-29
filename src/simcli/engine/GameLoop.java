@@ -20,8 +20,8 @@ import java.util.List;
  * <h2>Ownership</h2>
  * <p>This class owns the creation of {@link RandomEventManager},
  * {@link LifecycleManager}, {@link AutonomyManager}, {@link UpkeepManager},
- * {@link FamilyManager}
- * and {@link GoalManager}, keeping subsystem factories close to their
+ * {@link FamilyManager}, {@link GoalManager}
+ * and {@link InnerLifeManager}, keeping subsystem factories close to their
  * consumers and reducing the construction burden on {@link GameEngine}.</p>
  */
 public class GameLoop {
@@ -36,6 +36,7 @@ public class GameLoop {
     private final UpkeepManager upkeepManager;
     private final GoalManager goalManager;
     private final FamilyManager familyManager;
+    private final InnerLifeManager innerLifeManager;
 
     /**
      * Creates a new GameLoop with no world: idle Sims still sleep on their
@@ -90,6 +91,16 @@ public class GameLoop {
         this.upkeepManager = new UpkeepManager(worldManager, logger);
         this.goalManager = new GoalManager(worldManager, logger);
         this.familyManager = new FamilyManager(logger);
+        this.innerLifeManager = new InnerLifeManager(worldManager, logger);
+    }
+
+    /**
+     * Starts a play session: gives every Sim their wants for today (unless
+     * a loaded save already has them) and notes where they all are, so the
+     * first turn's changes can be noticed.
+     */
+    public void beginSession() {
+        innerLifeManager.afterTurn(neighborhood, timeManager.getCurrentDay());
     }
 
     /**
@@ -106,8 +117,9 @@ public class GameLoop {
      *         {@link #processDayBoundary(int)}.</li>
      * </ol>
      * <p>Once per turn, after the clock has moved, a random event is rolled
-     * for the active Sim, another for the whole household, and the
-     * household's goals are checked.</p>
+     * for the active Sim, another for the whole household, the household's
+     * goals are checked, and the {@link InnerLifeManager} notices what the
+     * turn changed (moodlets, memories, wants and fears).</p>
      *
      * <p>Sims other than the active player are reset to
      * {@link ActionState#IDLE} first (unless asleep), so an action they
@@ -142,6 +154,7 @@ public class GameLoop {
         eventManager.trigger(activePlayer, timeManager);
         eventManager.triggerHouseholdEvent(neighborhood, timeManager, worldManager);
         goalManager.check(neighborhood);
+        innerLifeManager.afterTurn(neighborhood, timeManager.getCurrentDay());
     }
 
     /**
@@ -207,6 +220,11 @@ public class GameLoop {
     /** Returns the upkeep (bills and spoilage) manager owned by this loop. */
     public UpkeepManager getUpkeepManager() {
         return upkeepManager;
+    }
+
+    /** Returns the inner-life (moodlets, wants, fears, memories) manager owned by this loop. */
+    public InnerLifeManager getInnerLifeManager() {
+        return innerLifeManager;
     }
 
     /** Returns the goal (aspirations and achievements) manager owned by this loop. */

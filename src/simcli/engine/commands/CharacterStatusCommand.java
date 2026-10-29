@@ -5,6 +5,8 @@ import simcli.engine.LifecycleManager;
 import simcli.entities.actors.Sim;
 import simcli.entities.managers.SkillManager;
 import simcli.entities.models.Job;
+import simcli.entities.models.Moodlet;
+import simcli.entities.models.Reward;
 import simcli.entities.models.SkillType;
 import simcli.entities.models.Trait;
 import simcli.ui.Panel;
@@ -82,6 +84,17 @@ public class CharacterStatusCommand extends BaseCommand {
         lines.add(Panel.meter("Health", sim.getHealth(), w) + "   " + Panel.meter("Hunger", sim.getHunger().getValue(), w));
         lines.add(Panel.meter("Energy", sim.getEnergy().getValue(), w) + "   " + Panel.meter("Hygiene", sim.getHygiene().getValue(), w));
         lines.add(Panel.meter("Fun", sim.getHappiness().getValue(), w) + "   " + Panel.meter("Social", sim.getSocial().getValue(), w));
+        lines.add(Panel.meter("Mood", sim.getMood(), w) + "   "
+                + (sim.isInGreatMood() ? "{G}great mood{/} {k}(learns and earns more){/}" : "{k}great mood at "
+                        + GameConstants.GREAT_MOOD_THRESHOLD + "+{/}"));
+        for (Moodlet m : sim.getMoodlets().getActive()) {
+            int effect = sim.getMoodlets().effectOf(m);
+            lines.add("  " + (m.isNegative() ? "{R}" : "{G}") + Style.fit(m.getLabel(), 18)
+                    + Style.fit((effect > 0 ? "+" : "") + effect, 5) + "{/}{k}"
+                    + sim.getMoodlets().getHoursLeft(m) + "h left{/}");
+        }
+        lines.add("{k}Satisfaction{/} {Y}" + sim.getWants().getPoints() + "{/} {k}points - spend them with [R]{/}"
+                + (sim.getWants().getPerks().isEmpty() ? "" : "  {k}perks:{/} " + perks(sim)));
         lines.add("");
         for (SkillType skill : SkillType.values()) {
             SkillManager skills = sim.getSkillManager();
@@ -108,6 +121,15 @@ public class CharacterStatusCommand extends BaseCommand {
         System.out.println(Panel.box("{W}{*}" + sim.getName() + "{/}", 'c', lines));
         pause();
         return CommandResult.NO_TICK;
+    }
+
+    private static String perks(Sim sim) {
+        StringBuilder sb = new StringBuilder();
+        for (Reward r : sim.getWants().getPerks()) {
+            if (sb.length() > 0) sb.append(", ");
+            sb.append(r.getDisplayName());
+        }
+        return sb.toString();
     }
 
     private static String traits(Sim sim) {

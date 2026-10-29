@@ -131,6 +131,12 @@ public class InputHandler implements IInputHandler {
                 case "C":
                     command = new HomeChatCommand(ctx);
                     break;
+                case "R":
+                    command = new RewardsCommand(ctx);
+                    break;
+                case "A":
+                    command = new AlbumCommand(ctx);
+                    break;
                 case "?":
                 case "HELP":
                     command = new HelpCommand(ctx);

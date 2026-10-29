@@ -2,6 +2,7 @@ package simcli.engine;
 
 import java.util.List;
 import java.util.Scanner;
+import simcli.engine.commands.AlbumCommand;
 import simcli.entities.actors.Sim;
 import simcli.entities.managers.NPCManager;
 import simcli.entities.models.ActionState;
@@ -9,6 +10,7 @@ import simcli.entities.models.SimState;
 import simcli.persistence.SaveManager;
 import simcli.ui.IRenderer;
 import simcli.ui.NeedSummary;
+import simcli.ui.Panel;
 import simcli.ui.TerminalRenderer;
 import simcli.ui.UIManager;
 import simcli.utils.GameConstants;
@@ -262,6 +264,7 @@ public class GameEngine {
         boolean tickForward = true;
 
         placeSimsInWorld();
+        gameLoop.beginSession();
 
         while (running) {
             syncActivePlayerToLocation();
@@ -433,6 +436,14 @@ public class GameEngine {
             int generations = GoalManager.getHighestGeneration(this.neighborhood);
             UIManager.info("Your family's legacy score: {Y}" + getGoalManager().getLegacyScore(this.neighborhood)
                     + "{/} across " + generations + (generations == 1 ? " generation." : " generations."));
+            UIManager.prompt("\nPress ENTER to read your family's story...");
+            scanner.nextLine();
+            for (Sim sim : this.neighborhood) {
+                if (!sim.getMemories().isEmpty()) {
+                    System.out.println(Panel.box("{W}{*}The life of " + sim.getName() + "{/}", 'm',
+                            AlbumCommand.lines(sim)));
+                }
+            }
             UIManager.prompt("\nPress ENTER to end simulation...");
             scanner.nextLine();
             return false;

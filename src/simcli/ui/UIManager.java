@@ -36,6 +36,11 @@ public class UIManager {
             "Go to work in a great mood to fill your performance meter faster.",
             "Grandparents love babysitting, and teach the teens their best skill.",
             "Finish your first-steps checklist on the Goals screen for some cash.",
+            "Do your Sim's daily wants to earn satisfaction points - spend them with [R].",
+            "Moodlets wear off: a good night's sleep or a home-cooked meal lifts the mood.",
+            "Do all of a day's wants for bonus satisfaction points.",
+            "Press A to look back over your family's memories in the album.",
+            "Sunny Disposition from the reward store halves bad moodlets.",
     };
 
     private static final AsciiEngine ASCII = new AsciiEngine();

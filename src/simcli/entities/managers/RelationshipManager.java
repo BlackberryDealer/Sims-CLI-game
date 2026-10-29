@@ -13,6 +13,7 @@ import simcli.entities.models.ActionState;
 import simcli.entities.models.Gender;
 import simcli.entities.models.Relationship;
 import simcli.entities.models.RelationshipStatus;
+import simcli.entities.models.Reward;
 import simcli.entities.models.SkillType;
 import simcli.entities.models.Trait;
 import simcli.entities.models.SocialAction;
@@ -266,6 +267,9 @@ public class RelationshipManager {
         }
         if (otherSim.hasTrait(Trait.LAZY)) {
             chance -= GameConstants.LAZY_TARGET_PENALTY;
+        }
+        if (owner.hasPerk(Reward.SILVER_TONGUE)) {
+            chance += GameConstants.SILVER_TONGUE_BONUS;
         }
         return Math.max(5, Math.min(95, chance));
     }

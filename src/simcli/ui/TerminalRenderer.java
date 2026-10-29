@@ -2,6 +2,7 @@ package simcli.ui;
 
 import simcli.engine.TimeManager;
 import simcli.entities.actors.Sim;
+import simcli.entities.managers.WantsManager;
 import simcli.entities.models.*;
 import simcli.world.Building;
 import simcli.world.interactables.Interactable;
@@ -170,15 +171,65 @@ public class TerminalRenderer implements IRenderer {
             case TIRED:  state = "{Y}{*}TIRED - get some sleep{/}"; break;
             case DEAD:   state = "{k}deceased{/}"; break;
             default:
-                state = activePlayer.isInGreatMood()
-                        ? "{G}{*}great mood{/} {k}(learns and earns more){/}" : "{G}feeling fine{/}";
+                Fear fear = activePlayer.getWants().getFear();
+                state = fear == null || activePlayer.getWants().hasFearCameTrue() ? "{G}feeling fine{/}"
+                        : "{k}fears{/} {R}" + fear.getText().toLowerCase() + "{/}";
                 break;
         }
+        boolean great = activePlayer.isInGreatMood();
+        String feelings = great && activePlayer.getMoodlets().getActive().isEmpty() ? ""
+                : moodlets(activePlayer, great ? 1 : 2);
+        lines.add(Panel.meter("Mood", activePlayer.getMood(), w) + "   "
+                + (great ? "{G}{*}great mood{/} {k}(earns & learns more){/}  " : "") + feelings);
         lines.add("{G}{*}$" + activePlayer.getMoney() + "{/}   {k}bag{/} " + activePlayer.getInventory().size()
                 + "/" + activePlayer.getInventoryCapacity() + "   {k}traits{/} " + traits(activePlayer)
                 + "   " + state);
+        String wants = wants(activePlayer);
+        if (!wants.isEmpty()) {
+            lines.add(wants);
+        }
 
         System.out.println(Panel.box(title, mood == 'R' ? 'r' : 'c', lines));
+    }
+
+    /**
+     * The Sim's strongest moodlets, e.g. "Well rested +10  Rejected -10".
+     *
+     * @param sim the Sim.
+     * @param max how many to show at most.
+     * @return the moodlets, coloured green or red, or a grey "no strong feelings".
+     */
+    static String moodlets(Sim sim, int max) {
+        List<Moodlet> active = sim.getMoodlets().getActive();
+        if (active.isEmpty()) {
+            return "{k}no strong feelings{/}";
+        }
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < Math.min(max, active.size()); i++) {
+            Moodlet m = active.get(i);
+            int effect = sim.getMoodlets().effectOf(m);
+            if (i > 0) sb.append("  ");
+            sb.append(m.isNegative() ? "{R}" : "{G}").append(m.getLabel()).append(' ')
+                    .append(effect > 0 ? "+" : "").append(effect).append("{/}");
+        }
+        if (active.size() > max) {
+            sb.append(" {k}+").append(active.size() - max).append(" more{/}");
+        }
+        return sb.toString();
+    }
+
+    /** Today's wants, with ticks for those done; empty before the first roll. */
+    private static String wants(Sim sim) {
+        WantsManager wants = sim.getWants();
+        if (wants.getWants().isEmpty()) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder("{k}Wants{/}");
+        for (Want want : wants.getWants()) {
+            sb.append("  ").append(wants.isDone(want) ? "{G}" + Panel.CHECK + "{/} {k}" : "{Y}" + Panel.DOT + "{/} ")
+                    .append(want.getText()).append(wants.isDone(want) ? "{/}" : "");
+        }
+        return sb.toString();
     }
 
     private static String traits(Sim sim) {
@@ -240,7 +291,9 @@ public class TerminalRenderer implements IRenderer {
                 Panel.option("I", "Status"),
                 Panel.option("V", "Inventory"),
                 Panel.option("K", "Switch Sim"),
-                Panel.option("G", "Goals")));
+                Panel.option("G", "Goals"),
+                Panel.option("R", "Rewards"),
+                Panel.option("A", "Album")));
         if (activePlayer.getRelationshipManager().getSpouse() != null) {
             me.add(Panel.option("L", "Family"));
         }

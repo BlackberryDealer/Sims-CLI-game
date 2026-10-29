@@ -17,16 +17,14 @@ public final class Sprites {
     }
 
     /**
-     * Colour tag for the Sim's plumbob, based on their average needs:
-     * green when content, yellow when needs are slipping, red when in trouble.
+     * Colour tag for the Sim's plumbob, based on their mood (needs and
+     * moodlets): green when content, yellow when slipping, red when in trouble.
      */
     public static char moodColor(Sim sim) {
-        int avg = (sim.getHunger().getValue() + sim.getEnergy().getValue() + sim.getHygiene().getValue()
-                + sim.getHappiness().getValue() + sim.getSocial().getValue()) / 5;
         if (sim.getHealth() < 40) {
             return 'R';
         }
-        return Style.levelColor(avg);
+        return Style.levelColor(sim.getMood());
     }
 
     /**
