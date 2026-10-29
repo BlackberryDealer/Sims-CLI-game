@@ -9,6 +9,7 @@ import simcli.entities.models.SimState;
 import simcli.entities.models.SkillType;
 import simcli.entities.models.WorkResult;
 import simcli.ui.UIManager;
+import simcli.utils.GameConstants;
 
 // Validates a chain of preconditions before letting the Sim work.
 // Order matters: life-stage → employment → hunger/tired state → weekday → overwork.
@@ -96,6 +97,13 @@ public class WorkCommand extends BaseCommand {
                     + result.getEarnings() + "{/}!");
             if (result.isOverworked()) {
                 UIManager.printWarning(activePlayer.getName() + " feels the heavy strain of overworking!");
+            }
+            Job job = activePlayer.getCareer();
+            if (!result.isPromoted() && activePlayer.getJobTier() < job.getMaxTier()) {
+                UIManager.info("Work performance: " + activePlayer.getCareerManager().getPerformance() + "/"
+                        + GameConstants.PROMOTION_PERFORMANCE + " towards a promotion"
+                        + (activePlayer.getMood() >= GameConstants.GREAT_MOOD_THRESHOLD ? "."
+                                : " {k}(arrive in a better mood to impress the boss){/}"));
             }
             int skillNeeded = activePlayer.getSkillNeededForPromotion();
             if (skillNeeded > 0) {

@@ -162,6 +162,7 @@ public class AutonomyManagerTest {
         Sim baby = active.getRelationshipManager().finalizeBaby("Bub", Gender.MALE);
         household.add(baby);
         baby.getHunger().setValue(10);
+        dormFridge().storeItem(new Food("Apple", 5, 15, 0)); // babies need real food
 
         playTurn(1);
 

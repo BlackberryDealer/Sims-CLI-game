@@ -187,8 +187,8 @@ public class GameEngineTest {
             GameEngine engine = new GameEngine("World", Arrays.asList(sim));
 
             assertNotNull(engine.getWorldManager(), "WorldManager should be initialized");
-            assertEquals(5, engine.getWorldManager().getCityMap().size(),
-                    "City map should have 5 buildings");
+            assertEquals(6, engine.getWorldManager().getCityMap().size(),
+                    "City map should have 6 buildings");
         }
 
         @Test

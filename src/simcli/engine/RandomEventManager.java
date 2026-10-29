@@ -117,7 +117,9 @@ public class RandomEventManager {
      * @param worldManager the city, for the fridges a power cut or a pie affects (may be {@code null}).
      */
     public void triggerHouseholdEvent(List<Sim> household, TimeManager timeManager, IWorldManager worldManager) {
-        if (GameRandom.RANDOM.nextInt(100) >= GameConstants.HOUSEHOLD_EVENT_CHANCE) {
+        // the first couple of days are for settling in
+        if (timeManager.getCurrentDay() < GameConstants.HOUSEHOLD_EVENTS_START_DAY
+                || GameRandom.RANDOM.nextInt(100) >= GameConstants.HOUSEHOLD_EVENT_CHANCE) {
             return;
         }
         List<HouseholdEvent> possible = eventsAt(timeManager);

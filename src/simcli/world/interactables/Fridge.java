@@ -135,6 +135,7 @@ public class Fridge implements Interactable, Container {
                 UIManager.success(sim.getName() + " cooks up a " + meal.getObjectName() + ".  {G}+"
                         + GameConstants.COOKING_HAPPINESS + " fun{/}");
                 sim.getHappiness().increase(GameConstants.COOKING_HAPPINESS);
+                sim.recordMealCooked();
                 meal.interact(sim, scanner, timeManager);
                 cooked = true;
             } else if (c != 0) {

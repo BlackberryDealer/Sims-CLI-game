@@ -29,7 +29,7 @@ public enum Achievement {
     GROWN_UP("All Grown Up", "Raise a child to their teens"),
 
     /** The household owns a home it bought. */
-    HOMEOWNER("Moving On Up", "Buy the Bungalow"),
+    HOMEOWNER("Moving On Up", "Buy a home"),
 
     /** Someone has a skill at level 5. */
     SKILLED("Skilled", "Reach level 5 in a skill"),

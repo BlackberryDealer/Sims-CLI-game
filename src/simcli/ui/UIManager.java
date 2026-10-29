@@ -29,9 +29,13 @@ public class UIManager {
             "The office is closed on weekends - plan some fun instead.",
             "Missing too many weekdays of work will get you fired.",
             "Press K to switch between the Sims in your household.",
-            "Babies can't feed themselves - use [L], or let an idle Sim do it.",
+            "Babies eat from the fridge - feed them with [L], or let an idle Sim do it.",
             "Teens go to school on weekdays and can take part-time jobs.",
-            "Save the money for the Bungalow: it's a lovely upgrade.",
+            "Save the money for the Bungalow - or the Townhouse, if you dream big.",
+            "Press C at home to chat with your family - no trip to the park needed.",
+            "Go to work in a great mood to fill your performance meter faster.",
+            "Grandparents love babysitting, and teach the teens their best skill.",
+            "Finish your first-steps checklist on the Goals screen for some cash.",
     };
 
     private static final AsciiEngine ASCII = new AsciiEngine();

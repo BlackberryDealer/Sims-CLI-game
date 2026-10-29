@@ -45,7 +45,7 @@ public class CharacterStatusCommand extends BaseCommand {
         Building currentLocation = ctx.getCurrentLocation();
         List<String> lines = new ArrayList<>();
 
-        int yearLength = LifecycleManager.daysPerAgeTickFor(sim, GameConstants.DAYS_PER_AGE_TICK);
+        int yearLength = LifecycleManager.daysPerAgeTickFor(sim, ctx.getDaysPerYear());
         int daysToBirthday = yearLength - (sim.getDaysAlive() % yearLength);
         lines.add("{k}Age{/}        " + sim.getAge() + " " + Panel.DOT + " " + sim.getCurrentStageName()
                 + "  {k}(next birthday in " + daysToBirthday + (daysToBirthday == 1 ? " day)" : " days)") + "{/}");
@@ -60,6 +60,11 @@ public class CharacterStatusCommand extends BaseCommand {
                         + "/" + job.getMaxTier() + ", $"
                         + job.getShiftPay(sim.getJobTier(), sim.getSkillLevel(job.getPrimarySkill()))
                         + " per shift){/}");
+                if (sim.getJobTier() < job.getMaxTier()) {
+                    lines.add("{k}Performance{/} " + Panel.bar(sim.getCareerManager().getPerformance(), 10)
+                            + " {k}/" + GameConstants.PROMOTION_PERFORMANCE
+                            + " for a promotion (good moods fill it faster){/}");
+                }
                 int needed = sim.getSkillNeededForPromotion();
                 if (needed > 0) {
                     lines.add("           {Y}Next promotion needs " + job.getPrimarySkill().getDisplayName()

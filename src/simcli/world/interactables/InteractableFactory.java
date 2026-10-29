@@ -18,6 +18,9 @@ public class InteractableFactory {
         FACTORY.put("Weight Bench", WeightBench::new);
         FACTORY.put("Shower", Shower::new);
         FACTORY.put("Storage Chest", StorageChest::new);
+        FACTORY.put("Comfy Bed", ComfyBed::new);
+        FACTORY.put("Smart Fridge", SmartFridge::new);
+        FACTORY.put("TV", Television::new);
     }
 
     public static Interactable create(String name) {

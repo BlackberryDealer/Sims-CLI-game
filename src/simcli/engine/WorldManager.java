@@ -74,6 +74,15 @@ public class WorldManager implements IWorldManager {
 
     /** Builds one building from its entry in {@code buildings.json}. */
     private Building build(Map<String, Object> json) {
+        Building building = buildByType(json);
+        Object opensAfter = json.get("opensAfter");
+        if (opensAfter != null) {
+            building.setOpensAfter(GameContent.string(json, "opensAfter"));
+        }
+        return building;
+    }
+
+    private Building buildByType(Map<String, Object> json) {
         String name = GameContent.string(json, "name");
         String type = GameContent.string(json, "type");
         switch (type) {

@@ -45,7 +45,9 @@ public class TravelCommand extends BaseCommand {
             String label = Style.fit(b.getName(), 20);
             String hint = describe(b);
             // Show "FOR SALE" tag for unowned residential properties
-            if (b instanceof Residential && !((Residential) b).isOwned()) {
+            if (!b.isOpenTo(ctx.getNeighborhood())) {
+                hint = "{k}opens after your first paycheck{/}";
+            } else if (b instanceof Residential && !((Residential) b).isOwned()) {
                 hint = "{Y}for sale - $" + ((Residential) b).getPurchasePrice() + "{/}";
             }
             if (b == currentLocation) {
@@ -64,6 +66,12 @@ public class TravelCommand extends BaseCommand {
                 Building target = cityMap.get(destStr - 1);
                 if (currentLocation == target) {
                     UIManager.info("You are already at " + target.getName() + "!");
+                    pause();
+                    return CommandResult.NO_TICK;
+                }
+                if (!target.isOpenTo(ctx.getNeighborhood())) {
+                    UIManager.info(target.getName() + " isn't open to you yet. {k}It opens after your household's"
+                            + " first paycheck - get a job with [J] and work a shift with [W].{/}");
                     pause();
                     return CommandResult.NO_TICK;
                 }

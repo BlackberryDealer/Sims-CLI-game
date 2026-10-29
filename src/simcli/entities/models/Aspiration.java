@@ -15,7 +15,7 @@ public enum Aspiration {
     BIG_FAMILY("Big Family", "Raise a family of 3 children"),
 
     /** Buy a home of their own. */
-    HOMEOWNER("Homeowner", "Buy the Bungalow"),
+    HOMEOWNER("Homeowner", "Buy a home of your own (the Bungalow or the Townhouse)"),
 
     /** Max out a skill. */
     SKILL_MASTER("Master of One", "Reach level 10 in any skill"),

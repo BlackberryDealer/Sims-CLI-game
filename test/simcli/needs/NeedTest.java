@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import simcli.needs.*;
+import simcli.utils.GameConstants;
 import simcli.entities.actors.Sim;
 import simcli.entities.models.Gender;
 import simcli.entities.models.Job;
@@ -83,12 +84,12 @@ public class NeedTest {
     }
 
     @Test
-    @DisplayName("Social.decay(1.0) decreases by its base decay rate (5)")
+    @DisplayName("Social.decay(1.0) decreases by its base decay rate")
     void testSocialDecayRate() {
         Social s = new Social();
         s.calculateDecay(createDummySim(), 1.0);
-        assertEquals(Need.MAX_VALUE - 5, s.getValue(),
-                "Social base decay rate is 5");
+        assertEquals(Need.MAX_VALUE - GameConstants.SOCIAL_BASE_DECAY_RATE, s.getValue(),
+                "Social decays by its base rate each hour");
     }
 
     // -----------------------------------------------------------------------

@@ -30,7 +30,7 @@ public class Bed implements Interactable {
 
         // going to bed hungry can mean starving overnight, so check first
         if (sim.getHunger().getValue() <= GameConstants.HUNGER_WARNING_LEVEL) {
-            int hungerByMorning = Math.max(0, sim.getHunger().getValue() - 3 * ticksToMorning);
+            int hungerByMorning = Math.max(0, sim.getHunger().getValue() - overnightHunger(ticksToMorning));
             UIManager.printWarning(sim.getName() + " is very hungry (" + sim.getHunger().getValue()
                     + ") and will be down to about " + hungerByMorning + " by morning"
                     + (hungerByMorning == 0 ? " - they could starve in their sleep!" : "."));
@@ -42,10 +42,31 @@ public class Bed implements Interactable {
         }
 
         sim.sleep(ticksToMorning);
+        afterSleep(sim, ticksToMorning);
 
         // Throw exception to let the game engine render the sleeping ASCII art
         // and pause for the sleep animation BEFORE advancing time.
         throw new simcli.engine.SleepEventException();
+    }
+
+    /**
+     * Returns how much hunger a night in this bed costs.
+     *
+     * @param hours hours until morning.
+     * @return the hunger lost overnight.
+     */
+    protected int overnightHunger(int hours) {
+        return 3 * hours;
+    }
+
+    /**
+     * Called once the Sim has gone to sleep, for better beds to add their
+     * comforts. A plain bed adds nothing.
+     *
+     * @param sim   the sleeping Sim.
+     * @param hours hours until morning.
+     */
+    protected void afterSleep(Sim sim, int hours) {
     }
 
     @Override

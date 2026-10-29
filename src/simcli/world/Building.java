@@ -15,8 +15,12 @@ import simcli.world.interactables.Interactable;
  * player can interact with when visiting.</p>
  */
 public abstract class Building {
+    /** The only unlock rule: open once someone in the household has worked a shift. */
+    public static final String OPENS_AFTER_FIRST_PAYCHECK = "firstPaycheck";
+
     private String name;
     private List<Interactable> interactables;
+    private String opensAfter;
 
     public Building(String name) {
         this.name = name;
@@ -25,6 +29,36 @@ public abstract class Building {
 
     public String getName() {
         return this.name;
+    }
+
+    // what has to happen before this building opens (null = always open)
+    public String getOpensAfter() {
+        return opensAfter;
+    }
+
+    public void setOpensAfter(String rule) {
+        if (rule != null && !rule.equals(OPENS_AFTER_FIRST_PAYCHECK)) {
+            throw new IllegalArgumentException("unknown opensAfter rule '" + rule + "' for " + name);
+        }
+        this.opensAfter = rule;
+    }
+
+    /**
+     * Returns whether the household may visit this building yet.
+     *
+     * @param household every Sim in the household.
+     * @return {@code true} if it's open to them.
+     */
+    public boolean isOpenTo(List<Sim> household) {
+        if (opensAfter == null) {
+            return true;
+        }
+        for (Sim sim : household) {
+            if (sim.getCareerManager().getTotalShiftsWorked() > 0) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public boolean isResidential() {

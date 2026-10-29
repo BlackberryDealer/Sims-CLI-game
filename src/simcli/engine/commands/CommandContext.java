@@ -4,6 +4,7 @@ import simcli.engine.IWorldManager;
 import simcli.engine.SimulationLogger;
 import simcli.engine.TimeManager;
 import simcli.entities.actors.Sim;
+import simcli.utils.GameConstants;
 import simcli.world.Building;
 import simcli.world.interactables.Interactable;
 
@@ -31,6 +32,7 @@ public class CommandContext {
     private final List<Interactable> availableItems;
     private final Consumer<Sim> setActivePlayer;   // callback → GameEngine.setActivePlayer
     private final SimulationLogger logger;
+    private final int daysPerYear;                 // the world's lifespan setting
 
     // private constructor forces everyone to use the Builder
     private CommandContext(Builder builder) {
@@ -43,6 +45,7 @@ public class CommandContext {
         this.availableItems  = builder.availableItems;
         this.setActivePlayer = builder.setActivePlayer;
         this.logger          = builder.logger;
+        this.daysPerYear     = builder.daysPerYear;
     }
 
     /** Returns the currently controlled Sim. */
@@ -69,6 +72,9 @@ public class CommandContext {
     /** Returns the simulation logger for buffering messages. */
     public SimulationLogger getLogger() { return logger; }
 
+    /** Returns how many days make a year of age for teens, adults and elders in this world. */
+    public int getDaysPerYear() { return daysPerYear; }
+
     // delegates back to engine without knowing about engine (Dependency Inversion)
     public void switchActivePlayer(Sim sim) {
         if (setActivePlayer != null) {
@@ -87,6 +93,7 @@ public class CommandContext {
         private List<Interactable> availableItems;
         private Consumer<Sim> setActivePlayer;
         private SimulationLogger logger;
+        private int daysPerYear = GameConstants.DAYS_PER_AGE_TICK;
 
         public Builder activePlayer(Sim activePlayer) {
             this.activePlayer = activePlayer;
@@ -130,6 +137,11 @@ public class CommandContext {
 
         public Builder logger(SimulationLogger logger) {
             this.logger = logger;
+            return this;
+        }
+
+        public Builder daysPerYear(int daysPerYear) {
+            this.daysPerYear = daysPerYear;
             return this;
         }
 

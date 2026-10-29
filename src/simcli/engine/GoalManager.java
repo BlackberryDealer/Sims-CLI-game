@@ -6,10 +6,12 @@ import simcli.entities.models.Aspiration;
 import simcli.entities.models.Job;
 import simcli.entities.models.SimState;
 import simcli.entities.models.SkillType;
+import simcli.entities.models.StarterGoal;
 import simcli.utils.GameConstants;
 import simcli.world.Building;
 import simcli.world.Residential;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +25,13 @@ import java.util.Set;
  * aspiration they earn {@link GameConstants#ASPIRATION_REWARD_MONEY} and a
  * big mood boost; once every living, playable Sim in the household has
  * fulfilled theirs, the household's legacy is complete — an ending to aim
- * for other than everyone dying. Play can carry on afterwards.</p>
+ * for other than everyone dying. Play can carry on afterwards: a Sim who
+ * has fulfilled their aspiration can choose another, and the household
+ * keeps building its {@link #getLegacyScore(List) legacy score} down the
+ * generations.</p>
+ *
+ * <p>It also runs the first week's {@link StarterGoal starter goals}, small
+ * cash rewards for learning the main systems.</p>
  */
 public class GoalManager {
 
@@ -38,6 +46,12 @@ public class GoalManager {
 
     /** Whether the legacy-complete ending has been reached. */
     private boolean legacyComplete;
+
+    /** Starter goals the household has completed. */
+    private final Set<StarterGoal> startersDone = EnumSet.noneOf(StarterGoal.class);
+
+    /** Whether the household has ever paid its weekly bills in full. */
+    private boolean billsPaid;
 
     /**
      * Creates a GoalManager.
@@ -129,6 +143,22 @@ public class GoalManager {
                 logger.log("\n*** ASPIRATION FULFILLED! " + sim.getName() + " is a true "
                         + sim.getAspiration().getDisplayName() + "! (+$" + GameConstants.ASPIRATION_REWARD_MONEY
                         + ") ***");
+                if (!nextAspirations(sim).isEmpty()) {
+                    logger.log(sim.getName() + " can choose a new aspiration on the Goals screen [G].");
+                }
+            }
+        }
+
+        for (StarterGoal goal : StarterGoal.values()) {
+            if (!startersDone.contains(goal)) {
+                Sim achiever = starterAchiever(goal, household);
+                if (achiever != null) {
+                    startersDone.add(goal);
+                    achiever.setMoney(achiever.getMoney() + goal.getReward());
+                    achiever.addTotalMoneyEarned(goal.getReward());
+                    logger.log("First steps: " + goal.getDescription() + " - done! (+$" + goal.getReward()
+                            + " to " + achiever.getName() + ")");
+                }
             }
         }
 
@@ -227,6 +257,98 @@ public class GoalManager {
         return false;
     }
 
+    /**
+     * Who completed a starter goal (and gets the reward), or {@code null}
+     * if nobody has yet.
+     */
+    private Sim starterAchiever(StarterGoal goal, List<Sim> household) {
+        Sim richest = null;
+        for (Sim sim : household) {
+            if (sim.getState() == SimState.DEAD) {
+                continue;
+            }
+            if (richest == null || sim.getMoney() > richest.getMoney()) {
+                richest = sim;
+            }
+            switch (goal) {
+                case GET_JOB:
+                    if (sim.getCareer() != Job.UNEMPLOYED) return sim;
+                    break;
+                case FIRST_SHIFT:
+                    if (sim.getCareerManager().getTotalShiftsWorked() > 0) return sim;
+                    break;
+                case COOK_MEAL:
+                    if (sim.getMealsCooked() > 0) return sim;
+                    break;
+                case MEET_SOMEONE:
+                    for (int score : sim.getRelationshipManager().getRelationships().values()) {
+                        if (score >= GameConstants.FLIRT_MIN_RELATIONSHIP) return sim;
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+        return goal == StarterGoal.PAY_BILLS && billsPaid ? richest : null;
+    }
+
+    /** Records that the household paid its weekly bills in full. */
+    public void recordBillsPaid() {
+        billsPaid = true;
+    }
+
+    /**
+     * Returns the aspirations a Sim could move on to once their current one
+     * is fulfilled: every aspiration they haven't fulfilled yet.
+     *
+     * @param sim the Sim.
+     * @return the aspirations still open to them.
+     */
+    public List<Aspiration> nextAspirations(Sim sim) {
+        List<Aspiration> open = new ArrayList<>();
+        for (Aspiration a : Aspiration.values()) {
+            if (a != sim.getAspiration() && !sim.getPastAspirations().contains(a)) {
+                open.add(a);
+            }
+        }
+        return open;
+    }
+
+    /**
+     * Returns the highest generation of the household to have come of age
+     * (reached their teens), living or not.
+     *
+     * @param household every Sim in the household.
+     * @return the generation, at least 1.
+     */
+    public static int getHighestGeneration(List<Sim> household) {
+        int highest = 1;
+        for (Sim sim : household) {
+            if (sim.getAge() >= GameConstants.TEEN_AGE) {
+                highest = Math.max(highest, sim.getGeneration());
+            }
+        }
+        return highest;
+    }
+
+    /**
+     * Returns the household's legacy score: points for every aspiration
+     * ever fulfilled, every achievement, and every generation after the
+     * first to come of age.
+     *
+     * @param household every Sim in the household, including those who have died.
+     * @return the score.
+     */
+    public int getLegacyScore(List<Sim> household) {
+        int aspirations = 0;
+        for (Sim sim : household) {
+            aspirations += sim.getAspirationsFulfilled();
+        }
+        return aspirations * GameConstants.LEGACY_POINTS_ASPIRATION
+                + unlocked.size() * GameConstants.LEGACY_POINTS_ACHIEVEMENT
+                + (getHighestGeneration(household) - 1) * GameConstants.LEGACY_POINTS_GENERATION;
+    }
+
     /** Only living Sims the player can control pursue aspirations. */
     private static boolean isGoalHolder(Sim sim) {
         return sim.getState() != SimState.DEAD && sim.isPlayable();
@@ -310,5 +432,32 @@ public class GoalManager {
      */
     public void setLegacyComplete(boolean legacyComplete) {
         this.legacyComplete = legacyComplete;
+    }
+
+    /**
+     * Returns whether a starter goal is done.
+     *
+     * @param goal the starter goal.
+     * @return {@code true} if completed.
+     */
+    public boolean isStarterDone(StarterGoal goal) {
+        return startersDone.contains(goal);
+    }
+
+    /** @return every completed starter goal. */
+    public Set<StarterGoal> getStartersDone() {
+        return startersDone;
+    }
+
+    /**
+     * Marks a starter goal done without paying its reward. Used when loading a save.
+     *
+     * @param goal the starter goal.
+     */
+    public void restoreStarter(StarterGoal goal) {
+        startersDone.add(goal);
+        if (goal == StarterGoal.PAY_BILLS) {
+            billsPaid = true;
+        }
     }
 }

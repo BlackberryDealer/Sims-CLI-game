@@ -1,6 +1,7 @@
 package simcli.entities.managers;
 
 import simcli.entities.models.Job;
+import simcli.utils.GameConstants;
 
 import simcli.engine.SimulationLogger;
 
@@ -28,6 +29,12 @@ public class CareerManager {
 
     /** Whether the overwork warning has been displayed this cycle. */
     private boolean hasWarnedAboutOverwork;
+
+    /** Work performance towards the next promotion, 0–{@link GameConstants#PROMOTION_PERFORMANCE}. */
+    private int performance;
+
+    /** Shifts worked over the Sim's whole life, in any job. */
+    private int totalShiftsWorked;
 
     /**
      * Constructs a new CareerManager with the Sim starting as
@@ -83,12 +90,14 @@ public class CareerManager {
             return;
         }
         this.consecutiveDaysMissed++;
+        addPerformance(-GameConstants.PERFORMANCE_MISSED_DAY_PENALTY);
         if (this.consecutiveDaysMissed > 3) {
             SimulationLogger.getInstance()
                     .logWarning("Oh no! " + simName + " missed too many days of work and was fired from "
                             + this.career.getTitle() + ".");
             this.career = Job.UNEMPLOYED;
             this.jobTier = 1;
+            this.performance = 0;
             this.consecutiveDaysMissed = 0;
             this.shiftsWorkedToday = 0;
         } else if (this.consecutiveDaysMissed > 0) {
@@ -99,7 +108,8 @@ public class CareerManager {
 
     /**
      * Promotes the Sim to the next tier in their current career, if
-     * they have not yet reached the maximum tier.
+     * they have not yet reached the maximum tier, and starts the
+     * performance meter again from zero.
      *
      * @param simName the Sim's display name (used in log messages).
      */
@@ -108,6 +118,7 @@ public class CareerManager {
             return;
         if (this.jobTier < this.career.getMaxTier()) {
             this.jobTier++;
+            this.performance = 0;
             SimulationLogger.getInstance().log("\n*** PROMOTION! " + simName + " has been promoted to tier "
                     + this.jobTier + " in " + this.career.getTitle() + "! ***");
         }
@@ -122,6 +133,7 @@ public class CareerManager {
     public void changeJob(Job newJob, String simName) {
         this.career = newJob;
         this.jobTier = 1;
+        this.performance = 0;
         this.consecutiveDaysMissed = 0;
         this.shiftsWorkedToday = 0;
         // Callers announce the change themselves (job market, forced retirement),
@@ -210,6 +222,7 @@ public class CareerManager {
      */
     public void incrementShiftsWorkedToday() {
         this.shiftsWorkedToday++;
+        this.totalShiftsWorked++;
     }
 
     /**
@@ -237,5 +250,52 @@ public class CareerManager {
      */
     public void setWarnedAboutOverwork(boolean warned) {
         this.hasWarnedAboutOverwork = warned;
+    }
+
+    /**
+     * Returns the Sim's work performance towards their next promotion.
+     *
+     * @return performance, 0–{@link GameConstants#PROMOTION_PERFORMANCE}.
+     */
+    public int getPerformance() {
+        return performance;
+    }
+
+    /**
+     * Adds (or, if negative, removes) work performance, kept within
+     * 0–{@link GameConstants#PROMOTION_PERFORMANCE}.
+     *
+     * @param amount the change in performance.
+     */
+    public void addPerformance(int amount) {
+        this.performance = Math.max(0, Math.min(GameConstants.PROMOTION_PERFORMANCE, this.performance + amount));
+    }
+
+    /**
+     * Sets work performance directly. Used for save/load restoration.
+     *
+     * @param performance the performance.
+     */
+    public void setPerformance(int performance) {
+        this.performance = 0;
+        addPerformance(performance);
+    }
+
+    /**
+     * Returns the number of shifts the Sim has worked in their life.
+     *
+     * @return total shifts worked.
+     */
+    public int getTotalShiftsWorked() {
+        return totalShiftsWorked;
+    }
+
+    /**
+     * Sets the lifetime shift count. Used for save/load restoration.
+     *
+     * @param shifts total shifts worked.
+     */
+    public void setTotalShiftsWorked(int shifts) {
+        this.totalShiftsWorked = shifts;
     }
 }

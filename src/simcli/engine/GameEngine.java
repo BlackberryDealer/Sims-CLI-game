@@ -54,6 +54,7 @@ public class GameEngine {
     private LifecycleManager lifecycleManager;
     private GameLoop gameLoop;
     private SimulationLogger logger;
+    private Lifespan lifespan = Lifespan.NORMAL;
 
     // World Stats tracking (aggregated upon save/game over)
     private NPCManager npcManager;
@@ -182,6 +183,7 @@ public class GameEngine {
         InputHandler handler = new InputHandler(this.worldManager, this.timeManager,
                 this.neighborhood, this::setActivePlayer, this.logger);
         handler.setGoalManager(this.gameLoop.getGoalManager());
+        handler.setDaysPerYear(() -> this.lifecycleManager.getDaysPerAgeTick());
         this.inputHandler = handler;
     }
 
@@ -222,6 +224,21 @@ public class GameEngine {
     /** Returns the upkeep manager handling bills and food spoilage. */
     public UpkeepManager getUpkeepManager() {
         return gameLoop.getUpkeepManager();
+    }
+
+    /** Returns this world's lifespan setting. */
+    public Lifespan getLifespan() {
+        return lifespan;
+    }
+
+    /**
+     * Sets how fast Sims age in this world.
+     *
+     * @param lifespan the lifespan setting.
+     */
+    public void setLifespan(Lifespan lifespan) {
+        this.lifespan = lifespan;
+        this.lifecycleManager.setDaysPerAgeTick(lifespan.getDaysPerYear());
     }
 
     // -------------------------------------------------------------------------
@@ -413,6 +430,9 @@ public class GameEngine {
             aggregateStats();
             UIManager.printGameOverStats(this.timeManager.getCurrentTick(),
                     this.sessionTotalMoney, this.sessionTotalItems);
+            int generations = GoalManager.getHighestGeneration(this.neighborhood);
+            UIManager.info("Your family's legacy score: {Y}" + getGoalManager().getLegacyScore(this.neighborhood)
+                    + "{/} across " + generations + (generations == 1 ? " generation." : " generations."));
             UIManager.prompt("\nPress ENTER to end simulation...");
             scanner.nextLine();
             return false;

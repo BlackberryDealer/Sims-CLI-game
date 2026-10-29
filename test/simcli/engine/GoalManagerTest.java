@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import simcli.entities.actors.NPCSim;
 import simcli.entities.actors.Sim;
 import simcli.entities.managers.NPCManager;
+import simcli.entities.managers.SkillManager;
 import simcli.entities.models.Achievement;
 import simcli.entities.models.Aspiration;
 import simcli.entities.models.Gender;
@@ -69,7 +70,7 @@ public class GoalManagerTest {
         assertEquals(5, career.getTarget());
         assertEquals(60, career.getPercent());
 
-        ann.getSkillManager().setExperience(SkillType.LOGIC, 4 * GameConstants.SKILL_XP_PER_LEVEL);
+        ann.getSkillManager().setExperience(SkillType.LOGIC, SkillManager.experienceForLevel(4));
         assertEquals(4, goals.progress(ann, Aspiration.SKILL_MASTER).getCurrent());
 
         assertFalse(goals.progress(ann, Aspiration.HOMEOWNER).isComplete());

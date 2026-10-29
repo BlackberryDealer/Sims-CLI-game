@@ -38,9 +38,10 @@ public class LifecycleManager {
 
     /**
      * How many in-game days must pass before a Sim ages by one year.
-     * Sourced from {@link GameConstants#DAYS_PER_AGE_TICK}.
+     * Starts at {@link GameConstants#DAYS_PER_AGE_TICK}; the world's
+     * {@link Lifespan} setting can change it.
      */
-    private final int daysPerAgeTick;
+    private int daysPerAgeTick;
 
     /**
      * Logger for lifecycle event messages (death, pension, retirement).
@@ -118,6 +119,7 @@ public class LifecycleManager {
         // Increment the Sim's day counter and reset daily career state.
         sim.incrementDaysAlive();
         sim.getCareerManager().resetDaily(true);
+        sim.getSkillManager().startNewDay();
 
         // Check if a full age-up cycle has elapsed.
         if (sim.getDaysAlive() % daysPerAgeTickFor(sim) == 0) {
@@ -162,10 +164,23 @@ public class LifecycleManager {
     /**
      * Returns the configured number of days per age-up cycle.
      *
-     * @return days-per-age-tick value set at construction.
+     * @return days-per-age-tick value.
      */
     public int getDaysPerAgeTick() {
         return daysPerAgeTick;
+    }
+
+    /**
+     * Changes how many days make one year of age (for the world's lifespan setting).
+     *
+     * @param daysPerAgeTick days per year; must be at least 1.
+     * @throws IllegalArgumentException if {@code daysPerAgeTick} is less than 1.
+     */
+    public void setDaysPerAgeTick(int daysPerAgeTick) {
+        if (daysPerAgeTick < 1) {
+            throw new IllegalArgumentException("daysPerAgeTick must be >= 1, but was: " + daysPerAgeTick);
+        }
+        this.daysPerAgeTick = daysPerAgeTick;
     }
 
     /**

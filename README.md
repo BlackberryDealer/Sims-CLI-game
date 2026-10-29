@@ -36,7 +36,7 @@ SimCLI is a life simulation game inspired by *The Sims*, written in plain Java a
 ┌─ What should Ann do? ──────────────────────────────────────────────────────┐
 │ HERE  [1] Sleep till 08:00                                                 │
 │ OUT   [W] Work        [T] Travel (1h) [J] Jobs                             │
-│ HOME  [M] Move room   [H] House info  [U] Upgrade room                     │
+│ HOME  [C] Chat (1h)   [M] Move room   [H] House info  [U] Upgrade room     │
 │ SIM   [I] Status      [V] Inventory   [K] Switch Sim  [G] Goals            │
 │ GAME  [?] Help        [S] Save & quit to menu                              │
 │ Using things here takes 1 hour; menus and info screens are free.           │
@@ -73,14 +73,14 @@ java -jar target/sims-cli-game.jar
 
 ## Your first day
 
-1. **Make a household.** Choose **New world**, name it, and create up to four Sims. Each Sim gets a random personality (Active, Lazy or Socialite), and you pick their **life aspiration**, the goal that wins you the game.
-2. **Get a job.** Press `J` and pick a career you're old enough for. Each career rewards one skill, so pick one you can train. Press `W` to work a shift; the office is closed at weekends.
+1. **Make a household.** Choose **New world**, name it, and create up to four Sims. Each Sim gets a random personality (Active, Lazy or Socialite), and you pick their **life aspiration**, the goal that wins you the game. Then choose how long lives last: short, normal or long.
+2. **Get a job.** Press `J` and pick a career you're old enough for. Each career rewards one skill, so pick one you can train. Press `W` to work a shift; the office is closed at weekends. Your first paycheck also opens the Bookshop.
 3. **Buy food.** Press `T` to travel to the **Town Supermarket**. Ready meals are convenient, but raw **Groceries** are far cheaper per bite. Bring them home and open the fridge: `C` cooks a meal, `S` stores food so it stays fresh longer.
-4. **Meet people.** Travel to the **City Park** and chat with the visitors. Chats always land; jokes and flirts are riskier. Keep talking to someone and you'll become friends, and maybe more.
+4. **Make friends.** Press `C` at home to chat with your family. For new faces, travel to the **City Park**. Chats always land; jokes and flirts are riskier. Keep talking to someone and you'll become friends, and maybe more.
 5. **Go to bed.** Sleeping skips to 08:00 and the whole household goes to bed with you. In the morning you'll see what changed overnight, e.g. `Hunger 72 → 49`.
 6. **Plan for Monday.** Bills for every home you own are due each Monday.
 
-The Sims you aren't controlling look after themselves: they eat from the fridge, shower and nap. Press `K` to switch to one of them. Press `?` in game for help at any time.
+The Goals screen (`G`) has a **first steps** checklist that pays a little cash for each of these. The Sims you aren't controlling look after themselves: they eat from the fridge, shower, nap and chat. Press `K` to switch to one of them. Press `?` in game for help at any time.
 
 ## Controls
 
@@ -90,12 +90,13 @@ The Sims you aren't controlling look after themselves: they eat from the fridge,
 | `W` | Work a shift (weekdays only) | the shift's length |
 | `T` | Travel somewhere, or buy a home | 1 hour |
 | `J` | Job market: take a job, change career, or quit | free |
+| `C` | Chat, joke or flirt with someone at home | 1 hour |
 | `M` / `H` / `U` | Move room / house info and bills / upgrade a room ($500) | free |
 | `I` | Status: needs, job, skills, family, friends | free |
 | `V` | Inventory: eat, use or drop items | free |
 | `K` | Switch to another Sim in the household | free |
 | `L` | Family: date your spouse, try for a baby, feed the babies, give a gift | 1 hour |
-| `G` | Goals: aspirations and achievements | free |
+| `G` | Goals: first steps, aspirations, legacy and achievements | free |
 | `?` | Help | free |
 | `S` | Save and quit to the main menu | free |
 
@@ -108,8 +109,9 @@ The full rules, for when you want the details. Click a section to open it.
 <details>
 <summary><b>Needs, health and death</b></summary>
 
-Every Sim has five needs from 0 to 100: **Hunger**, **Energy**, **Hygiene**, **Fun** and **Social**. They fall every hour, faster when working or exercising, and faster for older Sims. Low needs drag each other down: poor hygiene hurts social, and low fun and loneliness drain energy.
+Every Sim has five needs from 0 to 100: **Hunger**, **Energy**, **Hygiene**, **Fun** and **Social**. They fall every hour, faster when working or exercising. Age only matters once a Sim is an elder, and even then needs drain at most 1.3× as fast. Low needs drag each other down: poor hygiene hurts social, and low fun and loneliness drain energy.
 
+- **Mood** is the average of the five needs. A Sim in a **great mood** (80 or more) earns 10% more per shift and learns skills 50% faster. The HUD shows when they're in one.
 - **Health** regenerates while a Sim is fed, drains slowly while they're hungry (hunger 20 or below), and drains faster every hour they're starving at 0. A Sim dies when health reaches 0, and that includes babies.
 - **Tired** Sims (energy 20 or below) can't work or exercise. **Hungry** Sims can't work.
 - **Personality** matters: Active Sims tire 20% slower and Lazy Sims 50% faster. Socialites get 50% more out of chats, jokes and flirts, and learn Charisma faster.
@@ -131,10 +133,10 @@ Every Sim has five needs from 0 to 100: **Hunger**, **Energy**, **Hygiene**, **F
 
 Pay is the tier-1 rate and rises with each promotion.
 
-- **Promotions** have a 25% chance per shift, plus 5% per level of the job's skill (up to 75%). Past tier 2 the skill is required: tier 3 needs level 2, tier 4 needs level 4, and tier 5 needs level 6.
-- **Skill pays:** each level of the job's skill adds 5% to every paycheck.
+- **Promotions are earned, not rolled.** Every shift fills a **performance meter**, and a full meter (100) means a promotion. Each shift adds 5, plus 1 for every 10 points of mood you turn up with, plus 1 per level of the job's skill. A cheerful worker is promoted in about seven shifts, a miserable one in about fifteen. Past tier 2 the skill is also required: tier 3 needs level 2, tier 4 needs level 4, and tier 5 needs level 6.
+- **Skill pays:** each level of the job's skill adds 5% to every paycheck, and a great mood adds another 10%.
 - **Overwork:** extra shifts in one day cost more energy, hunger and hygiene each time (double, then triple), and the game asks you to confirm the first one.
-- **Attendance:** missing more than three weekdays in a row gets a Sim fired. Weekends never count.
+- **Attendance:** every missed weekday costs 10 performance, and missing more than three in a row gets a Sim fired. Weekends never count.
 - **Retirement:** Sims past a job's maximum age are retired from it. Unemployed elders collect a $100 pension on each birthday.
 
 | Skill (0–10) | How to train it | What it does |
@@ -143,7 +145,9 @@ Pay is the tier-1 rate and rises with each promotion.
 | Logic | Computer; teens also learn it at school | Pay and promotions for logic jobs |
 | Charisma | Chatting, joking, flirting and dates (Socialites learn 50% faster) | Jokes and flirts land more often and build relationships faster |
 
-Working a shift trains the job's skill a little too. The status screen (`I`) shows each skill's progress and what the next promotion needs.
+- **Each level costs more than the last:** level 1 needs 15 experience and level 10 needs 600 in total. A study session or workout is worth 10 (15 in a great mood).
+- **Daily practice limit:** each skill can learn at most 30 experience a day, so a little practice every day beats cramming. Maxing a skill takes about three weeks.
+- Working a shift trains the job's skill a little too. The status screen (`I`) shows each skill's progress, your work performance, and what the next promotion needs.
 
 </details>
 
@@ -151,7 +155,7 @@ Working a shift trains the job's skill a little too. The status screen (`I`) sho
 <summary><b>Money, food and bills</b></summary>
 
 - **Starting money:** each Sim you create starts with $500. Every Sim has their own wallet; babies start with nothing.
-- **Bills:** every Monday the household pays the weekly bill for each home it owns: $100 for the Dorm and $250 for the Bungalow. The richest Sim pays first. If the household can't cover it, everyone loses happiness. `H` shows what's due.
+- **Bills:** every Monday the household pays the weekly bill for each home it owns: $100 for the Dorm, $250 for the Bungalow and $400 for the Townhouse. The richest Sim pays first. If the household can't cover it, everyone loses happiness. `H` shows what's due.
 - **Cooking:** raw ingredients barely fill you up raw, but cooked at a fridge (`C`) they become proper meals.
 
   | Food | Price | Hunger | Notes |
@@ -162,8 +166,16 @@ Working a shift trains the job's skill a little too. The status screen (`I`) sho
   | Raw Steak | $35 | +15 raw, **+80** cooked | cooks into a Steak Dinner |
 
 - **Spoilage:** food stays fresh for a few days. It loses 1 day of freshness a day in a fridge and 2 a day in a bag or storage chest, and is thrown out when it runs out.
-- **The Bookshop** sells books (for fun), a Computer, and Energy Drinks for adults.
-- **The Bungalow** costs $5,000 and comes with its own Computer for studying.
+- **The Bookshop** opens after your household's first paycheck. It sells books (for fun), a Computer, and Energy Drinks for adults.
+- **Furniture worth buying** at the Supermarket. Furniture goes in your bag; place it in a room from the inventory (`V`):
+
+  | Furniture | Price | What it does |
+  |---|---|---|
+  | TV | $400 | an hour on the sofa: +25 fun |
+  | Comfy Bed | $900 | wake up with +15 fun, and lose half as much hunger overnight |
+  | Smart Fridge | $1,200 | food inside goes off half as fast |
+
+- **Homes:** the **Bungalow** ($5,000) has its own Computer for studying. The **Townhouse** ($15,000) comes with a Comfy Bed, a Smart Fridge, a TV, a home gym and an office.
 - **Upgrades:** `U` expands a room's storage for $500.
 
 </details>
@@ -181,9 +193,11 @@ Working a shift trains the job's skill a little too. The status screen (`I`) sho
   | Argue | always "lands" | hurts the relationship |
 
   The menu shows the odds for each action. Charisma raises them, a Socialite target is easier to win over (+15%), and a Lazy one is harder (−10%). A flop costs a little relationship and happiness.
+- **At home:** press `C` to chat, joke or flirt with someone in the household. If it lands, they enjoy it too. Lonely Sims you aren't controlling chat with each other on their own.
 - **Relationship levels:** stranger → acquaintance (20) → friend (50) → romantic (80) → married. At 100 you can propose, and your new spouse joins the household as a playable Sim.
-- **Family menu (`L`):** go on dates, try for a baby (a 50% chance; it takes an hour either way), feed the babies, or give your spouse a gift from your bag. Pricier gifts mean more.
-- **Children** are born as babies who only need feeding. They grow a year every day and become playable at 13. Teens go to school on weekdays (+Logic) and can take part-time jobs.
+- **Family menu (`L`):** go on dates, try for a baby, feed the babies, or give your spouse a gift from your bag. Pricier gifts mean more.
+- **Babies:** trying for a baby is a 50% chance and takes an hour either way. If it works, the baby is born **3 days later**. After a birth, the couple needs 2 days' rest before trying again.
+- **Children** are born as babies who need feeding, with real food from the fridge. Idle Sims feed them, grandparents first. They grow a year every day and become playable at 13. Teens go to school on weekdays (+Logic) and can take part-time jobs.
 - **The park** has eight visitors a day, drawn from a town that remembers who you've met. Each morning three leave and others arrive, either old faces or new ones. Townsfolk age too, and move away at 80.
 
 </details>
@@ -196,24 +210,30 @@ Working a shift trains the job's skill a little too. The status screen (`I`) sho
 | Child | 0–12 | ages one year **per day**; babies only need feeding |
 | Teen | 13–17 | playable; school on weekdays; part-time jobs |
 | Adult | 18–64 | every career open |
-| Elder | 65+ | pension when unemployed; dies of old age at 90 |
+| Elder | 65+ | pension when unemployed; mentors teens; dies of old age at 90 |
 
-Teens, adults and elders age one year every 3 in-game days. New households start with Sims aged 18–89.
+- **Lifespan** is chosen per world: teens, adults and elders age one year every 2 (short), 3 (normal) or 5 (long) in-game days. New households start with Sims aged 18–89.
+- **Grandparents** enjoy family life: feeding the babies lifts their social and fun, and every day they teach each teen their best skill.
+- **Inheritance:** when a Sim dies, their money goes to their spouse, otherwise to their children, otherwise to whoever else is at home. When the last of a generation is gone, the next one takes charge of the household.
 
 </details>
 
 <details>
 <summary><b>Goals: aspirations, achievements and winning</b></summary>
 
-Every playable Sim has one **aspiration**. Fulfilling it pays $1,000 and a big mood boost. When every playable Sim in the household has fulfilled theirs, your **legacy is complete** and you've won. You can keep playing afterwards.
+**First steps:** in the first week, a checklist on the Goals screen pays a little cash for each of: getting a job ($100), working your first shift ($50), cooking a meal ($50), getting to know someone ($50) and paying your first weekly bills ($100).
+
+Every playable Sim has one **aspiration**. Fulfilling it pays $1,000 and a big mood boost, and that Sim can then **choose a new one** from the Goals screen. When every playable Sim in the household has fulfilled theirs, your **legacy is complete** and you've won. You can keep playing afterwards.
 
 | Aspiration | Goal |
 |---|---|
 | Career Star | Reach the top tier of a career |
 | Big Family | Raise a family of 3 children |
-| Homeowner | Buy the Bungalow |
+| Homeowner | Buy a home of your own (the Bungalow or the Townhouse) |
 | Master of One | Reach level 10 in any skill |
 | Social Butterfly | Make 5 good friends (relationship 50+) |
+
+**Legacy score:** 100 points for every aspiration ever fulfilled, 25 for every achievement, and 250 for every generation after the first to come of age. It's shown on the Goals screen and when the game ends.
 
 **12 achievements** mark household milestones: Gainfully Employed, Moving Up, Corner Office, Good Friends, Wedding Bells, Bundle of Joy, All Grown Up, Moving On Up, Skilled, Master, Moneybags ($10,000 saved) and Golden Years. `G` shows everyone's progress and which achievements you've unlocked.
 
@@ -233,7 +253,7 @@ After every turn there's a **5% chance** of an event for the Sim you're playing:
 | Stove fire | −20 hunger, −25 energy, −10 health |
 | Lottery win | +$100 to $500, +30 fun |
 
-There's also a separate **4% chance** of a **household event**, chosen from the ones that fit the time:
+From day 3, there's also a separate **4% chance** of a **household event**, chosen from the ones that fit the time:
 
 | Event | When | Effect |
 |---|---|---|
@@ -266,7 +286,7 @@ For example, to sell coffee at the supermarket, add this to the grocery shop's `
 ```
 
 - **[`shops.json`](resources/simcli/data/shops.json)** — what each shop sells: food, raw ingredients (with the meal they cook into), consumables like books, and furniture. Items can be restricted with `availableIf`, for example `[{ "minAge": 25 }, { "minMoney": 500 }]`, meaning age 25+ *or* $500+.
-- **[`buildings.json`](resources/simcli/data/buildings.json)** — the travel map, in order: homes (price, weekly bill, rooms and furniture), shops (by shop id) and the park. Add new buildings at the **end** of the list, because saves refer to buildings by position.
+- **[`buildings.json`](resources/simcli/data/buildings.json)** — the travel map, in order: homes (price, weekly bill, rooms and furniture), shops (by shop id) and the park. Any building can stay closed until the first paycheck with `"opensAfter": "firstPaycheck"`. Add new buildings at the **end** of the list, because saves refer to buildings by position.
 
 Jobs are still defined in code ([`Job.java`](src/simcli/entities/models/Job.java)), because saves and game logic refer to them by name.
 
@@ -279,7 +299,7 @@ Jobs are still defined in code ([`Job.java`](src/simcli/entities/models/Job.java
 | Run without Maven | `javac -d bin -sourcepath src src/simcli/Main.java` then `java -cp "bin;resources" simcli.Main` (use `:` instead of `;` on macOS/Linux) |
 | Generate Javadoc | `javadoc -d docs -sourcepath src -subpackages simcli`, then open `docs/index.html` |
 
-The suite has about 390 JUnit 5 tests: unit tests for each manager, integration tests that play through commands, save/load round trips, and regression tests for UI and timekeeping bugs. [GitHub Actions](.github/workflows/tests.yml) runs them on **Windows, macOS and Linux** for every push and pull request.
+The suite has about 420 JUnit 5 tests: unit tests for each manager, integration tests that play through commands, save/load round trips, and regression tests for UI and timekeeping bugs. It also includes a **balance bot** ([`BalanceSimulationTest`](test/simcli/BalanceSimulationTest.java)) that plays a household for 90 in-game days, prints a report of money and milestones, and fails if a change makes progress far too fast or too slow. [GitHub Actions](.github/workflows/tests.yml) runs them on **Windows, macOS and Linux** for every push and pull request.
 
 ## Architecture
 
@@ -297,9 +317,10 @@ flowchart LR
     GL --> UM[UpkeepManager<br/>bills, spoilage]
     GL --> REM[RandomEventManager]
     GL --> GM[GoalManager<br/>aspirations, achievements]
+    GL --> FM[FamilyManager<br/>births, inheritance]
 ```
 
-Each turn, `GameEngine` renders the screen, and `InputHandler` turns the key you pressed into a **Command**. If the command takes time, `GameLoop` simulates it hour by hour: idle Sims act, needs decay, the clock advances, and at midnight it runs ageing, school, bills, spoilage and the park's daily rotation. After the turn it rolls for random events and checks goals.
+Each turn, `GameEngine` renders the screen, and `InputHandler` turns the key you pressed into a **Command**. If the command takes time, `GameLoop` simulates it hour by hour: idle Sims act, needs decay, the clock advances, and at midnight it runs ageing, school, births and mentoring, bills, spoilage and the park's daily rotation. After the turn it rolls for random events and checks goals.
 
 | Pattern | Where | Why |
 |---|---|---|

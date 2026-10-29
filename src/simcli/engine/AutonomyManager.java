@@ -4,18 +4,11 @@ import simcli.entities.actors.Sim;
 import simcli.entities.items.Consumable;
 import simcli.entities.items.Food;
 import simcli.entities.items.Ingredient;
-import simcli.entities.items.Item;
 import simcli.entities.models.ActionState;
 import simcli.entities.models.SimState;
 import simcli.utils.GameConstants;
-import simcli.world.Building;
-import simcli.world.Residential;
-import simcli.world.Room;
-import simcli.world.interactables.Fridge;
-import simcli.world.interactables.Interactable;
 import simcli.world.interactables.Shower;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.List;
@@ -30,7 +23,9 @@ import java.util.Set;
  *     <li>showers when their hygiene is very low,</li>
  *     <li>goes to bed when exhausted — or when the active Sim does — and
  *         gets up again once rested,</li>
- *     <li>feeds any hungry baby in the household.</li>
+ *     <li>chats with another idle Sim at home when lonely,</li>
+ *     <li>feeds any hungry baby in the household with food from the
+ *         fridge (grandparents first).</li>
  * </ul>
  *
  * <p>Idle Sims are treated as being at home, so they can use the fridges
@@ -118,9 +113,26 @@ public class AutonomyManager {
                 logger.log(sim.getName() + " is exhausted and goes to bed.");
             } else if (sim.getHygiene().getValue() <= GameConstants.AUTONOMY_HYGIENE_THRESHOLD) {
                 shower(sim);
+            } else if (sim.getSocial().getValue() <= GameConstants.AUTONOMY_SOCIAL_THRESHOLD) {
+                chatAtHome(sim, activePlayer, household);
             }
         }
         feedBabies(activePlayer, household);
+    }
+
+    /** A lonely idle Sim has a chat with another idle, awake Sim at home. */
+    private void chatAtHome(Sim sim, Sim activePlayer, List<Sim> household) {
+        for (Sim other : household) {
+            if (other != sim && other != activePlayer && canAct(other)
+                    && other.getCurrentAction() != ActionState.SLEEPING) {
+                sim.getSocial().increase(GameConstants.HOME_CHAT_SOCIAL);
+                other.getSocial().increase(GameConstants.HOME_CHAT_SOCIAL);
+                sim.getRelationshipManager().increaseRelationship(other, GameConstants.HOME_CHAT_RELATIONSHIP);
+                other.getRelationshipManager().increaseRelationship(sim, GameConstants.HOME_CHAT_RELATIONSHIP);
+                logger.log(sim.getName() + " and " + other.getName() + " catch up over a cup of tea.");
+                return;
+            }
+        }
     }
 
     /** Only living, playable Sims look after themselves; babies can't. */
@@ -133,58 +145,45 @@ public class AutonomyManager {
      * ingredients first.
      */
     private void eat(Sim sim) {
-        Fridge bestFridge = null;
-        Consumable bestFood = null;
-        for (Fridge fridge : homeObjects(Fridge.class)) {
-            for (Item item : fridge.getStoredItems()) {
-                if (item instanceof Consumable) {
-                    Consumable food = (Consumable) item;
-                    if (fillingness(food) > 0 && (bestFood == null || fillingness(food) > fillingness(bestFood))) {
-                        bestFood = food;
-                        bestFridge = fridge;
-                    }
-                }
-            }
-        }
-        if (bestFood == null) {
+        Consumable food = HomeSupplies.takeFood(worldManager, true);
+        if (food == null) {
             if (warnedNoFood.add(sim)) {
                 logger.logWarning(sim.getName() + " is hungry, but there's nothing to eat in the fridge!");
             }
             return;
         }
-        bestFridge.getStoredItems().remove(bestFood);
-        if (bestFood instanceof Ingredient) {
-            Food meal = ((Ingredient) bestFood).cook();
+        if (food instanceof Ingredient) {
+            Food meal = ((Ingredient) food).cook();
             sim.getHappiness().increase(GameConstants.COOKING_HAPPINESS);
+            sim.recordMealCooked();
             sim.eat(meal);
             logger.log(sim.getName() + " cooks a " + meal.getObjectName() + " and eats it.");
         } else {
-            sim.eat(bestFood);
-            logger.log(sim.getName() + " grabs a " + bestFood.getObjectName() + " from the fridge.");
+            sim.eat(food);
+            logger.log(sim.getName() + " grabs a " + food.getObjectName() + " from the fridge.");
         }
-    }
-
-    /** How much hunger the food restores, counting ingredients as the meal they cook into. */
-    private static int fillingness(Consumable food) {
-        return food instanceof Ingredient ? ((Ingredient) food).getMealSatiation() : food.getSatiationValue();
     }
 
     /** Takes a shower if there is one at home. */
     private void shower(Sim sim) {
-        if (homeObjects(Shower.class).isEmpty()) {
+        if (HomeSupplies.find(worldManager, Shower.class).isEmpty()) {
             return;
         }
         sim.getHygiene().increase(50);
         logger.log(sim.getName() + " takes a shower.");
     }
 
-    /** Has the first available household Sim feed every hungry baby. */
+    /**
+     * Has an idle household Sim feed every hungry baby, from the fridge.
+     * Grandparents step in first, since they enjoy it most.
+     */
     private void feedBabies(Sim activePlayer, List<Sim> household) {
         Sim carer = null;
         for (Sim sim : household) {
-            if (sim != activePlayer && canAct(sim)) {
+            if (sim != activePlayer && canAct(sim)
+                    && (carer == null || (sim.getAge() >= GameConstants.ELDER_AGE
+                            && carer.getAge() < GameConstants.ELDER_AGE))) {
                 carer = sim;
-                break;
             }
         }
         if (carer == null) {
@@ -192,30 +191,11 @@ public class AutonomyManager {
         }
         for (Sim baby : household) {
             if (baby.isChildSim() && !baby.isPlayable() && baby.getState() != SimState.DEAD
-                    && baby.getHunger().getValue() <= GameConstants.AUTONOMY_BABY_HUNGER_THRESHOLD) {
-                baby.getHunger().increase(GameConstants.BABY_FEED_AMOUNT);
-                logger.log(carer.getName() + " feeds " + baby.getName() + ".");
+                    && baby.getHunger().getValue() <= GameConstants.AUTONOMY_BABY_HUNGER_THRESHOLD
+                    && !HomeSupplies.feedBaby(carer, baby, worldManager, logger)
+                    && warnedNoFood.add(baby)) {
+                logger.logWarning(baby.getName() + " is hungry, but there's no food in the fridge to feed them!");
             }
         }
-    }
-
-    /** Finds every object of the given kind in the household's owned homes. */
-    private <T extends Interactable> List<T> homeObjects(Class<T> kind) {
-        List<T> found = new ArrayList<>();
-        if (worldManager == null) {
-            return found;
-        }
-        for (Building building : worldManager.getCityMap()) {
-            if (building instanceof Residential && ((Residential) building).isOwned()) {
-                for (Room room : ((Residential) building).getRooms()) {
-                    for (Interactable object : room.getInteractables()) {
-                        if (kind.isInstance(object)) {
-                            found.add(kind.cast(object));
-                        }
-                    }
-                }
-            }
-        }
-        return found;
     }
 }

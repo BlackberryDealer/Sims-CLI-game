@@ -5,7 +5,9 @@
     "  home  - name, optional price (0 or missing = owned from the start), weeklyBill,",
     "          rooms: [ { name, capacity, furniture: [ { name, space } ] } ]",
     "  shop  - name, shop (an id from shops.json)",
-    "  park  - name (the place to meet NPCs)"
+    "  park  - name (the place to meet NPCs)",
+    "Any building can have opensAfter: \"firstPaycheck\" to stay closed until someone in the",
+    "household has worked a shift."
   ],
   "buildings": [
     {
@@ -27,7 +29,18 @@
       ]
     },
     { "type": "shop", "name": "Town Supermarket", "shop": "grocery" },
-    { "type": "shop", "name": "The Bookshop", "shop": "bookshop" },
-    { "type": "park", "name": "City Park" }
+    { "type": "shop", "name": "The Bookshop", "shop": "bookshop", "opensAfter": "firstPaycheck" },
+    { "type": "park", "name": "City Park" },
+    {
+      "type": "home", "name": "The Townhouse", "price": 15000, "weeklyBill": 400,
+      "rooms": [
+        { "name": "Master Bedroom", "capacity": 120, "furniture": [ { "name": "Comfy Bed", "space": 30 } ] },
+        { "name": "Kitchen", "capacity": 80, "furniture": [ { "name": "Smart Fridge", "space": 25 } ] },
+        { "name": "Lounge", "capacity": 80, "furniture": [ { "name": "TV", "space": 15 } ] },
+        { "name": "Home Gym", "capacity": 80, "furniture": [ { "name": "Weight Bench", "space": 40 } ] },
+        { "name": "Office", "capacity": 60, "furniture": [ { "name": "Computer", "space": 20 } ] },
+        { "name": "Bathroom", "capacity": 40, "furniture": [ { "name": "Shower", "space": 10 } ] }
+      ]
+    }
   ]
 }

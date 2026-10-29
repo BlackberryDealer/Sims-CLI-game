@@ -209,6 +209,9 @@ public class SimTest {
         @Test
         @DisplayName("performWork() earns salary and tracks total money earned")
         void testWorkEarnsSalary() {
+            // a fresh Sim is in a great mood, which adds a bonus on top of the tier salary
+            adultSim.getHappiness().setValue(40);
+            adultSim.getSocial().setValue(40);
             int moneyBefore = adultSim.getMoney();
             int expectedSalary = Job.SOFTWARE_ENGINEER.getSalaryAtTier(1);
 

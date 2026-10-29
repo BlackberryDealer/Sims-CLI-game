@@ -5,16 +5,19 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import simcli.engine.CommandResult;
+import simcli.engine.HomeSupplies;
 import simcli.engine.IWorldManager;
 import simcli.engine.SimulationLogger;
 import simcli.engine.TimeManager;
 import simcli.engine.WorldManager;
 import simcli.entities.actors.Sim;
+import simcli.entities.items.Food;
 import simcli.entities.managers.NPCManager;
 import simcli.entities.models.Gender;
 import simcli.entities.models.Job;
 import simcli.utils.GameRandom;
 import simcli.world.Residential;
+import simcli.world.interactables.Fridge;
 
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
@@ -80,6 +83,7 @@ public class SpouseInteractionCommandTest {
         Sim baby = husband.getRelationshipManager().finalizeBaby("Bub", Gender.MALE);
         household.add(baby);
         baby.getHunger().setValue(10);
+        HomeSupplies.find(world, Fridge.class).get(0).storeItem(new Food("Apple", 10, 15, 5)); // babies need real food
         wife.markAsDead();
 
         CommandResult result = command("3\n").execute();

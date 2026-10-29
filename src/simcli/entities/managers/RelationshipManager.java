@@ -436,9 +436,14 @@ public class RelationshipManager {
         // Newborns don't come with the adult starting cash.
         child.setMoney(0);
         child.setTotalMoneyEarned(0);
+        int parentGeneration = spouse == null ? owner.getGeneration()
+                : Math.max(owner.getGeneration(), spouse.getGeneration());
+        child.setGeneration(parentGeneration + 1);
 
         this.addChild(child);
-        spouse.getRelationshipManager().addChild(child);
+        if (spouse != null) {
+            spouse.getRelationshipManager().addChild(child);
+        }
 
         // Updated to match the requested final format
         SimulationLogger.getInstance().log("\n*** NEW LIFE! " + child.getName() + " has been born! ***");

@@ -44,11 +44,16 @@ public class SkillManagerTest {
         GameRandom.RANDOM.setSeed(System.nanoTime());
     }
 
-    /** A Sim with one fixed trait, so trait bonuses don't make tests flaky. */
+    /**
+     * A Sim with one fixed trait, so trait bonuses don't make tests flaky,
+     * in an ordinary mood, so the great-mood bonuses don't apply.
+     */
     private static Sim sim(Job job, Trait trait) {
         Sim sim = new Sim("Sam", 30, Gender.MALE, job);
         sim.getTraits().clear();
         sim.getTraits().add(trait);
+        sim.getHappiness().setValue(40);
+        sim.getSocial().setValue(40);
         return sim;
     }
 
@@ -71,14 +76,29 @@ public class SkillManagerTest {
         }
 
         @Test
-        @DisplayName("Each SKILL_XP_PER_LEVEL points is one level")
+        @DisplayName("Levels come from experience, and a level-up is announced when a boundary is crossed")
         void testLevelsFromExperience() {
             SkillManager skills = new SkillManager();
-            assertFalse(skills.addExperience(SkillType.LOGIC, GameConstants.SKILL_XP_PER_LEVEL - 1, "Sam"));
+            assertFalse(skills.addExperience(SkillType.LOGIC, SkillManager.experienceForLevel(1) - 1, "Sam"));
             assertEquals(0, skills.getLevel(SkillType.LOGIC));
             assertTrue(skills.addExperience(SkillType.LOGIC, 1, "Sam"), "Crossing a level boundary is a level-up");
             assertEquals(1, skills.getLevel(SkillType.LOGIC));
             assertEquals(0, skills.getLevel(SkillType.FITNESS), "Skills are independent");
+        }
+
+        @Test
+        @DisplayName("Each level costs more experience than the last")
+        void testRisingCurve() {
+            assertEquals(0, SkillManager.experienceForLevel(0));
+            assertEquals(GameConstants.SKILL_XP_BASE, SkillManager.experienceForLevel(1));
+            int previousCost = 0;
+            for (int level = 1; level <= GameConstants.MAX_SKILL_LEVEL; level++) {
+                int cost = SkillManager.experienceForLevel(level) - SkillManager.experienceForLevel(level - 1);
+                assertTrue(cost > previousCost, "Level " + level + " should cost more than level " + (level - 1));
+                previousCost = cost;
+            }
+            assertEquals(600, SkillManager.experienceForLevel(GameConstants.MAX_SKILL_LEVEL),
+                    "Level 10 takes 600 experience: weeks of practice at 30 a day");
         }
 
         @Test
@@ -94,9 +114,11 @@ public class SkillManagerTest {
         @DisplayName("Progress shows how far through the current level the skill is")
         void testProgressPercent() {
             SkillManager skills = new SkillManager();
-            skills.setExperience(SkillType.FITNESS, GameConstants.SKILL_XP_PER_LEVEL + GameConstants.SKILL_XP_PER_LEVEL / 2);
-            assertEquals(1, skills.getLevel(SkillType.FITNESS));
-            assertEquals(50, skills.getProgressPercent(SkillType.FITNESS));
+            int start = SkillManager.experienceForLevel(2);
+            int span = SkillManager.experienceForLevel(3) - start;
+            skills.setExperience(SkillType.FITNESS, start + span / 2);
+            assertEquals(2, skills.getLevel(SkillType.FITNESS));
+            assertEquals((span / 2) * 100 / span, skills.getProgressPercent(SkillType.FITNESS), "about halfway");
         }
 
         @Test
@@ -120,7 +142,7 @@ public class SkillManagerTest {
             assertEquals(GameConstants.WORKOUT_FITNESS_XP, sim.getSkillManager().getExperience(SkillType.FITNESS));
 
             Sim fit = sim(Job.UNEMPLOYED, Trait.LAZY);
-            fit.getSkillManager().setExperience(SkillType.FITNESS, 5 * GameConstants.SKILL_XP_PER_LEVEL);
+            fit.getSkillManager().setExperience(SkillType.FITNESS, SkillManager.experienceForLevel(5));
             new WeightBench().interact(fit, noInput(), new TimeManager(8, 24));
             assertTrue(fit.getEnergy().getValue() > sim.getEnergy().getValue(),
                     "A level-5 Sim should tire less from the same workout");
@@ -176,7 +198,7 @@ public class SkillManagerTest {
         void testSkilledPayIsHigher() {
             Sim novice = sim(Job.SOFTWARE_ENGINEER, Trait.LAZY);
             Sim expert = sim(Job.SOFTWARE_ENGINEER, Trait.LAZY);
-            expert.getSkillManager().setExperience(SkillType.LOGIC, 10 * GameConstants.SKILL_XP_PER_LEVEL);
+            expert.getSkillManager().setExperience(SkillType.LOGIC, SkillManager.experienceForLevel(10));
 
             WorkResult a = novice.performWork();
             WorkResult b = expert.performWork();
@@ -187,11 +209,59 @@ public class SkillManagerTest {
         }
 
         @Test
-        @DisplayName("Promotion chance starts at 25% and grows with skill, up to 75%")
-        void testPromotionChance() {
-            assertEquals(0.25, Job.SOFTWARE_ENGINEER.getPromotionChance(0), 1e-9);
-            assertEquals(0.50, Job.SOFTWARE_ENGINEER.getPromotionChance(5), 1e-9);
-            assertEquals(0.75, Job.SOFTWARE_ENGINEER.getPromotionChance(10), 1e-9);
+        @DisplayName("Each shift earns more performance for a happier, more skilled Sim")
+        void testPerformanceGain() {
+            int miserable = Job.SOFTWARE_ENGINEER.getPerformanceGain(20, 0);
+            int happy = Job.SOFTWARE_ENGINEER.getPerformanceGain(90, 0);
+            int happySkilled = Job.SOFTWARE_ENGINEER.getPerformanceGain(90, 5);
+            assertEquals(GameConstants.PERFORMANCE_BASE_GAIN + 2, miserable);
+            assertTrue(happy > miserable);
+            assertEquals(happy + 5 * GameConstants.PERFORMANCE_PER_SKILL_LEVEL, happySkilled);
+        }
+
+        @Test
+        @DisplayName("A full performance meter earns a promotion, and the meter starts again")
+        void testPromotionFromPerformance() {
+            Sim sim = sim(Job.SOFTWARE_ENGINEER, Trait.LAZY);
+            int shifts = 0;
+            while (sim.getJobTier() == 1 && shifts < 40) {
+                sim.getCareerManager().setShiftsWorkedToday(0);
+                sim.performWork();
+                shifts++;
+            }
+            assertEquals(2, sim.getJobTier());
+            assertTrue(shifts > 5, "A promotion should take a working week or two, not one shift (took " + shifts + ")");
+            assertEquals(0, sim.getCareerManager().getPerformance(), "The meter restarts after a promotion");
+        }
+
+        @Test
+        @DisplayName("Missing a weekday of work costs performance")
+        void testMissedDayCostsPerformance() {
+            Sim sim = sim(Job.SOFTWARE_ENGINEER, Trait.LAZY);
+            sim.getCareerManager().setPerformance(50);
+            sim.getCareerManager().checkTruancy("Sam", true);
+            assertEquals(50 - GameConstants.PERFORMANCE_MISSED_DAY_PENALTY, sim.getCareerManager().getPerformance());
+        }
+
+        @Test
+        @DisplayName("A great mood adds 10% pay and 50% skill experience")
+        void testGreatMoodBonuses() {
+            Sim content = sim(Job.SOFTWARE_ENGINEER, Trait.LAZY);
+            Sim cheerful = sim(Job.SOFTWARE_ENGINEER, Trait.LAZY);
+            cheerful.getHappiness().setValue(100);
+            cheerful.getSocial().setValue(100);
+            assertFalse(content.isInGreatMood());
+            assertTrue(cheerful.isInGreatMood());
+
+            int basePay = content.performWork().getEarnings();
+            int greatPay = cheerful.performWork().getEarnings();
+            assertEquals((int) Math.round(basePay * (1 + GameConstants.GREAT_MOOD_PAY_BONUS)), greatPay);
+
+            Sim learner = sim(Job.UNEMPLOYED, Trait.LAZY);
+            learner.getHappiness().setValue(100);
+            learner.getSocial().setValue(100);
+            learner.trainSkill(SkillType.LOGIC, 10);
+            assertEquals(15, learner.getSkillManager().getExperience(SkillType.LOGIC));
         }
 
         @Test
@@ -212,7 +282,7 @@ public class SkillManagerTest {
             }
             assertEquals(2, sim.getJobTier(), "Without Logic 2 the Sim must never reach tier 3");
 
-            sim.getSkillManager().setExperience(SkillType.LOGIC, 2 * GameConstants.SKILL_XP_PER_LEVEL);
+            sim.getSkillManager().setExperience(SkillType.LOGIC, SkillManager.experienceForLevel(2));
             assertEquals(0, sim.getSkillNeededForPromotion());
             for (int i = 0; i < 50 && sim.getJobTier() == 2; i++) {
                 sim.getCareerManager().setShiftsWorkedToday(0);

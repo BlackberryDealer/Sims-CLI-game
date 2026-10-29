@@ -4,8 +4,8 @@
     "  food        - name, price, hunger, energy, optional freshness (days)",
     "  ingredient  - name, price, hunger (eaten raw), meal, mealHunger, optional freshness",
     "  consumable  - name, price, hunger, energy, fun (books, perfume... never go off)",
-    "  furniture   - name, price, space (must be something the game can build: Bed, Fridge,",
-    "                Shower, Weight Bench, Computer, Storage Chest)",
+    "  furniture   - name, price, space (must be something the game can build: Bed, Comfy Bed,",
+    "                Fridge, Smart Fridge, Shower, Weight Bench, Computer, TV, Storage Chest)",
     "An item with 'availableIf' is only on sale when the shopper meets at least one of",
     "the listed conditions; each condition may use minAge, minMoney and career (a job id)."
   ],
@@ -29,7 +29,10 @@
         { "type": "furniture", "name": "Weight Bench", "price": 150, "space": 40,
           "availableIf": [ { "minAge": 22 } ] },
         { "type": "furniture", "name": "Computer", "price": 500, "space": 20,
-          "availableIf": [ { "career": "SOFTWARE_ENGINEER" }, { "minMoney": 1000 } ] }
+          "availableIf": [ { "career": "SOFTWARE_ENGINEER" }, { "minMoney": 1000 } ] },
+        { "type": "furniture", "name": "TV", "price": 400, "space": 15 },
+        { "type": "furniture", "name": "Comfy Bed", "price": 900, "space": 30 },
+        { "type": "furniture", "name": "Smart Fridge", "price": 1200, "space": 25 }
       ]
     },
     {

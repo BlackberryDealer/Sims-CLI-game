@@ -168,6 +168,8 @@ public class LivelierWorldTest {
     void testTeensGoToSchool() {
         Sim parent = new Sim("Pat", 40, Gender.FEMALE, Job.UNEMPLOYED);
         Sim teen = new Sim("Tim", 15, Gender.MALE, Job.UNEMPLOYED);
+        teen.getHappiness().setValue(40); // an ordinary mood: no great-mood bonus to the XP
+        teen.getSocial().setValue(40);
         List<Sim> household = new ArrayList<>(List.of(parent, teen));
         // Monday 23:00 — the first hour crosses into Tuesday, so Monday was a school day
         new GameLoop(new TimeManager(23, 24), household, logger).processTick(parent, 1);
@@ -198,6 +200,8 @@ public class LivelierWorldTest {
         assertFalse(Job.UNEMPLOYED.isPartTime());
 
         Sim teen = new Sim("Tim", 15, Gender.MALE, Job.BARISTA);
+        teen.getHappiness().setValue(40); // an ordinary mood: no great-mood bonus to the pay
+        teen.getSocial().setValue(40);
         assertTrue(teen.canWork());
         assertTrue(teen.performWork().isSuccess());
         assertEquals(Job.BARISTA.getSalaryAtTier(1), teen.getMoney() - GameConstants.STARTING_MONEY);

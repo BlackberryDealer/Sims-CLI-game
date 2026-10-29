@@ -1,6 +1,7 @@
 package simcli.ui;
 
 import simcli.engine.GameEngine;
+import simcli.engine.Lifespan;
 import simcli.engine.SimulationLogger;
 import simcli.persistence.SaveManager;
 import simcli.entities.models.Aspiration;
@@ -199,12 +200,38 @@ public class MainMenu {
                     + ", dreams of being a {M}" + sim.getAspiration().getDisplayName() + "{/}");
         }
 
+        Lifespan lifespan = Lifespan.NORMAL;
+        UIManager.printMessage("\n" + Panel.rule("{W}Lifespan{/}", 'g'));
+        Lifespan[] lifespans = Lifespan.values();
+        for (int i = 0; i < lifespans.length; i++) {
+            UIManager.option(String.valueOf(i + 1), Style.fit(lifespans[i].getDisplayName(), 10),
+                    "a year of age every " + lifespans[i].getDaysPerYear() + " days");
+        }
+        while (true) {
+            UIManager.prompt("Lifespan (1-" + lifespans.length + ", ENTER for Normal)> ");
+            String lInput = scanner.nextLine().trim();
+            if (lInput.isEmpty()) {
+                break;
+            }
+            try {
+                int pick = Integer.parseInt(lInput);
+                if (pick >= 1 && pick <= lifespans.length) {
+                    lifespan = lifespans[pick - 1];
+                    break;
+                }
+            } catch (NumberFormatException e) {
+                // fall through to the error below
+            }
+            UIManager.error("Please enter a number from 1 to " + lifespans.length + ", or press ENTER.");
+        }
+
         System.out.println();
         UIManager.success("Booting world {W}" + newName + "{/}...");
         UIManager.prompt("\nPress ENTER to begin your new life...");
         scanner.nextLine();
 
         GameEngine newGame = new GameEngine(newName, startingNeighborhood);
+        newGame.setLifespan(lifespan);
         newGame.run(scanner);
     }
 

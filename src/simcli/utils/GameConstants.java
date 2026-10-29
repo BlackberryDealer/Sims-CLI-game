@@ -39,8 +39,10 @@ public final class GameConstants {
     public static final int ELDER_AGE = 65;
     /** The base age at which a Sim is likely to die of old age. */
     public static final int DEATH_AGE = 90;
-    /** Multiplier applied to energy costs as a Sim gets older. */
-    public static final double AGE_ENERGY_PENALTY_MULTIPLIER = 0.05;
+    /** Extra need decay per year of age past {@link #ELDER_AGE} (needs don't speed up before then). */
+    public static final double ELDER_DECAY_PER_YEAR = 0.02;
+    /** The fastest needs can ever decay because of age, as a multiplier. */
+    public static final double MAX_AGE_DECAY_MULTIPLIER = 1.3;
     /** How many game days pass for each year of age added to a Sim. */
     public static final int DAYS_PER_AGE_TICK = 3;
     /** The amount of pension income an elder Sim receives per tick. */
@@ -82,8 +84,6 @@ public final class GameConstants {
     public static final int GIFT_HAPPINESS = 15;
 
     // --- Skills ---
-    /** Experience points needed for each skill level. */
-    public static final int SKILL_XP_PER_LEVEL = 20;
     /** The highest level a skill can reach. */
     public static final int MAX_SKILL_LEVEL = 10;
     /** Fitness experience from one workout. */
@@ -96,12 +96,6 @@ public final class GameConstants {
     public static final int WORK_SKILL_XP = 3;
     /** Extra pay per level of the job's skill, as a fraction of the base pay. */
     public static final double SKILL_PAY_BONUS_PER_LEVEL = 0.05;
-    /** Chance of promotion per shift with no skill. */
-    public static final double BASE_PROMOTION_CHANCE = 0.25;
-    /** Extra promotion chance per level of the job's skill. */
-    public static final double PROMOTION_CHANCE_PER_SKILL_LEVEL = 0.05;
-    /** Highest promotion chance per shift. */
-    public static final double MAX_PROMOTION_CHANCE = 0.75;
     /** Skill levels needed per tier above 2 (tier 3 needs 2, tier 4 needs 4, ...). */
     public static final int SKILL_LEVELS_PER_TIER = 2;
     /** Extra percentage points of social success chance per charisma level. */
@@ -175,6 +169,66 @@ public final class GameConstants {
     /** Household savings that count as a fortune. */
     public static final int FORTUNE_AMOUNT = 10000;
 
+    // --- Home life ---
+    /** Idle Sims at or below this social chat with someone at home. */
+    public static final int AUTONOMY_SOCIAL_THRESHOLD = 35;
+    /** Social both Sims gain from an idle chat at home. */
+    public static final int HOME_CHAT_SOCIAL = 20;
+    /** Relationship both Sims gain from an idle chat at home. */
+    public static final int HOME_CHAT_RELATIONSHIP = 3;
+
+    // --- Progression ---
+    /** Household-wide events don't happen before this day, so the first days are calmer. */
+    public static final int HOUSEHOLD_EVENTS_START_DAY = 3;
+    /** Experience for the first level of a skill. */
+    public static final int SKILL_XP_BASE = 15;
+    /** Extra experience each further level costs (level n costs BASE + STEP × (n − 1)). */
+    public static final int SKILL_XP_STEP = 10;
+    /** Most experience a skill can gain from practice in one day; the rest of the day's practice is wasted. */
+    public static final int SKILL_DAILY_XP_CAP = 30;
+    /** Work performance needed for a promotion. */
+    public static final int PROMOTION_PERFORMANCE = 100;
+    /** Performance every shift earns, before mood and skill. */
+    public static final int PERFORMANCE_BASE_GAIN = 5;
+    /** Extra performance per shift for every 10 points of mood. */
+    public static final int PERFORMANCE_PER_10_MOOD = 1;
+    /** Extra performance per shift per level of the job's skill. */
+    public static final int PERFORMANCE_PER_SKILL_LEVEL = 1;
+    /** Performance lost for each weekday of work missed. */
+    public static final int PERFORMANCE_MISSED_DAY_PENALTY = 10;
+    /** A Sim whose average need is at least this is in a great mood. */
+    public static final int GREAT_MOOD_THRESHOLD = 80;
+    /** Skill experience multiplier while in a great mood. */
+    public static final double GREAT_MOOD_SKILL_MULTIPLIER = 1.5;
+    /** Extra pay, as a fraction, for a shift started in a great mood. */
+    public static final double GREAT_MOOD_PAY_BONUS = 0.10;
+
+    // --- Family ---
+    /** Days between conceiving and the baby being born. */
+    public static final int PREGNANCY_DAYS = 3;
+    /** Days after a birth before the couple can try for another baby. */
+    public static final int BABY_COOLDOWN_DAYS = 2;
+    /** Social an elder gains from looking after a baby. */
+    public static final int GRANDPARENT_CARE_SOCIAL = 15;
+    /** Fun an elder gains from looking after a baby. */
+    public static final int GRANDPARENT_CARE_FUN = 10;
+    /** Skill experience an elder passes on to each teen per day. */
+    public static final int MENTOR_XP = 6;
+
+    // --- Furniture ---
+    /** Fun gained from a night in a Comfy Bed. */
+    public static final int COMFY_BED_FUN = 15;
+    /** Fun gained from an hour of TV. */
+    public static final int TV_FUN = 25;
+
+    // --- Legacy ---
+    /** Legacy points for each aspiration fulfilled. */
+    public static final int LEGACY_POINTS_ASPIRATION = 100;
+    /** Legacy points for each achievement unlocked. */
+    public static final int LEGACY_POINTS_ACHIEVEMENT = 25;
+    /** Legacy points for each generation after the first to come of age. */
+    public static final int LEGACY_POINTS_GENERATION = 250;
+
     // --- Needs Tracker ---
     /** The number of ticks a Sim can survive at zero hunger before dying. */
     public static final int STARVING_DEATH_THRESHOLD = 3;
@@ -228,7 +282,7 @@ public final class GameConstants {
 
     // Social
     /** Base rate at which the social need decays per tick. */
-    public static final int SOCIAL_BASE_DECAY_RATE = 5;
+    public static final int SOCIAL_BASE_DECAY_RATE = 3;
     /** Amount of social need restored by performing social actions. */
     public static final int SOCIAL_ADDED_AMOUNT = 15;
 

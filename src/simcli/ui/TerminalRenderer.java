@@ -28,7 +28,10 @@ public class TerminalRenderer implements IRenderer {
     private static final Map<String, String> VERBS = new HashMap<>();
     static {
         VERBS.put("Bed", "Sleep till " + String.format("%02d:00", GameConstants.MORNING_HOUR));
+        VERBS.put("Comfy Bed", VERBS.get("Bed"));
         VERBS.put("Fridge", "Open fridge");
+        VERBS.put("Smart Fridge", "Open fridge");
+        VERBS.put("TV", "Watch TV");
         VERBS.put("Shower", "Shower");
         VERBS.put("Weight Bench", "Work out");
         VERBS.put("Computer", "Study");
@@ -166,7 +169,10 @@ public class TerminalRenderer implements IRenderer {
             case HUNGRY: state = "{R}{*}HUNGRY - eat something!{/}"; break;
             case TIRED:  state = "{Y}{*}TIRED - get some sleep{/}"; break;
             case DEAD:   state = "{k}deceased{/}"; break;
-            default:     state = "{G}feeling fine{/}"; break;
+            default:
+                state = activePlayer.isInGreatMood()
+                        ? "{G}{*}great mood{/} {k}(learns and earns more){/}" : "{G}feeling fine{/}";
+                break;
         }
         lines.add("{G}{*}$" + activePlayer.getMoney() + "{/}   {k}bag{/} " + activePlayer.getInventory().size()
                 + "/" + activePlayer.getInventoryCapacity() + "   {k}traits{/} " + traits(activePlayer)
@@ -224,6 +230,7 @@ public class TerminalRenderer implements IRenderer {
 
         if (isResidential) {
             addGroup(lines, "HOME", List.of(
+                    Panel.option("C", "Chat (1h)"),
                     Panel.option("M", "Move room"),
                     Panel.option("H", "House info"),
                     Panel.option("U", "Upgrade room")), 16);

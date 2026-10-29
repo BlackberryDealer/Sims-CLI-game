@@ -2,11 +2,13 @@ package simcli.persistence;
 
 import simcli.engine.GameEngine;
 import simcli.engine.GoalManager;
+import simcli.engine.Lifespan;
 import simcli.entities.items.Item;
 import simcli.entities.models.Achievement;
 import simcli.entities.models.Aspiration;
 import simcli.entities.models.Job;
 import simcli.entities.models.SkillType;
+import simcli.entities.models.StarterGoal;
 import simcli.entities.models.Trait;
 import simcli.entities.actors.Sim;
 import simcli.entities.actors.NPCSim;
@@ -173,10 +175,14 @@ public class SaveManager {
             writer.println("STATS_ITEMS:" + engine.getSessionTotalItems());
         }
 
+        writer.println("LIFESPAN:" + engine.getLifespan().name());
         GoalManager goals = engine.getGoalManager();
         writer.println("LEGACY:" + goals.isLegacyComplete());
         for (Achievement achievement : goals.getUnlocked()) {
             writer.println("Achievement:" + achievement.name());
+        }
+        for (StarterGoal starter : goals.getStartersDone()) {
+            writer.println("Starter:" + starter.name());
         }
 
         // Building states: ownership, room capacities, furniture, container contents
@@ -243,6 +249,18 @@ public class SaveManager {
             }
             writer.println("Aspiration:" + ids.get(sim) + "," + sim.getAspiration().name() + ","
                     + sim.isAspirationFulfilled());
+            StringBuilder past = new StringBuilder();
+            for (Aspiration a : sim.getPastAspirations()) {
+                if (past.length() > 0) past.append('|');
+                past.append(a.name());
+            }
+            writer.println("Life:" + ids.get(sim) + "," + sim.getGeneration() + "," + sim.getMealsCooked() + ","
+                    + sim.getCareerManager().getPerformance() + ","
+                    + sim.getCareerManager().getTotalShiftsWorked() + "," + sim.getLastBirthDay() + "," + past);
+            if (sim.isPregnant()) {
+                writer.println("Pregnancy:" + ids.get(sim) + "," + sim.getPregnancyDueDay() + ","
+                        + sim.getExpectedBabyGender().name() + "," + encode(sim.getExpectedBabyName()));
+            }
         }
 
         // Park NPCs (today's visitors), then townsfolk who aren't at the park today
@@ -331,7 +349,11 @@ public class SaveManager {
             List<String[]> aspirationLines = new ArrayList<>();
             List<String> achievementLines = new ArrayList<>();
             List<String[]> townsfolkLines = new ArrayList<>();
+            List<String[]> lifeLines = new ArrayList<>();
+            List<String[]> pregnancyLines = new ArrayList<>();
+            List<String> starterLines = new ArrayList<>();
             boolean legacyComplete = false;
+            Lifespan lifespan = Lifespan.NORMAL;
 
             while ((line = reader.readLine()) != null) {
                 if (line.startsWith("VERSION:")) {
@@ -377,6 +399,14 @@ public class SaveManager {
                     achievementLines.add(line.substring(12));
                 } else if (line.startsWith("LEGACY:")) {
                     legacyComplete = Boolean.parseBoolean(line.substring(7));
+                } else if (line.startsWith("LIFESPAN:")) {
+                    lifespan = Lifespan.valueOf(line.substring(9));
+                } else if (line.startsWith("Starter:")) {
+                    starterLines.add(line.substring(8));
+                } else if (line.startsWith("Life:")) {
+                    lifeLines.add(line.substring(5).split(",", -1));
+                } else if (line.startsWith("Pregnancy:")) {
+                    pregnancyLines.add(line.substring(10).split(","));
                 } else if (line.startsWith("Townsperson:")) {
                     townsfolkLines.add(line.substring(12).split(",", -1));
                 } else if (line.startsWith("NPC:")) {
@@ -429,6 +459,29 @@ public class SaveManager {
                 if (owner != null) {
                     owner.setAspiration(Aspiration.valueOf(aspData[1]));
                     owner.setAspirationFulfilled(Boolean.parseBoolean(aspData[2]));
+                }
+            }
+
+            // Load family history, work performance and pregnancies
+            for (String[] life : lifeLines) {
+                Sim owner = resolver.resolve(life[0]);
+                if (owner != null) {
+                    owner.setGeneration(Integer.parseInt(life[1]));
+                    owner.setMealsCooked(Integer.parseInt(life[2]));
+                    owner.getCareerManager().setPerformance(Integer.parseInt(life[3]));
+                    owner.getCareerManager().setTotalShiftsWorked(Integer.parseInt(life[4]));
+                    owner.setLastBirthDay(Integer.parseInt(life[5]));
+                    if (!life[6].isEmpty()) {
+                        for (String a : life[6].split("\\|")) {
+                            owner.getPastAspirations().add(Aspiration.valueOf(a));
+                        }
+                    }
+                }
+            }
+            for (String[] preg : pregnancyLines) {
+                Sim mother = resolver.resolve(preg[0]);
+                if (mother != null) {
+                    mother.startPregnancy(Integer.parseInt(preg[1]), decode(preg[3]), Gender.valueOf(preg[2]));
                 }
             }
 
@@ -516,6 +569,10 @@ public class SaveManager {
 
             GoalManager goals = engine.getGoalManager();
             goals.setLegacyComplete(legacyComplete);
+            engine.setLifespan(lifespan);
+            for (String name : starterLines) {
+                goals.restoreStarter(StarterGoal.valueOf(name));
+            }
             for (String name : achievementLines) {
                 goals.restoreUnlocked(Achievement.valueOf(name));
             }
@@ -534,9 +591,10 @@ public class SaveManager {
 
             // Furniture layout and container contents (version 2+)
             if (encoded) {
-                for (Building b : map) {
-                    if (b instanceof Residential) {
-                        for (Room r : ((Residential) b).getRooms()) {
+                // only homes the save describes; homes added to the game since keep their furniture
+                for (int i = 0; i < map.size(); i++) {
+                    if (map.get(i) instanceof Residential && parsedResStates.containsKey(i)) {
+                        for (Room r : ((Residential) map.get(i)).getRooms()) {
                             r.clearFurniture();
                         }
                     }

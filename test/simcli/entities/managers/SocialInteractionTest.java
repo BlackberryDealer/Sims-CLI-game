@@ -50,11 +50,18 @@ public class SocialInteractionTest {
         GameRandom.RANDOM.setSeed(System.nanoTime());
     }
 
-    /** An adult with the Active trait, which doesn't change social odds or charisma training. */
+    /**
+     * An adult with the Active trait, which doesn't change social odds or
+     * charisma training, in an ordinary mood so the great-mood bonus to
+     * skill experience doesn't apply.
+     */
     private static Sim adult(String name, Gender gender) {
         Sim sim = new Sim(name, 30, gender, Job.UNEMPLOYED);
         sim.getTraits().clear();
         sim.getTraits().add(Trait.ACTIVE);
+        sim.getHunger().setValue(60);
+        sim.getHappiness().setValue(40);
+        sim.getSocial().setValue(40);
         return sim;
     }
 
@@ -102,7 +109,7 @@ public class SocialInteractionTest {
         rm.increaseRelationship(bob, 40);
         assertEquals(flirtAtMinimum + 20, rm.getSuccessChance(bob, SocialAction.FLIRT));
 
-        ann.getSkillManager().setExperience(SkillType.CHARISMA, 5 * GameConstants.SKILL_XP_PER_LEVEL);
+        ann.getSkillManager().setExperience(SkillType.CHARISMA, SkillManager.experienceForLevel(5));
         assertEquals(GameConstants.JOKE_BASE_SUCCESS_CHANCE + 5 * GameConstants.CHARISMA_SUCCESS_BONUS_PER_LEVEL,
                 rm.getSuccessChance(bob, SocialAction.JOKE));
 
@@ -122,7 +129,7 @@ public class SocialInteractionTest {
     @DisplayName("Charisma makes friendly actions build relationships faster")
     void testCharismaBoostsGains() {
         Sim charmer = adult("Cal", Gender.MALE);
-        charmer.getSkillManager().setExperience(SkillType.CHARISMA, 10 * GameConstants.SKILL_XP_PER_LEVEL);
+        charmer.getSkillManager().setExperience(SkillType.CHARISMA, SkillManager.experienceForLevel(10));
         charmer.getRelationshipManager().performSocialAction(bob, SocialAction.CHAT);
         ann.getRelationshipManager().performSocialAction(bob, SocialAction.CHAT);
 

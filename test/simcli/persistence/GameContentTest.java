@@ -115,7 +115,7 @@ public class GameContentTest {
     @DisplayName("The city layout loads in travel-menu order")
     void testBuildings() {
         List<Map<String, Object>> buildings = GameContent.buildings();
-        assertEquals(5, buildings.size());
+        assertEquals(6, buildings.size());
         assertEquals("The Shared Dorm", GameContent.string(buildings.get(0), "name"));
         assertEquals("home", GameContent.string(buildings.get(0), "type"));
         assertEquals(100, GameContent.integer(buildings.get(0), "weeklyBill", 0));

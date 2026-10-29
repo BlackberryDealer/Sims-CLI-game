@@ -19,7 +19,8 @@ import java.util.List;
  *
  * <h2>Ownership</h2>
  * <p>This class owns the creation of {@link RandomEventManager},
- * {@link LifecycleManager}, {@link AutonomyManager}, {@link UpkeepManager}
+ * {@link LifecycleManager}, {@link AutonomyManager}, {@link UpkeepManager},
+ * {@link FamilyManager}
  * and {@link GoalManager}, keeping subsystem factories close to their
  * consumers and reducing the construction burden on {@link GameEngine}.</p>
  */
@@ -34,6 +35,7 @@ public class GameLoop {
     private final AutonomyManager autonomyManager;
     private final UpkeepManager upkeepManager;
     private final GoalManager goalManager;
+    private final FamilyManager familyManager;
 
     /**
      * Creates a new GameLoop with no world: idle Sims still sleep on their
@@ -87,6 +89,7 @@ public class GameLoop {
         this.autonomyManager = new AutonomyManager(worldManager, logger);
         this.upkeepManager = new UpkeepManager(worldManager, logger);
         this.goalManager = new GoalManager(worldManager, logger);
+        this.familyManager = new FamilyManager(logger);
     }
 
     /**
@@ -133,6 +136,7 @@ public class GameLoop {
             if (timeManager.getCurrentDay() != previousDay) {
                 processDayBoundary(timeManager.getCurrentDay());
             }
+            familyManager.checkDeaths(neighborhood);
         }
 
         eventManager.trigger(activePlayer, timeManager);
@@ -147,8 +151,9 @@ public class GameLoop {
      * day that just ended, then delegates lifecycle processing (aging,
      * death, retirement) to the {@link LifecycleManager}. Truancy must run
      * first because the lifecycle step resets each Sim's shifts-worked-today
-     * counter. Finally, food ages and bills are charged
-     * ({@link UpkeepManager}) and the park's visitors change.</p>
+     * counter. Then babies due today are born and grandparents mentor the
+     * teens ({@link FamilyManager}), food ages and bills are charged
+     * ({@link UpkeepManager}), and the park's visitors change.</p>
      *
      * @param dayNumber the day that has just begun.
      */
@@ -169,8 +174,11 @@ public class GameLoop {
 
         // Delegate aging/death/retirement to LifecycleManager (SRP).
         lifecycleManager.processDayForAll(neighborhood);
+        familyManager.processDay(dayNumber, neighborhood);
 
-        upkeepManager.processDay(dayNumber, neighborhood);
+        if (upkeepManager.processDay(dayNumber, neighborhood)) {
+            goalManager.recordBillsPaid();
+        }
         if (npcManager != null) {
             npcManager.startNewDay(dayNumber, logger);
         }

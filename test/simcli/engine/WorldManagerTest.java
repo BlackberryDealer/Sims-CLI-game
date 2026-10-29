@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * <p>Coverage:
  * <ul>
- *     <li>setupWorld() creates exactly 5 buildings</li>
+ *     <li>setupWorld() creates exactly 6 buildings</li>
  *     <li>Building types match expected order (Residential, Residential, Commercial, Commercial, Park)</li>
  *     <li>Default location is the first residential building</li>
  *     <li>setCurrentLocation() changes the active building</li>
@@ -57,10 +57,10 @@ public class WorldManagerTest {
     class CityMapTests {
 
         @Test
-        @DisplayName("setupWorld() creates exactly 5 buildings")
+        @DisplayName("setupWorld() creates exactly 6 buildings")
         void testCityMapSize() {
-            assertEquals(5, worldManager.getCityMap().size(),
-                    "City map should contain exactly 5 buildings");
+            assertEquals(6, worldManager.getCityMap().size(),
+                    "City map should contain exactly 6 buildings");
         }
 
         @Test
@@ -273,7 +273,7 @@ public class WorldManagerTest {
     void testSetupWorldIdempotency() {
         worldManager.setupWorld();
 
-        assertEquals(5, worldManager.getCityMap().size(),
-                "Calling setupWorld() twice should still yield exactly 5 buildings");
+        assertEquals(6, worldManager.getCityMap().size(),
+                "Calling setupWorld() twice should still yield exactly 6 buildings");
     }
 }

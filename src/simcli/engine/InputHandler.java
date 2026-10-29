@@ -3,12 +3,14 @@ package simcli.engine;
 import simcli.engine.commands.*;
 import simcli.entities.actors.Sim;
 import simcli.ui.UIManager;
+import simcli.utils.GameConstants;
 import simcli.world.Building;
 import simcli.world.interactables.Interactable;
 
 import java.util.List;
 import java.util.Scanner;
 import java.util.function.Consumer;
+import java.util.function.IntSupplier;
 
 /**
  * Factory and dispatcher: maps raw user input to the right Command object.
@@ -24,6 +26,7 @@ public class InputHandler implements IInputHandler {
     private final Consumer<Sim> setActivePlayer;
     private final SimulationLogger logger;
     private GoalManager goalManager;
+    private IntSupplier daysPerYear = () -> GameConstants.DAYS_PER_AGE_TICK;
 
     /**
      * Creates a new InputHandler.
@@ -54,6 +57,16 @@ public class InputHandler implements IInputHandler {
         this.goalManager = goalManager;
     }
 
+    /**
+     * Tells the handler how many days make a year of age in this world, so
+     * commands can show birthdays correctly.
+     *
+     * @param daysPerYear supplies the current days-per-year setting.
+     */
+    public void setDaysPerYear(IntSupplier daysPerYear) {
+        this.daysPerYear = daysPerYear;
+    }
+
     @Override
     public CommandResult handle(String input, Sim activePlayer, Scanner scanner) {
         Building currentLocation = worldManager.getCurrentLocation();
@@ -76,6 +89,7 @@ public class InputHandler implements IInputHandler {
                 .availableItems(items)
                 .setActivePlayer(setActivePlayer)
                 .logger(logger)
+                .daysPerYear(daysPerYear.getAsInt())
                 .build();
 
         try {
@@ -113,6 +127,9 @@ public class InputHandler implements IInputHandler {
                     break;
                 case "L":
                     command = new SpouseInteractionCommand(ctx);
+                    break;
+                case "C":
+                    command = new HomeChatCommand(ctx);
                     break;
                 case "?":
                 case "HELP":

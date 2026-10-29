@@ -11,7 +11,9 @@ import simcli.entities.managers.SkillManager;
 import simcli.entities.items.Item;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 import simcli.engine.SimulationLogger;
 import simcli.entities.lifecycle.AdultStage;
 import simcli.entities.lifecycle.ChildStage;
@@ -59,6 +61,15 @@ public class Sim implements ISimBehaviour {
     // Life goal
     private Aspiration aspiration;
     private boolean aspirationFulfilled;
+    private final Set<Aspiration> pastAspirations = EnumSet.noneOf(Aspiration.class);
+
+    // Family and household history
+    private int generation = 1;
+    private int mealsCooked;
+    private int pregnancyDueDay = -1;
+    private String expectedBabyName;
+    private Gender expectedBabyGender;
+    private int lastBirthDay = -1;
 
     // World Stats trackers
     private int totalMoneyEarned;
@@ -233,6 +244,164 @@ public class Sim implements ISimBehaviour {
      */
     public void setAspirationFulfilled(boolean fulfilled) {
         this.aspirationFulfilled = fulfilled;
+    }
+
+    /**
+     * Returns the aspirations this Sim fulfilled before their current one.
+     *
+     * @return earlier fulfilled aspirations (mutable, for save/load).
+     */
+    public Set<Aspiration> getPastAspirations() {
+        return pastAspirations;
+    }
+
+    /**
+     * Moves on to a new aspiration after fulfilling the current one,
+     * remembering the old one.
+     *
+     * @param next the new aspiration (one not fulfilled before).
+     * @throws IllegalStateException if the current aspiration isn't fulfilled yet.
+     */
+    public void chooseNextAspiration(Aspiration next) {
+        if (!aspirationFulfilled) {
+            throw new IllegalStateException(name + " hasn't fulfilled their current aspiration yet");
+        }
+        pastAspirations.add(aspiration);
+        setAspiration(next);
+    }
+
+    /**
+     * Returns how many aspirations this Sim has fulfilled in their life.
+     *
+     * @return the number of fulfilled aspirations, including the current one if done.
+     */
+    public int getAspirationsFulfilled() {
+        return pastAspirations.size() + (aspirationFulfilled ? 1 : 0);
+    }
+
+    // -------------------------------------------------------------------------
+    // Mood
+    // -------------------------------------------------------------------------
+
+    /**
+     * Returns this Sim's overall mood: the average of their five needs.
+     *
+     * @return the mood, 0–100.
+     */
+    public int getMood() {
+        return (getHunger().getValue() + getEnergy().getValue() + getHygiene().getValue()
+                + getHappiness().getValue() + getSocial().getValue()) / 5;
+    }
+
+    /**
+     * Returns whether the Sim is in a great mood, which makes them learn
+     * faster and earn more.
+     *
+     * @return {@code true} if the mood is at least {@link GameConstants#GREAT_MOOD_THRESHOLD}.
+     */
+    public boolean isInGreatMood() {
+        return getState() != SimState.DEAD && getMood() >= GameConstants.GREAT_MOOD_THRESHOLD;
+    }
+
+    // -------------------------------------------------------------------------
+    // Family and household history
+    // -------------------------------------------------------------------------
+
+    /**
+     * Returns which generation of the household this Sim belongs to:
+     * 1 for the founders, and one more than their parents for children.
+     *
+     * @return the generation.
+     */
+    public int getGeneration() {
+        return generation;
+    }
+
+    /**
+     * Sets this Sim's generation.
+     *
+     * @param generation the generation (1 for founders).
+     */
+    public void setGeneration(int generation) {
+        this.generation = Math.max(1, generation);
+    }
+
+    /** @return how many meals this Sim has cooked. */
+    public int getMealsCooked() {
+        return mealsCooked;
+    }
+
+    /** Records that this Sim cooked a meal. */
+    public void recordMealCooked() {
+        mealsCooked++;
+    }
+
+    /**
+     * Sets the meals-cooked counter. Used for save/load restoration.
+     *
+     * @param mealsCooked the number of meals cooked.
+     */
+    public void setMealsCooked(int mealsCooked) {
+        this.mealsCooked = mealsCooked;
+    }
+
+    /** @return {@code true} if this Sim is expecting a baby. */
+    public boolean isPregnant() {
+        return pregnancyDueDay >= 0;
+    }
+
+    /** @return the day the baby is due, or -1 if not expecting. */
+    public int getPregnancyDueDay() {
+        return pregnancyDueDay;
+    }
+
+    /** @return the name chosen for the expected baby, or {@code null}. */
+    public String getExpectedBabyName() {
+        return expectedBabyName;
+    }
+
+    /** @return the expected baby's gender, or {@code null}. */
+    public Gender getExpectedBabyGender() {
+        return expectedBabyGender;
+    }
+
+    /**
+     * Starts a pregnancy.
+     *
+     * @param dueDay   the day the baby will be born.
+     * @param babyName the name chosen for the baby.
+     * @param gender   the baby's gender.
+     */
+    public void startPregnancy(int dueDay, String babyName, Gender gender) {
+        this.pregnancyDueDay = dueDay;
+        this.expectedBabyName = babyName;
+        this.expectedBabyGender = gender;
+    }
+
+    /**
+     * Ends the pregnancy, recording the day of the birth.
+     *
+     * @param day the day the baby was born.
+     */
+    public void endPregnancy(int day) {
+        this.pregnancyDueDay = -1;
+        this.expectedBabyName = null;
+        this.expectedBabyGender = null;
+        this.lastBirthDay = day;
+    }
+
+    /** @return the day this Sim last had a baby, or -1 if never. */
+    public int getLastBirthDay() {
+        return lastBirthDay;
+    }
+
+    /**
+     * Sets the day this Sim last had a baby. Used for save/load restoration.
+     *
+     * @param day the day, or -1 for never.
+     */
+    public void setLastBirthDay(int day) {
+        this.lastBirthDay = day;
     }
 
     // -------------------------------------------------------------------------
@@ -538,7 +707,8 @@ public class Sim implements ISimBehaviour {
 
     /**
      * Trains a skill. Active Sims learn Fitness 50% faster and Socialites
-     * learn Charisma 50% faster.
+     * learn Charisma 50% faster, and any Sim in a great mood
+     * ({@link #isInGreatMood()}) learns 50% faster still.
      *
      * @param skill  the skill to train, or {@code null} to do nothing.
      * @param points the base experience points earned.
@@ -552,7 +722,10 @@ public class Sim implements ISimBehaviour {
                 || (skill == SkillType.CHARISMA && hasTrait(Trait.SOCIALITE))) {
             points = (int) (points * GameConstants.BONUS_TIMES);
         }
-        return skillManager.addExperience(skill, points, name);
+        if (isInGreatMood()) {
+            points = (int) (points * GameConstants.GREAT_MOOD_SKILL_MULTIPLIER);
+        }
+        return skillManager.addPractice(skill, points, name);
     }
 
     /**
@@ -618,8 +791,7 @@ public class Sim implements ISimBehaviour {
             return;
         }
 
-        double ageMultiplier = 1.0
-                + (Math.max(0, this.age - GameConstants.ADULT_AGE) * GameConstants.AGE_ENERGY_PENALTY_MULTIPLIER);
+        double ageMultiplier = getAgeDecayMultiplier();
         double stageEnergyModifier = (this.currentStage != null) ? this.currentStage.getEnergyDecayModifier() : 1.0;
         double traitEnergyMod = 1.0;
         for (Trait t : traits) {
@@ -632,6 +804,19 @@ public class Sim implements ISimBehaviour {
         } else {
             needsTracker.tick(this, ageMultiplier, stageEnergyModifier * traitEnergyMod, this.name);
         }
+    }
+
+    /**
+     * Returns how much faster this Sim's needs decay because of their age.
+     * Needs decay at the normal rate until {@link GameConstants#ELDER_AGE},
+     * then a little faster each year, up to
+     * {@link GameConstants#MAX_AGE_DECAY_MULTIPLIER}.
+     *
+     * @return the age decay multiplier (1.0 for children, teens and adults).
+     */
+    public double getAgeDecayMultiplier() {
+        double extra = Math.max(0, this.age - GameConstants.ELDER_AGE) * GameConstants.ELDER_DECAY_PER_YEAR;
+        return Math.min(GameConstants.MAX_AGE_DECAY_MULTIPLIER, 1.0 + extra);
     }
 
     /**
@@ -859,13 +1044,16 @@ public class Sim implements ISimBehaviour {
 
     /**
      * Performs a work shift: drains energy/hunger/hygiene, earns salary,
-     * trains the career's skill, and may earn a promotion.
+     * trains the career's skill, and builds work performance.
      *
-     * <p>Pay and promotion chance both rise with the career's skill
-     * (see {@link Job#getShiftPay(int, int)} and
-     * {@link Job#getPromotionChance(int)}), and promotion past tier 2 is
-     * only possible once the skill reaches
-     * {@link Job#getSkillRequiredForTier(int)}.</p>
+     * <p>Pay rises with tier and the career's skill
+     * ({@link Job#getShiftPay(int, int)}), plus
+     * {@link GameConstants#GREAT_MOOD_PAY_BONUS} for turning up in a great
+     * mood. Promotions are earned, not rolled: each shift adds
+     * {@link Job#getPerformanceGain(int, int)} performance, more for a
+     * happy, skilled Sim, and a full meter
+     * ({@link GameConstants#PROMOTION_PERFORMANCE}) earns a promotion once
+     * the skill reaches {@link Job#getSkillRequiredForTier(int)}.</p>
      *
      * @return a {@link WorkResult} indicating earnings, promotion, and overwork status.
      */
@@ -873,6 +1061,10 @@ public class Sim implements ISimBehaviour {
         if (!canWork() || getCareer() == Job.UNEMPLOYED) {
             return WorkResult.failure("Cannot work");
         }
+        // mood counts as the Sim walks in, before the shift wears them out
+        int moodAtStart = getMood();
+        boolean greatMood = isInGreatMood();
+
         int multiplier = 1 + getShiftsWorkedToday();
         getEnergy().decrease(getCareer().getEnergyDrain() * multiplier);
         getHunger().decrease(20 * multiplier);
@@ -881,15 +1073,20 @@ public class Sim implements ISimBehaviour {
         SkillType skill = getCareer().getPrimarySkill();
         int skillLevel = getSkillLevel(skill);
         int earnings = getCareer().getShiftPay(getJobTier(), skillLevel);
+        if (greatMood) {
+            earnings = (int) Math.round(earnings * (1 + GameConstants.GREAT_MOOD_PAY_BONUS));
+        }
         money += earnings;
         addTotalMoneyEarned(earnings);
         incrementShiftsWorkedToday();
         resetConsecutiveDaysMissed();
 
         boolean promoted = false;
-        if (getJobTier() < getCareer().getMaxTier() && getSkillNeededForPromotion() == 0) {
-            if (GameRandom.RANDOM.nextDouble() < getCareer().getPromotionChance(skillLevel)) {
-                getCareerManager().promote(getName());
+        if (getJobTier() < getCareer().getMaxTier()) {
+            CareerManager career = getCareerManager();
+            career.addPerformance(getCareer().getPerformanceGain(moodAtStart, skillLevel));
+            if (career.getPerformance() >= GameConstants.PROMOTION_PERFORMANCE && getSkillNeededForPromotion() == 0) {
+                career.promote(getName());
                 promoted = true;
             }
         }

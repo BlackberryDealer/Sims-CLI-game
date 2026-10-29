@@ -189,6 +189,8 @@ public class ParkBench implements Interactable {
     private void handleProposal(Sim sim, NPCSim target) {
         boolean married = sim.getRelationshipManager().marry(target);
         if (married) {
+            // marrying into the family makes them part of the same generation
+            target.setGeneration(sim.getGeneration());
             npcManager.removeNPC(target);
             npcManager.replenishNPCs(GameConstants.MAX_NPCS);
 

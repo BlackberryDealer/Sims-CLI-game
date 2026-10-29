@@ -233,16 +233,21 @@ public enum Job {
     }
 
     /**
-     * Computes the chance of promotion after one shift:
-     * {@link GameConstants#BASE_PROMOTION_CHANCE} plus
-     * {@link GameConstants#PROMOTION_CHANCE_PER_SKILL_LEVEL} per skill level,
-     * capped at {@link GameConstants#MAX_PROMOTION_CHANCE}.
+     * Computes the work performance one shift earns:
+     * {@link GameConstants#PERFORMANCE_BASE_GAIN}, plus
+     * {@link GameConstants#PERFORMANCE_PER_10_MOOD} for every 10 points of
+     * mood the Sim arrives with, plus
+     * {@link GameConstants#PERFORMANCE_PER_SKILL_LEVEL} per level of the
+     * job's skill. A happy level-0 Sim needs about 7 shifts for a
+     * promotion; a miserable one about 15.
      *
+     * @param mood       the Sim's mood (0–100) at the start of the shift.
      * @param skillLevel the Sim's level in {@link #getPrimarySkill()}.
-     * @return the promotion chance, 0.0–1.0.
+     * @return the performance gained.
      */
-    public double getPromotionChance(int skillLevel) {
-        return Math.min(GameConstants.MAX_PROMOTION_CHANCE,
-                GameConstants.BASE_PROMOTION_CHANCE + skillLevel * GameConstants.PROMOTION_CHANCE_PER_SKILL_LEVEL);
+    public int getPerformanceGain(int mood, int skillLevel) {
+        return GameConstants.PERFORMANCE_BASE_GAIN
+                + (Math.max(0, mood) / 10) * GameConstants.PERFORMANCE_PER_10_MOOD
+                + skillLevel * GameConstants.PERFORMANCE_PER_SKILL_LEVEL;
     }
 }
